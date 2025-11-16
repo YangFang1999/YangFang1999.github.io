@@ -46,7 +46,7 @@
 </head>
 <body class="font-sans bg-light text-dark dark:bg-dark dark:text-white">
     <!-- 导航栏 -->
-    <header id="navbar" class="fixed w-full bg-white/90 dark:bg-dark/90 backdrop-blur-md shadow-sm z-50 transition-all duration-300">
+    <header id="navbar" class="fixed w-full bg-white/90 backdrop-blur-md shadow-sm z-50 transition-all duration-300">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
                 <div class="flex items-center">
@@ -63,15 +63,10 @@
                         <a href="../index.html#categories" class="text-gray-700 dark:text-gray-200 hover:text-primary font-medium transition-colors">分类</a>
                         <a href="../index.html#about" class="text-gray-700 dark:text-gray-200 hover:text-primary font-medium transition-colors">关于我</a>
                     </nav>
-                    <button id="theme-toggle" class="inline-flex items-center px-3 py-1.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" title="切换主题">
-                        <i class="fa fa-moon-o"></i>
-                    </button>
+                    
                 </div>
                 <!-- 移动端菜单按钮 -->
                 <div class="md:hidden flex items-center space-x-3">
-                    <button id="theme-toggle-mobile" class="text-gray-700 dark:text-gray-200 hover:text-primary focus:outline-none" title="切换主题">
-                        <i class="fa fa-moon-o text-xl"></i>
-                    </button>
                     <button id="mobile-menu-button" class="text-gray-700 hover:text-primary focus:outline-none">
                         <i class="fa fa-bars text-xl"></i>
                     </button>
@@ -79,12 +74,12 @@
             </div>
         </div>
         <!-- 移动端菜单 -->
-        <div id="mobile-menu" class="hidden md:hidden bg-white dark:bg-dark shadow-lg absolute w-full">
+        <div id="mobile-menu" class="hidden md:hidden bg-white shadow-lg absolute w-full">
             <div class="px-4 py-4 space-y-3">
-                <a href="../index.html#home" class="block text-gray-700 dark:text-gray-200 hover:text-primary font-medium py-2 transition-colors">首页</a>
-                <a href="../all-notes.html" class="block text-gray-700 dark:text-gray-200 hover:text-primary font-medium py-2 transition-colors">所有笔记</a>
-                <a href="../index.html#categories" class="block text-gray-700 dark:text-gray-200 hover:text-primary font-medium py-2 transition-colors">分类</a>
-                <a href="../index.html#about" class="block text-gray-700 dark:text-gray-200 hover:text-primary font-medium py-2 transition-colors">关于我</a>
+                <a href="../index.html#home" class="block text-gray-700 hover:text-primary font-medium py-2 transition-colors">首页</a>
+                <a href="../all-notes.html" class="block text-gray-700 hover:text-primary font-medium py-2 transition-colors">所有笔记</a>
+                <a href="../index.html#categories" class="block text-gray-700 hover:text-primary font-medium py-2 transition-colors">分类</a>
+                <a href="../index.html#about" class="block text-gray-700 hover:text-primary font-medium py-2 transition-colors">关于我</a>
             </div>
         </div>
     </header>
@@ -92,16 +87,16 @@
     <!-- 文章主体 -->
     <main class="pt-24 pb-16">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <article class="max-w-3xl mx-auto bg-white dark:bg-gray-900 rounded-xl shadow-md p-6 md:p-8 border border-gray-100 dark:border-gray-800">
+            <article class="max-w-3xl mx-auto bg-white rounded-xl shadow-md p-6 md:p-8 border border-gray-100">
                 <header class="mb-6">
-                    <h1 class="prose-title font-extrabold text-dark dark:text-white mb-2">Java 技术栈概览：从入门到实战</h1>
-                    <p class="text-gray-500 dark:text-gray-400 text-sm">
+                    <h1 class="prose-title font-extrabold text-dark mb-2">Java 技术栈概览：从入门到实战</h1>
+                    <p class="text-gray-500 text-sm">
                         <i class="fa fa-calendar-o mr-1"></i> 发布于 2024-06-01 · 预计阅读 8 分钟
                     </p>
                 </header>
 
-                <section class="space-y-6 leading-relaxed text-gray-700 dark:text-gray-300">
-                    <div class="p-4 bg-primary/10 dark:bg-gray-800 rounded-lg">
+                <section class="space-y-6 leading-relaxed text-gray-700">
+                    <div class="p-4 bg-primary/10 rounded-lg">
                         快速实践建议：从一个最小的 REST API 开始（Spring Boot + JPA + MySQL），为 2-3 个实体设计 CRUD；补上单元测试与简单日志；将经验沉淀为一篇复盘笔记。
                     </div>
                     <p>
@@ -226,21 +221,7 @@
             }
         });
 
-        // 主题初始化与切换
-        const root = document.documentElement;
-        const savedTheme = localStorage.getItem('theme');
-        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-        if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
-            root.classList.add('dark');
-        }
-        const themeToggle = document.getElementById('theme-toggle');
-        const themeToggleMobile = document.getElementById('theme-toggle-mobile');
-        const toggleTheme = () => {
-            root.classList.toggle('dark');
-            localStorage.setItem('theme', root.classList.contains('dark') ? 'dark' : 'light');
-        };
-        themeToggle && themeToggle.addEventListener('click', toggleTheme);
-        themeToggleMobile && themeToggleMobile.addEventListener('click', toggleTheme);
+        
 
         // 平滑滚动到顶部按钮
         const backToTop = document.getElementById('back-to-top');

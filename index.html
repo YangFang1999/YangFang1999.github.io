@@ -15,7 +15,6 @@
     <!-- Tailwind 配置 -->
     <script>
         tailwind.config = {
-            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
@@ -62,9 +61,9 @@
         }
     </style>
 </head>
-<body class="font-sans bg-light text-dark dark:bg-dark dark:text-white">
+<body class="font-sans bg-light text-dark">
     <!-- 导航栏 -->
-    <header id="navbar" class="fixed w-full bg-white/90 dark:bg-dark/90 backdrop-blur-md shadow-sm z-50 transition-all duration-300">
+    <header id="navbar" class="fixed w-full bg-white/90 backdrop-blur-md shadow-sm z-50 transition-all duration-300">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
                 <div class="flex items-center">
@@ -81,9 +80,7 @@
                         <a href="categories.html" class="text-gray-700 dark:text-gray-200 hover:text-primary font-medium transition-colors relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-primary after:transition-all hover:after:w-full">分类</a>
                         <a href="#about" class="text-gray-700 dark:text-gray-200 hover:text-primary font-medium transition-colors relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-primary after:transition-all hover:after:w-full">关于我</a>
                     </nav>
-                    <button id="theme-toggle" class="inline-flex items-center px-3 py-1.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" title="切换主题">
-                        <i class="fa fa-moon-o"></i>
-                    </button>
+                    
                 </div>
                 
                 <!-- 移动端菜单按钮 -->
@@ -96,16 +93,12 @@
         </div>
         
         <!-- 移动端菜单 -->
-        <div id="mobile-menu" class="hidden md:hidden bg-white dark:bg-dark shadow-lg absolute w-full">
+        <div id="mobile-menu" class="hidden md:hidden bg-white shadow-lg absolute w-full">
             <div class="px-4 py-4 space-y-3">
-                <a href="#home" class="block text-gray-700 dark:text-gray-200 hover:text-primary font-medium py-2 transition-colors">首页</a>
-                <a href="#articles" class="block text-gray-700 dark:text-gray-200 hover:text-primary font-medium py-2 transition-colors">学习笔记</a>
-                <a href="categories.html" class="block text-gray-700 dark:text-gray-200 hover:text-primary font-medium py-2 transition-colors">分类</a>
-                <a href="#about" class="block text-gray-700 dark:text-gray-200 hover:text-primary font-medium py-2 transition-colors">关于我</a>
-                <!-- 移动端主题切换按钮 -->
-                <button id="theme-toggle-mobile" class="inline-flex items-center mt-2 px-3 py-2 rounded-full border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" aria-label="切换主题">
-                    <i class="fa fa-moon-o"></i> <span class="ml-2 text-sm">深色模式</span>
-                </button>
+                <a href="#home" class="block text-gray-700 hover:text-primary font-medium py-2 transition-colors">首页</a>
+                <a href="#articles" class="block text-gray-700 hover:text-primary font-medium py-2 transition-colors">学习笔记</a>
+                <a href="categories.html" class="block text-gray-700 hover:text-primary font-medium py-2 transition-colors">分类</a>
+                <a href="#about" class="block text-gray-700 hover:text-primary font-medium py-2 transition-colors">关于我</a>
             </div>
         </div>
     </header>
@@ -142,7 +135,7 @@
     </section>
 
     <!-- 文章列表 -->
-    <section id="articles" class="py-20 bg-white dark:bg-dark">
+    <section id="articles" class="py-20 bg-white">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
                 <h2 class="text-[clamp(1.8rem,4vw,3rem)] font-bold text-dark dark:text-white mb-4 inline-block border-dash-tech pb-4">最新学习笔记</h2>
@@ -280,7 +273,7 @@
             </div>
             
             <div class="text-center mt-12">
-            <a href="all-notes.html" class="inline-flex items-center justify-center bg-white dark:bg-gray-900 border-2 border-primary text-primary hover:bg-primary hover:text-white font-bold px-8 py-3 rounded-full transition-all shadow-sm hover:shadow-lg">
+            <a href="all-notes.html" class="inline-flex items-center justify-center bg-white border-2 border-primary text-primary hover:bg-primary hover:text-white font-bold px-8 py-3 rounded-full transition-all shadow-sm hover:shadow-lg">
             查看更多笔记 <i class="fa fa-angle-double-right ml-2"></i>
             </a>
             </div>
@@ -288,19 +281,19 @@
     </section>
 
     <!-- 关于我 -->
-    <section id="about" class="py-20 bg-gradient-to-br from-primary/5 to-secondary/5 dark:from-dark dark:to-dark">
+    <section id="about" class="py-20 bg-gradient-to-br from-primary/5 to-secondary/5">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex flex-col items-center text-center">
                 <div class="max-w-3xl">
-                    <h2 class="text-[clamp(1.8rem,4vw,3rem)] font-bold text-dark dark:text-white mb-6 inline-block border-dash-tech pb-4">关于我</h2>
-                    <div class="bg-white dark:bg-gray-900 rounded-2xl p-8 shadow-lg">
-                        <p class="text-gray-700 dark:text-gray-300 mb-6 leading-relaxed">
+                    <h2 class="text-[clamp(1.8rem,4vw,3rem)] font-bold text-dark mb-6 inline-block border-dash-tech pb-4">关于我</h2>
+                    <div class="bg-white rounded-2xl p-8 shadow-lg">
+                        <p class="text-gray-700 mb-6 leading-relaxed">
                             你好！我是一名正在学习 Java 的后端开发新手。之前有一些 C 语言基础，现在决定专注于 Java 生态的学习。
                         </p>
-                        <p class="text-gray-700 dark:text-gray-300 mb-6 leading-relaxed">
+                        <p class="text-gray-700 mb-6 leading-relaxed">
                             我创建这个博客的目的是为了记录我的学习过程，把遇到的问题和解决方案分享出来。一方面是为了巩固自己的知识，另一方面也希望能帮助到和我一样的初学者。
                         </p>
-                        <p class="text-gray-700 dark:text-gray-300 mb-8 leading-relaxed">
+                        <p class="text-gray-700 mb-8 leading-relaxed">
                             我的学习路线是从 Java SE 开始，然后逐步学习 Spring、Spring Boot 等主流框架，最终目标是成为一名合格的 Java 后端工程师。
                         </p>
                         
@@ -319,12 +312,12 @@
                     输入你的邮箱，获取最新的 Java 学习内容和资源分享，一起进步！
                 </p>
                 <form class="flex flex-col sm:flex-row gap-4 max-w-xl mx-auto">
-                    <input type="email" placeholder="你的邮箱地址" class="flex-grow px-6 py-4 rounded-full text-gray-800 dark:bg-gray-800 dark:text-gray-200 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary shadow-md">
+                <input type="email" placeholder="你的邮箱地址" class="flex-grow px-6 py-4 rounded-full text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary shadow-md">
                     <button type="submit" class="bg-primary hover:bg-primary/90 text-white font-bold px-8 py-4 rounded-full transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1 whitespace-nowrap">
                         立即订阅
                     </button>
                 </form>
-                <p class="text-gray-500 dark:text-gray-400 text-sm mt-4">
+                <p class="text-gray-500 text-sm mt-4">
                     我们尊重你的隐私，不会向任何第三方分享你的信息
                 </p>
             </div>
@@ -353,13 +346,7 @@
 
     <!-- JavaScript -->
     <script>
-        // 主题初始化
-        const root = document.documentElement;
-        const savedTheme = localStorage.getItem('theme');
-        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-        if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
-            root.classList.add('dark');
-        }
+        
         
         // 设置当前年份
         document.getElementById('current-year').textContent = new Date().getFullYear();
@@ -429,23 +416,7 @@
         window.addEventListener('load', animateOnScroll);
         window.addEventListener('scroll', animateOnScroll);
 
-        // 主题切换
-        const themeToggle = document.getElementById('theme-toggle');
-        const themeToggleMobile = document.getElementById('theme-toggle-mobile');
-        const toggleTheme = () => {
-            root.classList.toggle('dark');
-            const isDark = root.classList.contains('dark');
-            localStorage.setItem('theme', isDark ? 'dark' : 'light');
-            // 切换图标
-            if (themeToggle) themeToggle.innerHTML = isDark ? '<i class="fa fa-sun-o"></i>' : '<i class="fa fa-moon-o"></i>';
-            if (themeToggleMobile) themeToggleMobile.innerHTML = (isDark ? '<i class="fa fa-sun-o"></i>' : '<i class="fa fa-moon-o"></i>') + '<span class="ml-2 text-sm">' + (isDark ? '浅色模式' : '深色模式') + '</span>';
-        };
-        if (themeToggle) themeToggle.addEventListener('click', toggleTheme);
-        if (themeToggleMobile) themeToggleMobile.addEventListener('click', toggleTheme);
-        // 初始图标
-        const isDarkInit = root.classList.contains('dark');
-        if (themeToggle) themeToggle.innerHTML = isDarkInit ? '<i class="fa fa-sun-o"></i>' : '<i class="fa fa-moon-o"></i>';
-        if (themeToggleMobile) themeToggleMobile.innerHTML = (isDarkInit ? '<i class="fa fa-sun-o"></i>' : '<i class="fa fa-moon-o"></i>') + '<span class="ml-2 text-sm">' + (isDarkInit ? '浅色模式' : '深色模式') + '</span>';
+        
 
         // 返回顶部按钮
         const backToTop = document.getElementById('back-to-top');

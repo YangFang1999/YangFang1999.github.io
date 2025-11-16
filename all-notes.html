@@ -18,7 +18,6 @@
     <!-- Tailwind 配置 -->
     <script>
         tailwind.config = {
-            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
@@ -51,9 +50,9 @@
         }
     </style>
 </head>
-<body class="font-sans bg-light text-dark dark:bg-dark dark:text-white">
+<body class="font-sans bg-light text-dark">
     <!-- 导航栏 -->
-    <header id="navbar" class="fixed w-full bg-white/90 dark:bg-dark/90 backdrop-blur-md shadow-sm z-50 transition-all duration-300">
+    <header id="navbar" class="fixed w-full bg-white/90 backdrop-blur-md shadow-sm z-50 transition-all duration-300">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
                 <div class="flex items-center">
@@ -69,22 +68,22 @@
         </div>
         
         <!-- 移动端菜单 -->
-        <div id="mobile-menu" class="hidden md:hidden bg-white dark:bg-dark shadow-lg absolute w-full">
+        <div id="mobile-menu" class="hidden md:hidden bg-white shadow-lg absolute w-full">
             <div class="px-4 py-4 space-y-3">
-                <a href="index.html#home" class="block text-gray-700 dark:text-gray-200 hover:text-primary font-medium py-2 transition-colors">首页</a>
+                <a href="index.html#home" class="block text-gray-700 hover:text-primary font-medium py-2 transition-colors">首页</a>
                 <a href="all-notes.html" class="block text-primary font-medium py-2 transition-colors">所有笔记</a>
-                <a href="categories.html" class="block text-gray-700 dark:text-gray-200 hover:text-primary font-medium py-2 transition-colors">分类</a>
-                <a href="index.html#about" class="block text-gray-700 dark:text-gray-200 hover:text-primary font-medium py-2 transition-colors">关于我</a>
+                <a href="categories.html" class="block text-gray-700 hover:text-primary font-medium py-2 transition-colors">分类</a>
+                <a href="index.html#about" class="block text-gray-700 hover:text-primary font-medium py-2 transition-colors">关于我</a>
             </div>
         </div>
     </header>
 
     <!-- 笔记列表区域 -->
-    <section class="pt-28 pb-20 bg-white dark:bg-dark">
+    <section class="pt-28 pb-20 bg-white">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
-                <h1 class="text-[clamp(1.8rem,4vw,3rem)] font-bold text-dark dark:text-white mb-4 inline-block">所有学习笔记</h1>
-                <p class="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto mt-6">这里是我记录的所有 Java 学习笔记，按发布时间倒序排列，持续更新中...</p>
+                <h1 class="text-[clamp(1.8rem,4vw,3rem)] font-bold text-dark mb-4 inline-block">所有学习笔记</h1>
+                <p class="text-gray-600 max-w-2xl mx-auto mt-6">这里是我记录的所有 Java 学习笔记，按发布时间倒序排列，持续更新中...</p>
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -375,20 +374,7 @@
         });
 
         // 简易深色模式：与首页保持一致
-        const root = document.documentElement;
-        const savedTheme = localStorage.getItem('theme');
-        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-        if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
-            root.classList.add('dark');
-        }
-        const themeToggle = document.getElementById('theme-toggle');
-        const themeToggleMobile = document.getElementById('theme-toggle-mobile');
-        const toggleTheme = () => {
-            root.classList.toggle('dark');
-            localStorage.setItem('theme', root.classList.contains('dark') ? 'dark' : 'light');
-        };
-        themeToggle && themeToggle.addEventListener('click', toggleTheme);
-        themeToggleMobile && themeToggleMobile.addEventListener('click', toggleTheme);
+        
 
         // 返回顶部按钮显示/隐藏与点击行为
         const backToTop = document.getElementById('back-to-top');

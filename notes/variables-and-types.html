@@ -53,9 +53,9 @@
         }
     </style>
 </head>
-<body class="font-sans bg-light text-dark dark:bg-dark dark:text-white">
+<body class="font-sans bg-light text-dark">
     <!-- 导航栏 -->
-    <header id="navbar" class="fixed w-full bg-white/90 dark:bg-dark/90 backdrop-blur-md shadow-sm z-50 transition-all duration-300">
+    <header id="navbar" class="fixed w-full bg-white/90 backdrop-blur-md shadow-sm z-50 transition-all duration-300">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
                 <div class="flex items-center">
@@ -72,15 +72,10 @@
                         <a href="../categories.html" class="text-gray-700 dark:text-gray-200 hover:text-primary font-medium transition-colors">分类</a>
                         <a href="../index.html#about" class="text-gray-700 dark:text-gray-200 hover:text-primary font-medium transition-colors">关于我</a>
                     </nav>
-                    <button id="theme-toggle" class="inline-flex items-center px-3 py-1.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" title="切换主题">
-                        <i class="fa fa-moon-o"></i>
-                    </button>
+                    
                 </div>
                 
                 <div class="md:hidden flex items-center space-x-3">
-                    <button id="theme-toggle-mobile" class="text-gray-700 dark:text-gray-200 hover:text-primary focus:outline-none" title="切换主题">
-                        <i class="fa fa-moon-o text-xl"></i>
-                    </button>
                     <button id="mobile-menu-button" class="text-gray-700 hover:text-primary focus:outline-none">
                         <i class="fa fa-bars text-xl"></i>
                     </button>
@@ -89,24 +84,24 @@
         </div>
         
         <!-- 移动端菜单 -->
-        <div id="mobile-menu" class="hidden md:hidden bg-white dark:bg-dark shadow-lg absolute w-full">
+        <div id="mobile-menu" class="hidden md:hidden bg-white shadow-lg absolute w-full">
             <div class="px-4 py-4 space-y-3">
-                <a href="../index.html#home" class="block text-gray-700 dark:text-gray-200 hover:text-primary font-medium py-2 transition-colors">首页</a>
-                <a href="../all-notes.html" class="block text-gray-700 dark:text-gray-200 hover:text-primary font-medium py-2 transition-colors">所有笔记</a>
-                <a href="../categories.html" class="block text-gray-700 dark:text-gray-200 hover:text-primary font-medium py-2 transition-colors">分类</a>
-                <a href="../index.html#about" class="block text-gray-700 dark:text-gray-200 hover:text-primary font-medium py-2 transition-colors">关于我</a>
+                <a href="../index.html#home" class="block text-gray-700 hover:text-primary font-medium py-2 transition-colors">首页</a>
+                <a href="../all-notes.html" class="block text-gray-700 hover:text-primary font-medium py-2 transition-colors">所有笔记</a>
+                <a href="../categories.html" class="block text-gray-700 hover:text-primary font-medium py-2 transition-colors">分类</a>
+                <a href="../index.html#about" class="block text-gray-700 hover:text-primary font-medium py-2 transition-colors">关于我</a>
             </div>
         </div>
     </header>
 
     <!-- 笔记内容区域 -->
-    <section class="pt-28 pb-20 bg-white dark:bg-dark">
+    <section class="pt-28 pb-20 bg-white">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
             <div class="max-w-3xl mx-auto">
                 <!-- 笔记标题和元信息 -->
                 <div class="mb-10 text-center">
                     <span class="inline-block bg-accent/10 text-accent text-xs font-bold px-3 py-1 rounded-full mb-4">Java 基础</span>
-                    <h1 class="text-[clamp(1.8rem,4vw,2.5rem)] font-bold text-dark dark:text-white mb-4">Java 中的变量、常量与数据类型详解</h1>
+                    <h1 class="text-[clamp(1.8rem,4vw,2.5rem)] font-bold text-dark mb-4">Java 中的变量、常量与数据类型详解</h1>
                     <div class="flex items-center justify-center text-sm text-gray-500 space-x-4">
                         <span class="flex items-center"><i class="fa fa-calendar-o mr-2"></i> 2024-05-10</span>
                         <span class="flex items-center"><i class="fa fa-clock-o mr-2"></i> 阅读时间: 约 10 分钟</span>
@@ -114,7 +109,7 @@
                 </div>
                 
                 <!-- 笔记正文 -->
-                <div class="prose prose-lg max-w-none text-gray-700 dark:text-gray-300">
+                <div class="prose prose-lg max-w-none text-gray-700">
                     <p>Hello, 各位小伙伴！在编写了第一个 "Hello, World!" 程序后，我们来深入了解一下 Java 程序的基本构成单元：变量和数据类型。这是任何编程语言的基石，理解它们对于后续的学习至关重要。</p>
                     
                     <h2>1. 变量 (Variable)</h2>
@@ -257,18 +252,7 @@ int smallNum = (int) bigNum; // 强制转换，会发生溢出，结果可能是
 
     <!-- JavaScript -->
     <script>
-        const root = document.documentElement;
-        const savedTheme = localStorage.getItem('theme');
-        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-        if (savedTheme === 'dark' || (!savedTheme && prefersDark)) { root.classList.add('dark'); }
-        const themeToggle = document.getElementById('theme-toggle');
-        const themeToggleMobile = document.getElementById('theme-toggle-mobile');
-        const toggleTheme = () => {
-            root.classList.toggle('dark');
-            localStorage.setItem('theme', root.classList.contains('dark') ? 'dark' : 'light');
-        };
-        themeToggle && themeToggle.addEventListener('click', toggleTheme);
-        themeToggleMobile && themeToggleMobile.addEventListener('click', toggleTheme);
+        
         // 设置当前年份
         document.getElementById('current-year').textContent = new Date().getFullYear();
         
@@ -288,12 +272,10 @@ int smallNum = (int) bigNum; // 强制转换，会发生溢出，结果可能是
                 navbar.classList.add('shadow-md');
                 navbar.classList.remove('shadow-sm');
                 navbar.classList.add('bg-white/95');
-                navbar.classList.add('dark:bg-dark/95');
             } else {
                 navbar.classList.remove('shadow-md');
                 navbar.classList.add('shadow-sm');
                 navbar.classList.remove('bg-white/95');
-                navbar.classList.remove('dark:bg-dark/95');
             }
         });
     </script>
