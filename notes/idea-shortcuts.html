@@ -50,9 +50,9 @@
         }
     </style>
 </head>
-<body class="font-sans bg-light text-dark">
+<body class="font-sans bg-light text-dark dark:bg-dark dark:text-white">
     <!-- 导航栏 -->
-    <header id="navbar" class="fixed w-full bg-white/90 backdrop-blur-md shadow-sm z-50 transition-all duration-300">
+    <header id="navbar" class="fixed w-full bg-white/90 dark:bg-dark/90 backdrop-blur-md shadow-sm z-50 transition-all duration-300">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
                 <div class="flex items-center">
@@ -64,14 +64,20 @@
                 
                 <!-- 桌面端菜单 -->
                 <nav class="hidden md:flex space-x-8">
-                    <a href="../index.html#home" class="text-gray-700 hover:text-primary font-medium transition-colors">首页</a>
-                    <a href="../index.html#articles" class="text-gray-700 hover:text-primary font-medium transition-colors">学习笔记</a>
-                    <a href="../index.html#categories" class="text-gray-700 hover:text-primary font-medium transition-colors">分类</a>
-                    <a href="../index.html#about" class="text-gray-700 hover:text-primary font-medium transition-colors">关于我</a>
+                    <a href="../index.html#home" class="text-gray-700 dark:text-gray-200 hover:text-primary font-medium transition-colors">首页</a>
+                    <a href="../index.html#articles" class="text-gray-700 dark:text-gray-200 hover:text-primary font-medium transition-colors">学习笔记</a>
+                    <a href="../index.html#categories" class="text-gray-700 dark:text-gray-200 hover:text-primary font-medium transition-colors">分类</a>
+                    <a href="../index.html#about" class="text-gray-700 dark:text-gray-200 hover:text-primary font-medium transition-colors">关于我</a>
                 </nav>
+                <button id="theme-toggle" class="hidden md:inline-flex items-center px-3 py-1.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" title="切换主题">
+                    <i class="fa fa-moon-o"></i>
+                </button>
                 
                 <!-- 移动端菜单按钮 -->
-                <div class="md:hidden">
+                <div class="md:hidden flex items-center space-x-3">
+                    <button id="theme-toggle-mobile" class="text-gray-700 dark:text-gray-200 hover:text-primary focus:outline-none" title="切换主题">
+                        <i class="fa fa-moon-o text-xl"></i>
+                    </button>
                     <button id="mobile-menu-button" class="text-gray-700 hover:text-primary focus:outline-none">
                         <i class="fa fa-bars text-xl"></i>
                     </button>
@@ -80,24 +86,24 @@
         </div>
         
         <!-- 移动端菜单 -->
-        <div id="mobile-menu" class="hidden md:hidden bg-white shadow-lg absolute w-full">
+        <div id="mobile-menu" class="hidden md:hidden bg-white dark:bg-dark shadow-lg absolute w-full">
             <div class="px-4 py-4 space-y-3">
-                <a href="../index.html#home" class="block text-gray-700 hover:text-primary font-medium py-2 transition-colors">首页</a>
-                <a href="../index.html#articles" class="block text-gray-700 hover:text-primary font-medium py-2 transition-colors">学习笔记</a>
-                <a href="../index.html#categories" class="block text-gray-700 hover:text-primary font-medium py-2 transition-colors">分类</a>
-                <a href="../index.html#about" class="block text-gray-700 hover:text-primary font-medium py-2 transition-colors">关于我</a>
+                <a href="../index.html#home" class="block text-gray-700 dark:text-gray-200 hover:text-primary font-medium py-2 transition-colors">首页</a>
+                <a href="../index.html#articles" class="block text-gray-700 dark:text-gray-200 hover:text-primary font-medium py-2 transition-colors">学习笔记</a>
+                <a href="../index.html#categories" class="block text-gray-700 dark:text-gray-200 hover:text-primary font-medium py-2 transition-colors">分类</a>
+                <a href="../index.html#about" class="block text-gray-700 dark:text-gray-200 hover:text-primary font-medium py-2 transition-colors">关于我</a>
             </div>
         </div>
     </header>
 
     <!-- 笔记内容区域 -->
-    <section class="pt-28 pb-20 bg-white">
+    <section class="pt-28 pb-20 bg-white dark:bg-dark">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
             <div class="max-w-3xl mx-auto">
                 <!-- 笔记标题和元信息 -->
                 <div class="mb-10 text-center">
                     <span class="inline-block bg-secondary/10 text-secondary text-xs font-bold px-3 py-1 rounded-full mb-4">开发工具</span>
-                    <h1 class="text-[clamp(1.8rem,4vw,2.5rem)] font-bold text-dark mb-4">IntelliJ IDEA 新手常用快捷键整理</h1>
+                    <h1 class="text-[clamp(1.8rem,4vw,2.5rem)] font-bold text-dark dark:text-white mb-4">IntelliJ IDEA 新手常用快捷键整理</h1>
                     <div class="flex items-center justify-center text-sm text-gray-500 space-x-4">
                         <span class="flex items-center"><i class="fa fa-calendar-o mr-2"></i> 2024-05-15</span>
                         <span class="flex items-center"><i class="fa fa-clock-o mr-2"></i> 阅读时间: 约 5 分钟</span>
@@ -105,7 +111,7 @@
                 </div>
                 
                 <!-- 笔记正文 -->
-                <div class="prose prose-lg max-w-none text-gray-700">
+                <div class="prose prose-lg max-w-none text-gray-700 dark:text-gray-300">
                     <p>大家好！在上一篇笔记中，我们成功运行了第一个 Java 程序。工欲善其事，必先利其器。今天，我想和大家分享一些我在使用 IntelliJ IDEA (简称 IDEA) 过程中收集和整理的常用快捷键。熟练使用这些快捷键，可以让你的编码速度和效率大大提升。</p>
                     
                     <p>注意：以下快捷键以 Windows / Linux 系统为准。Mac 用户通常可以将 <code>Ctrl</code> 键替换为 <code>Cmd</code> 键。</p>
@@ -204,10 +210,12 @@
                 navbar.classList.add('shadow-md');
                 navbar.classList.remove('shadow-sm');
                 navbar.classList.add('bg-white/95');
+                navbar.classList.add('dark:bg-dark/95');
             } else {
                 navbar.classList.remove('shadow-md');
                 navbar.classList.add('shadow-sm');
                 navbar.classList.remove('bg-white/95');
+                navbar.classList.remove('dark:bg-dark/95');
             }
         });
 
