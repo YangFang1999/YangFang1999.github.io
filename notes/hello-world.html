@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Java 入门：Hello World 详解与环境配置 | Java 新手成长记</title>
+    <meta name="description" content="记录第一个 Java 程序的编写，包括 JDK 安装、环境变量配置和 IDEA 的使用。">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- Google Fonts - Noto Sans SC -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind 配置 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3B82F6',
+                        secondary: '#60A5FA',
+                        accent: '#F59E0B',
+                        dark: '#1E293B',
+                        light: '#F8FAFC'
+                    },
+                    fontFamily: {
+                        sans: ['Noto Sans SC', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .code-block {
+                background-color: #1E293B;
+                color: #E2E8F0;
+                border-radius: 0.5rem;
+                padding: 1rem;
+                margin: 1rem 0;
+                overflow-x: auto;
+                font-family: 'Fira Code', monospace;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body class="font-sans bg-light text-dark">
+    <!-- 导航栏 -->
+    <header id="navbar" class="fixed w-full bg-white/90 backdrop-blur-md shadow-sm z-50 transition-all duration-300">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <a href="../index.html" class="flex items-center space-x-2">
+                        <span class="text-primary text-2xl"><i class="fa fa-code"></i></span>
+                        <span class="font-bold text-xl tracking-wide text-primary">Java 新手成长记</span>
+                    </a>
+                </div>
+                
+                <!-- 桌面端菜单 -->
+                <nav class="hidden md:flex space-x-8">
+                    <a href="../index.html#home" class="text-gray-700 hover:text-primary font-medium transition-colors">首页</a>
+                    <a href="../index.html#articles" class="text-gray-700 hover:text-primary font-medium transition-colors">学习笔记</a>
+                    <a href="../index.html#categories" class="text-gray-700 hover:text-primary font-medium transition-colors">分类</a>
+                    <a href="../index.html#about" class="text-gray-700 hover:text-primary font-medium transition-colors">关于我</a>
+                </nav>
+                
+                <!-- 移动端菜单按钮 -->
+                <div class="md:hidden">
+                    <button id="mobile-menu-button" class="text-gray-700 hover:text-primary focus:outline-none">
+                        <i class="fa fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 移动端菜单 -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white shadow-lg absolute w-full">
+            <div class="px-4 py-4 space-y-3">
+                <a href="../index.html#home" class="block text-gray-700 hover:text-primary font-medium py-2 transition-colors">首页</a>
+                <a href="../index.html#articles" class="block text-gray-700 hover:text-primary font-medium py-2 transition-colors">学习笔记</a>
+                <a href="../index.html#categories" class="block text-gray-700 hover:text-primary font-medium py-2 transition-colors">分类</a>
+                <a href="../index.html#about" class="block text-gray-700 hover:text-primary font-medium py-2 transition-colors">关于我</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- 笔记内容区域 -->
+    <section class="pt-28 pb-20 bg-white">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="max-w-3xl mx-auto">
+                <!-- 笔记标题和元信息 -->
+                <div class="mb-10 text-center">
+                    <span class="inline-block bg-primary/10 text-primary text-xs font-bold px-3 py-1 rounded-full mb-4">Java 基础</span>
+                    <h1 class="text-[clamp(1.8rem,4vw,2.5rem)] font-bold text-dark mb-4">Java 入门：Hello World 详解与环境配置</h1>
+                    <div class="flex items-center justify-center text-sm text-gray-500 space-x-4">
+                        <span class="flex items-center"><i class="fa fa-calendar-o mr-2"></i> 2024-05-20</span>
+                        <span class="flex items-center"><i class="fa fa-clock-o mr-2"></i> 阅读时间: 约 8 分钟</span>
+                    </div>
+                </div>
+                
+                <!-- 笔记正文 -->
+                <div class="prose prose-lg max-w-none text-gray-700">
+                    <p>大家好！这是我的第一篇 Java 学习笔记。作为一个不折不扣的新手，我想把我从零开始的每一步都记录下来，希望能帮助到和我一样刚刚起步的朋友。今天，我们就从最经典的 "Hello, World!" 程序开始。</p>
+                    
+                    <h2>1. 准备工作：安装 JDK</h2>
+                    <p>要运行 Java 程序，首先得有 Java 开发环境，也就是 JDK (Java Development Kit)。</p>
+                    <ol>
+                        <li><strong>下载 JDK</strong>：我推荐从 <a href="https://www.oracle.com/java/technologies/downloads/" class="text-primary hover:underline" target="_blank">Oracle 官网</a> 下载。注意，现在主流的是 Java 17 或 21。选择对应操作系统的安装包。</li>
+                        <li><strong>安装</strong>：运行安装程序，一路点击下一步即可。建议不要修改默认安装路径，或者记下你安装的路径，后面会用到。</li>
+                    </ol>
+
+                    <h2>2. 配置环境变量 (Windows)</h2>
+                    <p>这是最关键也最容易出错的一步。</p>
+                    <ol>
+                        <li>右键点击 "此电脑" -> "属性" -> "高级系统设置" -> "环境变量"。</li>
+                        <li>在 "系统变量" 区域，点击 "新建"。
+                            <ul>
+                                <li><strong>变量名</strong>：<code>JAVA_HOME</code></li>
+                                <li><strong>变量值</strong>：你的 JDK 安装路径，例如 <code>C:\Program Files\Java\jdk-17</code></li>
+                            </ul>
+                        </li>
+                        <li>找到名为 <code>Path</code> 的系统变量，点击 "编辑"。</li>
+                        <li>点击 "新建"，然后输入 <code>%JAVA_HOME%\bin</code>，点击确定。</li>
+                        <li>再次点击 "新建"，输入 <code>%JAVA_HOME%\jre\bin</code> (如果是 Java 9 及以上版本，可能没有 jre 文件夹，可以省略这一步)，点击确定。</li>
+                        <li>一路点击确定关闭所有窗口。</li>
+                    </ol>
+                    <p><strong>验证</strong>：打开一个新的命令提示符（CMD）或 PowerShell，输入以下命令，如果能正确显示版本号，就说明配置成功了。</p>
+                    <div class="code-block">
+                        <code>java -version</code>
+                    </div>
+                    <div class="code-block">
+                        <code>javac -version</code>
+                    </div>
+
+                    <h2>3. 使用 IntelliJ IDEA 编写第一个程序</h2>
+                    <p>虽然可以用记事本写代码，但强烈建议使用一个 IDE (集成开发环境)，能大大提高效率。我使用的是 IntelliJ IDEA Community Edition (社区版，免费)。</p>
+                    <ol>
+                        <li><strong>创建项目</strong>：打开 IDEA，选择 "New Project"。选择 "Java"，然后选择你刚刚配置好的 JDK，点击 "Next"，再点击 "Next"。给项目起个名字，比如 <code>HelloWorldProject</code>，点击 "Finish"。</li>
+                        <li><strong>创建 Java 类</strong>：在左侧项目视图中，右键点击 <code>src</code> -> "New" -> "Java Class"。
+                            <ul>
+                                <li><strong>Class name</strong>：输入 <code>HelloWorld</code> (注意大小写，Java 类名首字母大写)。</li>
+                                <li><strong>Kind</strong>：选择 <code>Class</code>。</li>
+                                <li>点击 "Enter"。</li>
+                            </ul>
+                        </li>
+                        <li><strong>编写代码</strong>：在打开的 <code>HelloWorld.java</code> 文件中，输入以下代码：</li>
+                    </ol>
+                    <div class="code-block">
+<pre><code>public class HelloWorld {
+    public static void main(String[] args) {
+        // 这是我的第一个 Java 程序
+        System.out.println("Hello, World!");
+    }
+}</code></pre>
+                    </div>
+                    <p><strong>代码解释</strong>：
+                        <ul>
+                            <li><code>public class HelloWorld</code>：定义了一个名为 <code>HelloWorld</code> 的公共类。文件名必须和类名一致。</li>
+                            <li><code>public static void main(String[] args)</code>：这是 Java 程序的入口点，也就是main方法。程序从这里开始执行。</li>
+                            <li><code>// 这是我的第一个 Java 程序</code>：这是单行注释，编译器会忽略它。</li>
+                            <li><code>System.out.println("Hello, World!");</code>：这行代码的作用是在控制台打印出 "Hello, World!" 这句话。<code>;</code> 表示语句结束。</li>
+                        </ul>
+                    </p>
+
+                    <h2>4. 运行程序</h2>
+                    <p>在 IDEA 中运行程序非常简单：</p>
+                    <ol>
+                        <li>在代码编辑区，右键点击任意位置。</li>
+                        <li>选择 "Run 'HelloWorld.main()'"。</li>
+                    </ol>
+                    <p>你应该能在下方的 "Run" 控制台看到输出结果：</p>
+                    <div class="code-block">
+                        <code>Hello, World!</code>
+                    </div>
+                    <p>恭喜你！你已经成功编写并运行了你的第一个 Java 程序！</p>
+
+                    <h2>5. 常见问题排查</h2>
+                    <ul>
+                        <li><strong>"java" 不是内部或外部命令...</strong>：这通常是环境变量 <code>Path</code> 配置错误。请仔细检查第 2 步。记住，修改环境变量后需要打开新的 CMD 窗口才能生效。</li>
+                        <li><strong>文件名和类名不匹配</strong>：如果你的类名是 <code>HelloWorld</code>，你的文件名必须是 <code>HelloWorld.java</code>，否则编译器会报错。</li>
+                        <li><strong>大小写错误</strong>：Java 是大小写敏感的。<code>system.out.println</code> 和 <code>System.out.println</code> 是不一样的，后者才是正确的。</li>
+                    </ul>
+
+                    <h2>总结</h2>
+                    <p>今天我们完成了 Java 开发的入门，包括安装 JDK、配置环境变量、使用 IDEA 创建项目、编写并运行 "Hello, World!" 程序。这是一个非常好的开始。接下来，我们将继续学习 Java 的基本语法。</p>
+                    <p>如果你在过程中遇到了任何问题，欢迎在评论区留言，我们一起讨论解决！</p>
+                </div>
+                
+                <!-- 返回按钮 -->
+                <div class="mt-16 text-center">
+                    <a href="../index.html#articles" class="inline-flex items-center justify-center bg-white border-2 border-primary text-primary hover:bg-primary hover:text-white font-bold px-8 py-3 rounded-full transition-all shadow-sm hover:shadow-lg">
+                        <i class="fa fa-arrow-left mr-2"></i> 返回笔记列表
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="bg-dark text-white py-16">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col items-center text-center">
+                <div class="flex items-center space-x-2 mb-6">
+                    <span class="text-primary text-2xl"><i class="fa fa-code"></i></span>
+                    <span class="font-bold text-xl tracking-wide text-white">Java 新手成长记</span>
+                </div>
+                <p class="text-gray-400 mb-8 max-w-md">
+                    记录 Java 学习路上的点点滴滴，与万千开发者一起成长。
+                </p>
+                <div class="border-t border-gray-800 w-full pt-8">
+                    <p class="text-gray-500">
+                        &copy; <span id="current-year"></span> Java 新手成长记. 保留所有权利.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // 设置当前年份
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+        
+        // 移动端菜单切换
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+        
+        // 导航栏滚动效果
+        const navbar = document.getElementById('navbar');
+        
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                navbar.classList.add('shadow-md');
+                navbar.classList.remove('shadow-sm');
+                navbar.classList.add('bg-white/95');
+            } else {
+                navbar.classList.remove('shadow-md');
+                navbar.classList.add('shadow-sm');
+                navbar.classList.remove('bg-white/95');
+            }
+        });
+    </script>
+</body>
+</html>
