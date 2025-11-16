@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>分类 | Java 新手成长记</title>
+    <meta name="description" content="按分类查看我的 Java 学习笔记，涵盖 Java 基础、开发工具与精选文章。">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3B82F6',
+                        secondary: '#60A5FA',
+                        accent: '#F59E0B',
+                        dark: '#1E293B',
+                        light: '#F8FAFC'
+                    },
+                    fontFamily: {
+                        sans: ['Noto Sans SC', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .card-hover { transition: all 0.3s ease; }
+            .card-hover:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,0.1); }
+            .anchor { scroll-margin-top: 6rem; }
+        }
+    </style>
+</head>
+<body class="font-sans bg-light text-dark dark:bg-dark dark:text-white">
+    <header id="navbar" class="fixed w-full bg-white/90 dark:bg-dark/90 backdrop-blur-md shadow-sm z-50 transition-all duration-300">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <a href="index.html" class="flex items-center space-x-2">
+                        <span class="text-primary text-2xl"><i class="fa fa-code"></i></span>
+                        <span class="font-bold text-xl tracking-wide text-primary">Java 新手成长记</span>
+                    </a>
+                </div>
+                <div class="hidden md:flex items-center space-x-6">
+                    <nav class="flex space-x-8">
+                        <a href="index.html#home" class="text-gray-700 dark:text-gray-200 hover:text-primary font-medium transition-colors">首页</a>
+                        <a href="all-notes.html" class="text-gray-700 dark:text-gray-200 hover:text-primary font-medium transition-colors">所有笔记</a>
+                        <a href="categories.html" class="text-primary font-medium transition-colors border-b-2 border-primary pb-1">分类</a>
+                        <a href="index.html#about" class="text-gray-700 dark:text-gray-200 hover:text-primary font-medium transition-colors">关于我</a>
+                    </nav>
+                    <button id="theme-toggle" class="inline-flex items-center px-3 py-1.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" title="切换主题">
+                        <i class="fa fa-moon-o"></i>
+                    </button>
+                </div>
+                <div class="md:hidden flex items-center space-x-3">
+                    <button id="theme-toggle-mobile" class="text-gray-700 dark:text-gray-200 hover:text-primary focus:outline-none" title="切换主题">
+                        <i class="fa fa-moon-o text-xl"></i>
+                    </button>
+                    <button id="mobile-menu-button" class="text-gray-700 hover:text-primary focus:outline-none">
+                        <i class="fa fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div id="mobile-menu" class="hidden md:hidden bg-white dark:bg-dark shadow-lg absolute w-full">
+            <div class="px-4 py-4 space-y-3">
+                <a href="index.html#home" class="block text-gray-700 dark:text-gray-200 hover:text-primary font-medium py-2 transition-colors">首页</a>
+                <a href="all-notes.html" class="block text-gray-700 dark:text-gray-200 hover:text-primary font-medium py-2 transition-colors">所有笔记</a>
+                <a href="categories.html" class="block text-primary font-medium py-2 transition-colors">分类</a>
+                <a href="index.html#about" class="block text-gray-700 dark:text-gray-200 hover:text-primary font-medium py-2 transition-colors">关于我</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="pt-28 pb-20">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h1 class="text-[clamp(1.8rem,4vw,3rem)] font-bold text-dark dark:text-white">按分类查看笔记</h1>
+                <p class="text-gray-600 dark:text-gray-300 mt-4">将现有笔记按主题分类，便于快速定位与学习。</p>
+            </div>
+
+            <section id="java-basics" class="anchor mb-12">
+                <h2 class="text-2xl font-bold text-dark dark:text-white mb-6">Java 基础</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <article class="bg-white dark:bg-gray-900 rounded-xl overflow-hidden shadow-md card-hover border border-gray-100 dark:border-gray-700">
+                        <div class="p-6">
+                            <h3 class="text-lg font-bold mb-3 hover:text-primary transition-colors">
+                                <a href="notes/hello-world.html">Java 入门：Hello World 详解与环境配置</a>
+                            </h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4 line-clamp-3">从 JDK 安装、环境变量到 IDEA 运行第一个程序，记录常见坑与解法。</p>
+                            <a href="notes/hello-world.html" class="inline-flex items-center text-primary font-medium hover:underline group">
+                                阅读更多 <i class="fa fa-long-arrow-right ml-2 transform group-hover:translate-x-1 transition-transform"></i>
+                            </a>
+                        </div>
+                    </article>
+                    <article class="bg-white dark:bg-gray-900 rounded-xl overflow-hidden shadow-md card-hover border border-gray-100 dark:border-gray-700">
+                        <div class="p-6">
+                            <h3 class="text-lg font-bold mb-3 hover:text-primary transition-colors">
+                                <a href="notes/variables-and-types.html">Java 中的变量、常量与数据类型详解</a>
+                            </h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4 line-clamp-3">理解基本与引用类型、常量与类型转换，为后续编程打好基础。</p>
+                            <a href="notes/variables-and-types.html" class="inline-flex items-center text-primary font-medium hover:underline group">
+                                阅读更多 <i class="fa fa-long-arrow-right ml-2 transform group-hover:translate-x-1 transition-transform"></i>
+                            </a>
+                        </div>
+                    </article>
+                </div>
+            </section>
+
+            <section id="tools" class="anchor mb-12">
+                <h2 class="text-2xl font-bold text-dark dark:text-white mb-6">开发工具</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <article class="bg-white dark:bg-gray-900 rounded-xl overflow-hidden shadow-md card-hover border border-gray-100 dark:border-gray-700">
+                        <div class="p-6">
+                            <h3 class="text-lg font-bold mb-3 hover:text-primary transition-colors">
+                                <a href="notes/idea-shortcuts.html">IntelliJ IDEA 新手常用快捷键整理</a>
+                            </h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4 line-clamp-3">整理高频快捷键与提升效率的小技巧，适合日常开发使用。</p>
+                            <a href="notes/idea-shortcuts.html" class="inline-flex items-center text-primary font-medium hover:underline group">
+                                阅读更多 <i class="fa fa-long-arrow-right ml-2 transform group-hover:translate-x-1 transition-transform"></i>
+                            </a>
+                        </div>
+                    </article>
+                </div>
+            </section>
+
+            <section id="featured" class="anchor">
+                <h2 class="text-2xl font-bold text-dark dark:text-white mb-6">精选文章</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <article class="bg-white dark:bg-gray-900 rounded-xl overflow-hidden shadow-md card-hover border border-gray-100 dark:border-gray-700">
+                        <div class="p-6">
+                            <h3 class="text-lg font-bold mb-3 hover:text-primary transition-colors">
+                                <a href="notes/java-tech-stack.html">Java 技术栈概览：从入门到实战</a>
+                            </h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4 line-clamp-3">纵览语言、框架与配套工具，给出循序渐进的实践路线。</p>
+                            <a href="notes/java-tech-stack.html" class="inline-flex items-center text-primary font-medium hover:underline group">
+                                阅读更多 <i class="fa fa-long-arrow-right ml-2 transform group-hover:translate-x-1 transition-transform"></i>
+                            </a>
+                        </div>
+                    </article>
+                </div>
+            </section>
+
+            <section id="backend" class="anchor mt-12">
+                <h2 class="text-2xl font-bold text-dark dark:text-white mb-6">后端开发</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <article class="bg-white dark:bg-gray-900 rounded-xl overflow-hidden shadow-md card-hover border border-gray-100 dark:border-gray-700">
+                        <div class="p-6">
+                            <h3 class="text-lg font-bold mb-3 hover:text-primary transition-colors">
+                                <a href="notes/spring-boot-rest-api.html">Spring Boot：构建最小 REST API</a>
+                            </h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4 line-clamp-3">最小控制器与运行测试建议，快速搭建可用接口。</p>
+                            <a href="notes/spring-boot-rest-api.html" class="inline-flex items-center text-primary font-medium hover:underline group">
+                                阅读更多 <i class="fa fa-long-arrow-right ml-2 transform group-hover:translate-x-1 transition-transform"></i>
+                            </a>
+                        </div>
+                    </article>
+                    <article class="bg-white dark:bg-gray-900 rounded-xl overflow-hidden shadow-md card-hover border border-gray-100 dark:border-gray-700">
+                        <div class="p-6">
+                            <h3 class="text-lg font-bold mb-3 hover:text-primary transition-colors">
+                                <a href="notes/jpa-quickstart.html">JPA 快速上手：实体与简单查询</a>
+                            </h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4 line-clamp-3">完成实体与仓库的最小实践，掌握常见查询方式。</p>
+                            <a href="notes/jpa-quickstart.html" class="inline-flex items-center text-primary font-medium hover:underline group">
+                                阅读更多 <i class="fa fa-long-arrow-right ml-2 transform group-hover:translate-x-1 transition-transform"></i>
+                            </a>
+                        </div>
+                    </article>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer class="bg-dark text-white py-16">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col items-center text-center">
+                <div class="flex items-center space-x-2 mb-6">
+                    <span class="text-primary text-2xl"><i class="fa fa-code"></i></span>
+                    <span class="font-bold text-xl tracking-wide text-white">Java 新手成长记</span>
+                </div>
+                <p class="text-gray-400 mb-8 max-w-md">记录 Java 学习路上的点点滴滴，与万千开发者一起成长。</p>
+                <div class="border-t border-gray-800 w-full pt-8">
+                    <p class="text-gray-500">&copy; <span id="current-year"></span> Java 新手成长记. 保留所有权利.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        mobileMenuButton.addEventListener('click', () => { mobileMenu.classList.toggle('hidden'); });
+        const navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) { navbar.classList.add('shadow-md'); navbar.classList.remove('shadow-sm'); navbar.classList.add('bg-white/95'); }
+            else { navbar.classList.remove('shadow-md'); navbar.classList.add('shadow-sm'); navbar.classList.remove('bg-white/95'); }
+        });
+        const root = document.documentElement;
+        const savedTheme = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (savedTheme === 'dark' || (!savedTheme && prefersDark)) { root.classList.add('dark'); }
+        const themeToggle = document.getElementById('theme-toggle');
+        const themeToggleMobile = document.getElementById('theme-toggle-mobile');
+        const toggleTheme = () => {
+            root.classList.toggle('dark');
+            localStorage.setItem('theme', root.classList.contains('dark') ? 'dark' : 'light');
+        };
+        themeToggle && themeToggle.addEventListener('click', toggleTheme);
+        themeToggleMobile && themeToggleMobile.addEventListener('click', toggleTheme);
+    </script>
+    <button id="back-to-top" aria-label="返回顶部" class="fixed bottom-6 right-6 z-40 hidden md:flex items-center justify-center w-10 h-10 rounded-full bg-primary text-white shadow-lg hover:bg-secondary transition-all">
+        <i class="fa fa-arrow-up"></i>
+    </button>
+</body>
+</html>
