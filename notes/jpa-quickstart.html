@@ -97,7 +97,7 @@ public interface UserRepository extends JpaRepository&lt;User, Long&gt; {
         <div class="flex flex-col items-center text-center">
             <div class="flex items-center space-x-2 mb-6">
                 <span class="text-primary text-2xl"><i class="fa fa-code"></i></span>
-                <span class="font-bold text-xl tracking-wide text白色">Java 新手成长记</span>
+                <span class="font-bold text-xl tracking-wide text-white">Java 新手成长记</span>
             </div>
             <p class="text-gray-400 mb-8 max-w-md">记录 Java 学习路上的点点滴滴，与万千开发者一起成长。</p>
             <div class="border-t border-gray-800 w-full pt-8">
@@ -116,7 +116,11 @@ public interface UserRepository extends JpaRepository&lt;User, Long&gt; {
     mobileMenuButton.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
     const navbar = document.getElementById('navbar');
     window.addEventListener('scroll', () => { if (window.scrollY > 50) { navbar.classList.add('shadow-md','bg-white/95'); navbar.classList.remove('shadow-sm'); } else { navbar.classList.remove('shadow-md','bg-white/95'); navbar.classList.add('shadow-sm'); } });
-    
+    const root = document.documentElement; const savedTheme = localStorage.getItem('theme'); const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches; if (savedTheme === 'dark' || (!savedTheme && prefersDark)) { root.classList.add('dark'); }
+    const themeToggle = document.getElementById('theme-toggle'); const themeToggleMobile = document.getElementById('theme-toggle-mobile');
+    const toggleTheme = () => { root.classList.toggle('dark'); localStorage.setItem('theme', root.classList.contains('dark') ? 'dark' : 'light'); };
+    themeToggle && themeToggle.addEventListener('click', toggleTheme);
+    themeToggleMobile && themeToggleMobile.addEventListener('click', toggleTheme);
 </script>
 </body>
 </html>
