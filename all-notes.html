@@ -420,6 +420,28 @@
 
         if (themeToggle) themeToggle.addEventListener('click', toggleTheme);
         if (themeToggleMobile) themeToggleMobile.addEventListener('click', toggleTheme);
+
+        // Scroll Animation Observer
+        const observerOptions = {
+            root: null,
+            rootMargin: '0px',
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate-fade-in-up');
+                    entry.target.style.opacity = '1';
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('article').forEach((el) => {
+            el.style.opacity = '0';
+            observer.observe(el);
+        });
     </script>
 </body>
 </html>
