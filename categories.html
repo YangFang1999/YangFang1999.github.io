@@ -210,10 +210,15 @@
             <img src="https://win98icons.alexmeub.com/icons/png/windows-0.png" class="w-5 h-5" alt="win">
             开始
         </button>
-        <!-- Active Window Tab -->
-        <div class="flex-1 flex justify-start">
-            <div class="px-4 py-1 bg-silver shadow-win95-inset font-bold text-sm flex items-center gap-2 w-48 bg-gray/20">
-                <i class="fa fa-cog"></i> 分类
+        <!-- Taskbar Items Container -->
+        <div class="flex-1 flex justify-start gap-1 overflow-hidden px-1">
+            <!-- Parent Folder (Inactive) -->
+             <div class="px-2 py-1 bg-silver shadow-win95-outset font-bold text-sm flex items-center gap-2 w-32 md:w-40 shrink min-w-0 cursor-pointer" onclick="window.location.href='index.html'">
+                <i class="fa fa-desktop shrink-0"></i> <span class="truncate">桌面</span>
+            </div>
+            <!-- Current File (Active) -->
+             <div class="px-2 py-1 bg-silver shadow-win95-inset font-bold text-sm flex items-center gap-2 w-32 md:w-40 shrink min-w-0 bg-gray/20 border border-dotted border-gray-400">
+                <i class="fa fa-cog shrink-0"></i> <span class="truncate">分类</span>
             </div>
         </div>
         <div class="px-3 py-1 bg-silver shadow-win95-inset flex items-center gap-2 text-xs min-w-[80px] justify-end">

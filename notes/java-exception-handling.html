@@ -172,14 +172,14 @@
         <div class="w-[2px] h-6 bg-gray border-r border-white mx-1"></div>
 
         <!-- Taskbar Items Container -->
-        <div class="flex-1 flex justify-start gap-1 overflow-x-auto">
+        <div class="flex-1 flex justify-start gap-1 overflow-hidden px-1">
             <!-- Parent Folder (Inactive) -->
-             <div class="px-2 py-1 bg-silver shadow-win95-outset font-bold text-sm flex items-center gap-2 w-40 cursor-pointer" onclick="window.location.href='../all-notes.html'">
-                <i class="fa fa-folder-open"></i> 我的文档
+             <div class="px-2 py-1 bg-silver shadow-win95-outset font-bold text-sm flex items-center gap-2 w-32 md:w-40 shrink min-w-0 cursor-pointer" onclick="window.location.href='../all-notes.html'">
+                <i class="fa fa-folder-open shrink-0"></i> <span class="truncate">我的文档</span>
             </div>
             <!-- Current File (Active) -->
-             <div class="px-2 py-1 bg-silver shadow-win95-inset font-bold text-sm flex items-center gap-2 w-40 bg-gray/20 border border-dotted border-gray-400">
-                <i class="fa fa-file-text-o"></i> Java Exceptions.html
+             <div class="px-2 py-1 bg-silver shadow-win95-inset font-bold text-sm flex items-center gap-2 w-32 md:w-40 shrink min-w-0 bg-gray/20 border border-dotted border-gray-400">
+                <i class="fa fa-file-text-o shrink-0"></i> <span class="truncate">Java Exceptions.html</span>
             </div>
         </div>
 
