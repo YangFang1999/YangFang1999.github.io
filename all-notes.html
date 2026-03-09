@@ -1,447 +1,261 @@
 <!DOCTYPE html>
-<html lang="zh-CN" class="scroll-smooth">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>所有学习笔记 | Java 新手成长记</title>
-    <meta name="description" content="查看我的所有 Java 学习笔记，从基础到进阶，持续更新中。">
-    <!-- Tailwind CSS -->
+    <title>My Notes - File Explorer</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome -->
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
-    <!-- Google Fonts - Inter & Noto Sans SC -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
-    
-    <!-- Tailwind 配置 -->
     <script>
         tailwind.config = {
-            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
-                        primary: {
-                            50: '#eef2ff',
-                            100: '#e0e7ff',
-                            200: '#c7d2fe',
-                            300: '#a5b4fc',
-                            400: '#818cf8',
-                            500: '#6366f1', // Indigo 500
-                            600: '#4f46e5', // Indigo 600
-                            700: '#4338ca',
-                            800: '#3730a3',
-                            900: '#312e81',
-                        },
-                        dark: {
-                            bg: '#0f172a', // Slate 900
-                            card: '#1e293b', // Slate 800
-                            border: '#334155', // Slate 700
-                        }
+                        teal: '#008080',
+                        silver: '#c0c0c0',
+                        gray: '#808080',
+                        navy: '#000080',
+                        win_black: '#000000',
+                        win_white: '#ffffff',
                     },
                     fontFamily: {
-                        sans: ['Inter', 'Noto Sans SC', 'sans-serif'],
+                        sans: ['"MS Sans Serif"', 'Tahoma', 'sans-serif'],
+                        mono: ['"Courier New"', 'monospace'],
                     },
-                    animation: {
-                        'fade-in-up': 'fadeInUp 0.8s ease-out forwards',
-                    },
-                    keyframes: {
-                        fadeInUp: {
-                            '0%': { opacity: '0', transform: 'translateY(20px)' },
-                            '100%': { opacity: '1', transform: 'translateY(0)' },
-                        }
+                    boxShadow: {
+                        'win95-outset': 'inset -1px -1px #0a0a0a, inset 1px 1px #dfdfdf, inset -2px -2px #808080, inset 2px 2px #ffffff',
+                        'win95-inset': 'inset -1px -1px #ffffff, inset 1px 1px #0a0a0a, inset -2px -2px #dfdfdf, inset 2px 2px #808080',
                     }
                 }
             }
         }
     </script>
-    
-    <style type="text/tailwindcss">
-        @layer utilities {
-            .glass {
-                @apply bg-white/70 dark:bg-dark-bg/70 backdrop-blur-lg border-b border-gray-200 dark:border-gray-800;
-            }
-            .card-glass {
-                @apply bg-white dark:bg-dark-card border border-gray-100 dark:border-dark-border shadow-lg dark:shadow-none hover:shadow-xl transition-all duration-300;
-            }
-            .content-auto {
-                content-visibility: auto;
-            }
+    <style>
+        body {
+            font-family: 'MS Sans Serif', 'Tahoma', sans-serif;
+            -webkit-font-smoothing: none;
+            image-rendering: pixelated;
         }
-        
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { @apply bg-gray-300 dark:bg-gray-700 rounded-full; }
-        ::-webkit-scrollbar-thumb:hover { @apply bg-gray-400 dark:bg-gray-600; }
+        .win-btn:active {
+            box-shadow: inset -1px -1px #ffffff, inset 1px 1px #0a0a0a, inset -2px -2px #dfdfdf, inset 2px 2px #808080;
+            padding-top: 2px;
+            padding-left: 2px;
+        }
+        .file-item:hover {
+            background-color: #000080;
+            color: white;
+        }
+        .file-item:hover .file-icon {
+            filter: brightness(1.2);
+        }
     </style>
 </head>
-<body class="font-sans bg-gray-50 dark:bg-dark-bg text-gray-800 dark:text-gray-200 transition-colors duration-300 selection:bg-primary-500 selection:text-white">
+<body class="h-screen w-screen overflow-hidden flex flex-col">
 
-    <!-- 导航栏 -->
-    <header id="navbar" class="fixed w-full z-50 transition-all duration-300 glass">
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-16">
-                <!-- Logo -->
-                <div class="flex items-center">
-                    <a href="index.html" class="flex items-center space-x-2 group">
-                        <div class="w-8 h-8 rounded-lg bg-primary-600 flex items-center justify-center text-white transform group-hover:rotate-12 transition-transform">
-                            <i class="fa fa-code"></i>
-                        </div>
-                        <span class="font-bold text-xl tracking-tight text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">想当 Java 高手</span>
-                    </a>
-                </div>
-                
-                <!-- Desktop Menu -->
-                <div class="hidden md:flex items-center space-x-8">
-                    <nav class="flex space-x-6">
-                        <a href="index.html" class="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">首页</a>
-                        <a href="all-notes.html" class="text-sm font-medium text-primary-600 dark:text-primary-400 font-bold transition-colors">所有笔记</a>
-                        <a href="categories.html" class="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">分类</a>
-                        <a href="index.html#about" class="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">关于我</a>
-                    </nav>
-                    
-                    <!-- Theme Toggle -->
-                    <button id="theme-toggle" class="p-2 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-primary-100 dark:hover:bg-gray-700 transition-colors focus:outline-none">
-                        <i class="fa fa-moon-o dark:hidden"></i>
-                        <i class="fa fa-sun-o hidden dark:block"></i>
-                    </button>
-                </div>
-                
-                <!-- Mobile Menu Button -->
-                <div class="md:hidden flex items-center space-x-4">
-                    <button id="theme-toggle-mobile" class="text-gray-600 dark:text-gray-300 focus:outline-none">
-                        <i class="fa fa-moon-o dark:hidden"></i>
-                        <i class="fa fa-sun-o hidden dark:block"></i>
-                    </button>
-                    <button id="mobile-menu-button" class="text-gray-600 dark:text-gray-300 hover:text-primary-600 focus:outline-none">
-                        <i class="fa fa-bars text-xl"></i>
-                    </button>
-                </div>
+    <!-- Main Window (Maximizedish) -->
+    <div class="flex-1 m-1 flex flex-col bg-silver shadow-win95-outset p-1">
+        <!-- Title Bar -->
+        <div class="bg-navy px-2 py-1 flex justify-between items-center select-none">
+            <div class="flex items-center gap-2">
+                <i class="fa fa-folder-open text-white"></i>
+                <span class="text-white font-bold text-sm tracking-wide">C:\我的文档\文章</span>
+            </div>
+            <div class="flex gap-1">
+                <button onclick="window.location.href='index.html'" class="w-4 h-4 bg-silver shadow-win95-outset flex items-center justify-center active:shadow-win95-inset text-[10px] font-bold pb-1" title="最小化">_</button>
+                <button class="w-4 h-4 bg-silver shadow-win95-outset flex items-center justify-center active:shadow-win95-inset text-[10px] font-bold pb-1" title="最大化">□</button>
+                <button onclick="window.location.href='index.html'" class="w-4 h-4 bg-silver shadow-win95-outset flex items-center justify-center active:shadow-win95-inset text-[10px] font-bold pb-1" title="关闭">×</button>
             </div>
         </div>
-        
-        <!-- Mobile Menu -->
-        <div id="mobile-menu" class="hidden md:hidden bg-white dark:bg-dark-card border-t border-gray-100 dark:border-gray-800 shadow-lg absolute w-full">
-            <div class="px-4 py-4 space-y-1">
-                <a href="index.html" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-primary-600 transition-colors">首页</a>
-                <a href="all-notes.html" class="block px-3 py-2 rounded-md text-base font-medium text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-gray-800 transition-colors">所有笔记</a>
-                <a href="categories.html" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-primary-600 transition-colors">分类</a>
-                <a href="index.html#about" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-primary-600 transition-colors">关于我</a>
+
+        <!-- Menu Bar -->
+        <div class="flex px-1 py-1 text-sm select-none border-b border-gray-300">
+            <div class="px-2 py-1 hover:bg-navy hover:text-white cursor-pointer"><span class="underline decoration-1 underline-offset-2">文</span>件(F)</div>
+            <div class="px-2 py-1 hover:bg-navy hover:text-white cursor-pointer"><span class="underline decoration-1 underline-offset-2">编</span>辑(E)</div>
+            <div class="px-2 py-1 hover:bg-navy hover:text-white cursor-pointer"><span class="underline decoration-1 underline-offset-2">查</span>看(V)</div>
+            <div class="px-2 py-1 hover:bg-navy hover:text-white cursor-pointer"><span class="underline decoration-1 underline-offset-2">转</span>到(G)</div>
+            <div class="px-2 py-1 hover:bg-navy hover:text-white cursor-pointer"><span class="underline decoration-1 underline-offset-2">收</span>藏(A)</div>
+            <div class="px-2 py-1 hover:bg-navy hover:text-white cursor-pointer"><span class="underline decoration-1 underline-offset-2">帮</span>助(H)</div>
+        </div>
+
+        <!-- Address Bar -->
+        <div class="flex items-center gap-2 px-2 py-1 border-b border-gray-300">
+            <span class="text-xs">地址(D)</span>
+            <div class="flex-1 bg-white shadow-win95-inset px-2 py-0.5 text-sm flex items-center gap-2">
+                <i class="fa fa-folder text-yellow-400"></i>
+                C:\我的文档\文章
             </div>
         </div>
-    </header>
 
-    <!-- 笔记列表区域 -->
-    <main class="pt-32 pb-20 min-h-screen">
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16 animate-fade-in-up">
-                <h1 class="text-4xl font-extrabold text-gray-900 dark:text-white mb-4">所有学习笔记</h1>
-                <p class="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">记录学习路上的点点滴滴，持续更新中...</p>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 animate-fade-in-up" style="animation-delay: 0.2s;">
-                <!-- Java 技术栈概览 -->
-                <article class="card-glass rounded-xl overflow-hidden group cursor-pointer" onclick="location.href='notes/java-tech-stack.html'">
-                    <div class="p-6">
-                        <div class="flex justify-between items-center mb-4">
-                             <span class="bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 text-xs font-bold px-3 py-1 rounded-full">
-                                精选文章
-                            </span>
-                            <span class="text-sm text-gray-500 dark:text-gray-400 flex items-center">
-                                <i class="fa fa-calendar-o mr-1"></i> 2024-06-01
-                            </span>
-                        </div>
-                        <h3 class="text-xl font-bold mb-3 text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
-                            Java 技术栈概览
-                        </h3>
-                        <p class="text-gray-600 dark:text-gray-300 mb-4 line-clamp-3">
-                            纵览 Java 常用技术栈：语言基础、Spring/Spring Boot、数据库与持久化、构建与部署，适合初学者建立全局视图。
-                        </p>
-                        <span class="text-primary-600 dark:text-primary-400 text-sm font-medium group-hover:translate-x-1 transition-transform inline-flex items-center">
-                            阅读更多 <i class="fa fa-long-arrow-right ml-2"></i>
-                        </span>
-                    </div>
-                </article>
-
-                <!-- Spring Boot REST API -->
-                <article class="card-glass rounded-xl overflow-hidden group cursor-pointer" onclick="location.href='notes/spring-boot-rest-api.html'">
-                    <div class="p-6">
-                        <div class="flex justify-between items-center mb-4">
-                             <span class="bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-bold px-3 py-1 rounded-full">
-                                后端开发
-                            </span>
-                            <span class="text-sm text-gray-500 dark:text-gray-400 flex items-center">
-                                <i class="fa fa-calendar-o mr-1"></i> 2024-06-10
-                            </span>
-                        </div>
-                        <h3 class="text-xl font-bold mb-3 text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
-                            Spring Boot：构建最小 REST API
-                        </h3>
-                        <p class="text-gray-600 dark:text-gray-300 mb-4 line-clamp-3">
-                            用最少依赖完成可运行的 REST API，覆盖控制器、运行与基础测试建议。
-                        </p>
-                        <span class="text-primary-600 dark:text-primary-400 text-sm font-medium group-hover:translate-x-1 transition-transform inline-flex items-center">
-                            阅读更多 <i class="fa fa-long-arrow-right ml-2"></i>
-                        </span>
-                    </div>
-                </article>
-
-                <!-- JPA 快速上手 -->
-                <article class="card-glass rounded-xl overflow-hidden group cursor-pointer" onclick="location.href='notes/jpa-quickstart.html'">
-                    <div class="p-6">
-                        <div class="flex justify-between items-center mb-4">
-                             <span class="bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-bold px-3 py-1 rounded-full">
-                                后端开发
-                            </span>
-                            <span class="text-sm text-gray-500 dark:text-gray-400 flex items-center">
-                                <i class="fa fa-calendar-o mr-1"></i> 2024-06-12
-                            </span>
-                        </div>
-                        <h3 class="text-xl font-bold mb-3 text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
-                            JPA 快速上手：实体与简单查询
-                        </h3>
-                        <p class="text-gray-600 dark:text-gray-300 mb-4 line-clamp-3">
-                            完成最小实体映射与 Repository 查询，理解常见注解与查询用法。
-                        </p>
-                        <span class="text-primary-600 dark:text-primary-400 text-sm font-medium group-hover:translate-x-1 transition-transform inline-flex items-center">
-                            阅读更多 <i class="fa fa-long-arrow-right ml-2"></i>
-                        </span>
-                    </div>
-                </article>
-
-                <!-- Java 基础：Hello World -->
-                <article class="card-glass rounded-xl overflow-hidden group cursor-pointer" onclick="location.href='notes/hello-world.html'">
-                    <div class="p-6">
-                        <div class="flex justify-between items-center mb-4">
-                             <span class="bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 text-xs font-bold px-3 py-1 rounded-full">
-                                Java 基础
-                            </span>
-                            <span class="text-sm text-gray-500 dark:text-gray-400 flex items-center">
-                                <i class="fa fa-calendar-o mr-1"></i> 2024-05-20
-                            </span>
-                        </div>
-                        <h3 class="text-xl font-bold mb-3 text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
-                            Java 入门：Hello World
-                        </h3>
-                        <p class="text-gray-600 dark:text-gray-300 mb-4 line-clamp-3">
-                            从 JDK 下载安装、环境变量配置，到使用 IDEA 编写并运行 Hello World。
-                        </p>
-                        <span class="text-primary-600 dark:text-primary-400 text-sm font-medium group-hover:translate-x-1 transition-transform inline-flex items-center">
-                            阅读更多 <i class="fa fa-long-arrow-right ml-2"></i>
-                        </span>
-                    </div>
-                </article>
+        <!-- Content Area (Grid) -->
+        <div class="flex-1 bg-white shadow-win95-inset m-1 p-4 overflow-y-auto min-h-0">
+            <div class="grid grid-cols-[repeat(auto-fill,minmax(100px,1fr))] gap-4">
                 
-                <!-- IDEA 快捷键 -->
-                <article class="card-glass rounded-xl overflow-hidden group cursor-pointer" onclick="location.href='notes/idea-shortcuts.html'">
-                    <div class="p-6">
-                        <div class="flex justify-between items-center mb-4">
-                             <span class="bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 text-xs font-bold px-3 py-1 rounded-full">
-                                开发工具
-                            </span>
-                            <span class="text-sm text-gray-500 dark:text-gray-400 flex items-center">
-                                <i class="fa fa-calendar-o mr-1"></i> 2024-05-15
-                            </span>
-                        </div>
-                        <h3 class="text-xl font-bold mb-3 text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
-                            IntelliJ IDEA 新手常用快捷键
-                        </h3>
-                        <p class="text-gray-600 dark:text-gray-300 mb-4 line-clamp-3">
-                            整理日常开发中最常用的快捷键，代码自动补全、格式化、快速导包等，新手必备！
-                        </p>
-                        <span class="text-primary-600 dark:text-primary-400 text-sm font-medium group-hover:translate-x-1 transition-transform inline-flex items-center">
-                            阅读更多 <i class="fa fa-long-arrow-right ml-2"></i>
-                        </span>
+                <!-- File Item -->
+                <a href="notes/java-tech-stack.html" class="file-item flex flex-col items-center gap-1 p-2 cursor-pointer border border-transparent hover:border-dotted hover:border-gray-400">
+                    <div class="file-icon text-4xl text-blue-400">
+                        <i class="fa fa-file-text-o"></i>
                     </div>
-                </article>
-                
-                <!-- 变量与数据类型 -->
-                <article class="card-glass rounded-xl overflow-hidden group cursor-pointer" onclick="location.href='notes/variables-and-types.html'">
-                    <div class="p-6">
-                        <div class="flex justify-between items-center mb-4">
-                             <span class="bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 text-xs font-bold px-3 py-1 rounded-full">
-                                Java 基础
-                            </span>
-                            <span class="text-sm text-gray-500 dark:text-gray-400 flex items-center">
-                                <i class="fa fa-calendar-o mr-1"></i> 2024-05-10
-                            </span>
-                        </div>
-                        <h3 class="text-xl font-bold mb-3 text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
-                            Java 变量与数据类型
-                        </h3>
-                        <p class="text-gray-600 dark:text-gray-300 mb-4 line-clamp-3">
-                            深入理解基本数据类型和引用数据类型，以及变量和常量的定义与使用。
-                        </p>
-                        <span class="text-primary-600 dark:text-primary-400 text-sm font-medium group-hover:translate-x-1 transition-transform inline-flex items-center">
-                            阅读更多 <i class="fa fa-long-arrow-right ml-2"></i>
-                        </span>
-                    </div>
-                </article>
+                    <span class="text-xs text-center break-words w-full">Java Tech Stack.html</span>
+                </a>
 
-                <!-- Maven 依赖管理 -->
-                <article class="card-glass rounded-xl overflow-hidden group cursor-pointer" onclick="location.href='notes/maven-dependency-management.html'">
-                    <div class="p-6">
-                        <div class="flex justify-between items-center mb-4">
-                             <span class="bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 text-xs font-bold px-3 py-1 rounded-full">
-                                构建工具
-                            </span>
-                            <span class="text-sm text-gray-500 dark:text-gray-400 flex items-center">
-                                <i class="fa fa-calendar-o mr-1"></i> 2024-06-15
-                            </span>
-                        </div>
-                        <h3 class="text-xl font-bold mb-3 text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
-                            Maven 依赖管理详解
-                        </h3>
-                        <p class="text-gray-600 dark:text-gray-300 mb-4 line-clamp-3">
-                            依赖范围、传递性依赖、依赖冲突解决等核心概念，帮助构建稳定可维护的项目。
-                        </p>
-                        <span class="text-primary-600 dark:text-primary-400 text-sm font-medium group-hover:translate-x-1 transition-transform inline-flex items-center">
-                            阅读更多 <i class="fa fa-long-arrow-right ml-2"></i>
-                        </span>
+                <!-- File Item -->
+                <a href="notes/spring-boot-rest-api.html" class="file-item flex flex-col items-center gap-1 p-2 cursor-pointer border border-transparent hover:border-dotted hover:border-gray-400">
+                    <div class="file-icon text-4xl text-blue-400">
+                        <i class="fa fa-file-text-o"></i>
                     </div>
-                </article>
+                    <span class="text-xs text-center break-words w-full">Spring Boot REST.html</span>
+                </a>
 
-                <!-- 异常处理 -->
-                <article class="card-glass rounded-xl overflow-hidden group cursor-pointer" onclick="location.href='notes/java-exception-handling.html'">
-                    <div class="p-6">
-                        <div class="flex justify-between items-center mb-4">
-                             <span class="bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 text-xs font-bold px-3 py-1 rounded-full">
-                                Java 核心
-                            </span>
-                            <span class="text-sm text-gray-500 dark:text-gray-400 flex items-center">
-                                <i class="fa fa-calendar-o mr-1"></i> 2024-06-18
-                            </span>
-                        </div>
-                        <h3 class="text-xl font-bold mb-3 text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
-                            Java 异常处理机制
-                        </h3>
-                        <p class="text-gray-600 dark:text-gray-300 mb-4 line-clamp-3">
-                            全面解析 Java 异常体系结构、try-catch-finally、自定义异常。
-                        </p>
-                        <span class="text-primary-600 dark:text-primary-400 text-sm font-medium group-hover:translate-x-1 transition-transform inline-flex items-center">
-                            阅读更多 <i class="fa fa-long-arrow-right ml-2"></i>
-                        </span>
+                <!-- File Item -->
+                <a href="notes/jpa-quickstart.html" class="file-item flex flex-col items-center gap-1 p-2 cursor-pointer border border-transparent hover:border-dotted hover:border-gray-400">
+                    <div class="file-icon text-4xl text-blue-400">
+                        <i class="fa fa-file-text-o"></i>
                     </div>
-                </article>
+                    <span class="text-xs text-center break-words w-full">JPA Quickstart.html</span>
+                </a>
 
-                <!-- 集合框架 -->
-                <article class="card-glass rounded-xl overflow-hidden group cursor-pointer" onclick="location.href='notes/java-collections-framework.html'">
-                    <div class="p-6">
-                        <div class="flex justify-between items-center mb-4">
-                             <span class="bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 text-xs font-bold px-3 py-1 rounded-full">
-                                Java 核心
-                            </span>
-                            <span class="text-sm text-gray-500 dark:text-gray-400 flex items-center">
-                                <i class="fa fa-calendar-o mr-1"></i> 2024-06-20
-                            </span>
-                        </div>
-                        <h3 class="text-xl font-bold mb-3 text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
-                            Java 集合框架详解
-                        </h3>
-                        <p class="text-gray-600 dark:text-gray-300 mb-4 line-clamp-3">
-                            全面解析 List、Set、Map 等核心接口及其实现类的特点和使用场景。
-                        </p>
-                        <span class="text-primary-600 dark:text-primary-400 text-sm font-medium group-hover:translate-x-1 transition-transform inline-flex items-center">
-                            阅读更多 <i class="fa fa-long-arrow-right ml-2"></i>
-                        </span>
+                <!-- File Item -->
+                <a href="notes/hello-world.html" class="file-item flex flex-col items-center gap-1 p-2 cursor-pointer border border-transparent hover:border-dotted hover:border-gray-400">
+                    <div class="file-icon text-4xl text-blue-400">
+                        <i class="fa fa-file-text-o"></i>
                     </div>
-                </article>
+                    <span class="text-xs text-center break-words w-full">Hello World.html</span>
+                </a>
+
+                <!-- File Item -->
+                <a href="notes/idea-shortcuts.html" class="file-item flex flex-col items-center gap-1 p-2 cursor-pointer border border-transparent hover:border-dotted hover:border-gray-400">
+                    <div class="file-icon text-4xl text-blue-400">
+                        <i class="fa fa-file-text-o"></i>
+                    </div>
+                    <span class="text-xs text-center break-words w-full">IDEA Shortcuts.html</span>
+                </a>
+
+                <!-- File Item -->
+                <a href="notes/variables-and-types.html" class="file-item flex flex-col items-center gap-1 p-2 cursor-pointer border border-transparent hover:border-dotted hover:border-gray-400">
+                    <div class="file-icon text-4xl text-blue-400">
+                        <i class="fa fa-file-text-o"></i>
+                    </div>
+                    <span class="text-xs text-center break-words w-full">Variables.html</span>
+                </a>
+
+                <!-- File Item -->
+                <a href="notes/maven-dependency-management.html" class="file-item flex flex-col items-center gap-1 p-2 cursor-pointer border border-transparent hover:border-dotted hover:border-gray-400">
+                    <div class="file-icon text-4xl text-blue-400">
+                        <i class="fa fa-file-text-o"></i>
+                    </div>
+                    <span class="text-xs text-center break-words w-full">Maven Guide.html</span>
+                </a>
+
+                <!-- File Item -->
+                <a href="notes/java-exception-handling.html" class="file-item flex flex-col items-center gap-1 p-2 cursor-pointer border border-transparent hover:border-dotted hover:border-gray-400">
+                    <div class="file-icon text-4xl text-blue-400">
+                        <i class="fa fa-file-text-o"></i>
+                    </div>
+                    <span class="text-xs text-center break-words w-full">Exceptions.html</span>
+                </a>
+
+                <!-- File Item -->
+                <a href="notes/java-collections-framework.html" class="file-item flex flex-col items-center gap-1 p-2 cursor-pointer border border-transparent hover:border-dotted hover:border-gray-400">
+                    <div class="file-icon text-4xl text-blue-400">
+                        <i class="fa fa-file-text-o"></i>
+                    </div>
+                    <span class="text-xs text-center break-words w-full">Collections.html</span>
+                </a>
 
             </div>
         </div>
-    </main>
 
-    <!-- Footer -->
-    <footer class="bg-white dark:bg-dark-card border-t border-gray-200 dark:border-gray-800 py-12">
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-col items-center text-center">
-                <div class="flex items-center space-x-2 mb-6">
-                    <div class="w-8 h-8 rounded-lg bg-primary-600 flex items-center justify-center text-white">
-                        <i class="fa fa-code"></i>
-                    </div>
-                    <span class="font-bold text-xl tracking-tight text-gray-900 dark:text-white">Java 新手成长记</span>
-                </div>
-                <p class="text-gray-600 dark:text-gray-400 mb-8 max-w-md">记录 Java 学习路上的点点滴滴，与万千开发者一起成长。</p>
-                <div class="flex space-x-6 mb-8">
-                    <a href="#" class="text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
-                        <i class="fa fa-github text-xl"></i>
-                    </a>
-                    <a href="#" class="text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
-                        <i class="fa fa-twitter text-xl"></i>
-                    </a>
-                    <a href="#" class="text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
-                        <i class="fa fa-envelope text-xl"></i>
-                    </a>
-                </div>
-                <div class="text-sm text-gray-500 dark:text-gray-500">
-                    &copy; <span id="current-year"></span> Java 新手成长记. 保留所有权利.
-                </div>
+        <!-- Status Bar -->
+        <div class="px-2 py-1 text-xs text-gray-600 border-t border-gray shadow-none flex justify-between">
+            <span>9 个对象</span>
+            <span>120KB</span>
+        </div>
+    </div>
+
+    <!-- Start Menu -->
+    <div id="start-menu" class="absolute bottom-10 left-1 bg-silver shadow-win95-outset w-48 flex flex-col z-[60] hidden">
+        <div class="flex">
+            <div class="w-8 bg-navy text-white flex items-end justify-center pb-2 relative">
+                 <span class="transform -rotate-90 text-lg font-bold whitespace-nowrap tracking-widest mb-4">RetroOS</span>
             </div>
+            <div class="flex-1 py-1 text-sm">
+                 <div class="hover:bg-navy hover:text-white px-2 py-1 flex items-center gap-2 cursor-pointer" onclick="window.location.href='index.html'">
+                     <i class="fa fa-desktop"></i> 桌面
+                 </div>
+                 <div class="hover:bg-navy hover:text-white px-2 py-1 flex items-center gap-2 cursor-pointer" onclick="window.location.href='all-notes.html'">
+                     <i class="fa fa-folder-open"></i> 文章
+                 </div>
+                 <div class="hover:bg-navy hover:text-white px-2 py-1 flex items-center gap-2 cursor-pointer" onclick="window.location.href='categories.html'">
+                     <i class="fa fa-cog"></i> 分类
+                 </div>
+                 <div class="hover:bg-navy hover:text-white px-2 py-1 flex items-center gap-2 cursor-pointer" onclick="window.open('https://github.com', '_blank')">
+                     <i class="fa fa-globe"></i> Internet
+                 </div>
+                 <div class="border-t border-gray-400 border-b border-white my-1"></div>
+                 <div class="hover:bg-navy hover:text-white px-2 py-1 flex items-center gap-2 cursor-pointer" onclick="shutdown()">
+                     <i class="fa fa-power-off"></i> 关闭系统...
+                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Taskbar -->
+    <footer class="h-10 bg-silver shadow-win95-outset flex items-center px-1 py-1 gap-1 z-50">
+        <button id="start-btn" onclick="toggleStartMenu()" class="flex items-center gap-1 px-2 py-1 bg-silver shadow-win95-outset active:shadow-win95-inset font-bold text-sm win-btn">
+            <img src="https://win98icons.alexmeub.com/icons/png/windows-0.png" class="w-5 h-5" alt="win">
+            开始
+        </button>
+        <!-- Active Window Tab -->
+        <div class="flex-1 flex justify-start">
+            <div class="px-4 py-1 bg-silver shadow-win95-inset font-bold text-sm flex items-center gap-2 w-48 bg-gray/20">
+                <i class="fa fa-folder-open"></i> 我的文档
+            </div>
+        </div>
+        <div class="px-3 py-1 bg-silver shadow-win95-inset flex items-center gap-2 text-xs min-w-[80px] justify-end">
+            <span id="clock">12:00 PM</span>
         </div>
     </footer>
 
     <script>
-        // Footer Year
-        document.getElementById('current-year').textContent = new Date().getFullYear();
-
-        // Mobile Menu Toggle
-        const mobileMenuButton = document.getElementById('mobile-menu-button');
-        const mobileMenu = document.getElementById('mobile-menu');
-
-        mobileMenuButton.addEventListener('click', () => {
-            mobileMenu.classList.toggle('hidden');
-        });
-
-        // Dark Mode Toggle Logic
-        const root = document.documentElement;
-        const themeToggle = document.getElementById('theme-toggle');
-        const themeToggleMobile = document.getElementById('theme-toggle-mobile');
-        
-        // Initialize theme based on local storage or system preference
-        const savedTheme = localStorage.getItem('theme');
-        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-        
-        if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
-            root.classList.add('dark');
-        } else {
-            root.classList.remove('dark');
+        // Start Menu Logic
+        function toggleStartMenu() {
+            const menu = document.getElementById('start-menu');
+            menu.classList.toggle('hidden');
+            const btn = document.getElementById('start-btn');
+            btn.classList.toggle('shadow-win95-inset');
+            btn.classList.toggle('shadow-win95-outset');
         }
 
-        const toggleTheme = () => {
-            if (root.classList.contains('dark')) {
-                root.classList.remove('dark');
-                localStorage.setItem('theme', 'light');
-            } else {
-                root.classList.add('dark');
-                localStorage.setItem('theme', 'dark');
+        document.addEventListener('click', function(e) {
+            const menu = document.getElementById('start-menu');
+            const btn = document.getElementById('start-btn');
+            if (menu && !menu.contains(e.target) && !btn.contains(e.target) && !menu.classList.contains('hidden')) {
+                toggleStartMenu();
             }
-        };
-
-        if (themeToggle) themeToggle.addEventListener('click', toggleTheme);
-        if (themeToggleMobile) themeToggleMobile.addEventListener('click', toggleTheme);
-
-        // Scroll Animation Observer
-        const observerOptions = {
-            root: null,
-            rootMargin: '0px',
-            threshold: 0.1
-        };
-
-        const observer = new IntersectionObserver((entries, observer) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('animate-fade-in-up');
-                    entry.target.style.opacity = '1';
-                    observer.unobserve(entry.target);
-                }
-            });
-        }, observerOptions);
-
-        document.querySelectorAll('article').forEach((el) => {
-            el.style.opacity = '0';
-            observer.observe(el);
         });
+
+        function shutdown() {
+            document.body.innerHTML = `
+                <div class="h-screen w-screen bg-black flex items-center justify-center flex-col gap-4">
+                    <div class="text-[#ff6600] font-bold text-2xl" style="font-family: 'Courier New', monospace;">It is now safe to turn off your computer.</div>
+                    <div class="text-[#ff6600] text-sm" style="font-family: 'Courier New', monospace;">(现在可以安全地关闭浏览器了)</div>
+                    <button onclick="window.close()" class="px-4 py-2 bg-silver text-black border-2 border-white shadow-win95-outset active:shadow-win95-inset cursor-pointer font-bold">关闭页面</button>
+                </div>
+            `;
+            window.close();
+        }
+
+        function updateClock() {
+            const now = new Date();
+            let hours = now.getHours();
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12; 
+            document.getElementById('clock').textContent = `${hours}:${minutes} ${ampm}`;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
     </script>
 </body>
 </html>

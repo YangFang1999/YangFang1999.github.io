@@ -1,361 +1,266 @@
 <!DOCTYPE html>
-<html lang="zh-CN" class="scroll-smooth">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>分类 | Java 新手成长记</title>
-    <meta name="description" content="按分类查看我的 Java 学习笔记，涵盖 Java 基础、开发工具与精选文章。">
-    <!-- Tailwind CSS -->
+    <title>Categories - Control Panel</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome -->
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
-    <!-- Google Fonts - Inter & Noto Sans SC -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
-    
-    <!-- Tailwind 配置 -->
     <script>
         tailwind.config = {
-            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
-                        primary: {
-                            50: '#eef2ff',
-                            100: '#e0e7ff',
-                            200: '#c7d2fe',
-                            300: '#a5b4fc',
-                            400: '#818cf8',
-                            500: '#6366f1', // Indigo 500
-                            600: '#4f46e5', // Indigo 600
-                            700: '#4338ca',
-                            800: '#3730a3',
-                            900: '#312e81',
-                        },
-                        dark: {
-                            bg: '#0f172a', // Slate 900
-                            card: '#1e293b', // Slate 800
-                            border: '#334155', // Slate 700
-                        }
+                        teal: '#008080',
+                        silver: '#c0c0c0',
+                        gray: '#808080',
+                        navy: '#000080',
+                        win_black: '#000000',
+                        win_white: '#ffffff',
                     },
                     fontFamily: {
-                        sans: ['Inter', 'Noto Sans SC', 'sans-serif'],
+                        sans: ['"MS Sans Serif"', 'Tahoma', 'sans-serif'],
+                        mono: ['"Courier New"', 'monospace'],
                     },
-                    animation: {
-                        'fade-in-up': 'fadeInUp 0.8s ease-out forwards',
-                    },
-                    keyframes: {
-                        fadeInUp: {
-                            '0%': { opacity: '0', transform: 'translateY(20px)' },
-                            '100%': { opacity: '1', transform: 'translateY(0)' },
-                        }
+                    boxShadow: {
+                        'win95-outset': 'inset -1px -1px #0a0a0a, inset 1px 1px #dfdfdf, inset -2px -2px #808080, inset 2px 2px #ffffff',
+                        'win95-inset': 'inset -1px -1px #ffffff, inset 1px 1px #0a0a0a, inset -2px -2px #dfdfdf, inset 2px 2px #808080',
                     }
                 }
             }
         }
     </script>
-    
-    <style type="text/tailwindcss">
-        @layer utilities {
-            .glass {
-                @apply bg-white/70 dark:bg-dark-bg/70 backdrop-blur-lg border-b border-gray-200 dark:border-gray-800;
-            }
-            .card-glass {
-                @apply bg-white dark:bg-dark-card border border-gray-100 dark:border-dark-border shadow-lg dark:shadow-none hover:shadow-xl transition-all duration-300;
-            }
-            .section-title {
-                @apply text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center;
-            }
-            .section-title::before {
-                content: '';
-                @apply w-1.5 h-6 bg-primary-600 rounded-full mr-3 inline-block;
-            }
+    <style>
+        body {
+            font-family: 'MS Sans Serif', 'Tahoma', sans-serif;
+            -webkit-font-smoothing: none;
+            image-rendering: pixelated;
+            background-image: url('wallpaper.jpg');
+            background-size: cover;
+            background-position: center;
         }
-        
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { @apply bg-gray-300 dark:bg-gray-700 rounded-full; }
-        ::-webkit-scrollbar-thumb:hover { @apply bg-gray-400 dark:bg-gray-600; }
+        .win-btn:active {
+            box-shadow: inset -1px -1px #ffffff, inset 1px 1px #0a0a0a, inset -2px -2px #dfdfdf, inset 2px 2px #808080;
+            padding-top: 2px;
+            padding-left: 2px;
+        }
+        .file-item:hover {
+            background-color: #000080;
+            color: white;
+        }
+        .file-item:hover .file-icon {
+            filter: brightness(1.2);
+        }
+        .group-box {
+            border: 2px solid #808080;
+            border-style: groove;
+            position: relative;
+            margin-top: 10px;
+            padding: 10px;
+        }
+        .group-box-label {
+            position: absolute;
+            top: -10px;
+            left: 10px;
+            background-color: #c0c0c0;
+            padding: 0 5px;
+        }
     </style>
 </head>
-<body class="font-sans bg-gray-50 dark:bg-dark-bg text-gray-800 dark:text-gray-200 transition-colors duration-300 selection:bg-primary-500 selection:text-white">
+<body class="h-screen w-screen overflow-hidden flex flex-col">
 
-    <!-- 导航栏 -->
-    <header id="navbar" class="fixed w-full z-50 transition-all duration-300 glass">
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-16">
-                <!-- Logo -->
-                <div class="flex items-center">
-                    <a href="index.html" class="flex items-center space-x-2 group">
-                        <div class="w-8 h-8 rounded-lg bg-primary-600 flex items-center justify-center text-white transform group-hover:rotate-12 transition-transform">
-                            <i class="fa fa-code"></i>
-                        </div>
-                        <span class="font-bold text-xl tracking-tight text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">想当 Java 高手</span>
+    <!-- Main Window -->
+    <div class="flex-1 m-1 flex flex-col bg-silver shadow-win95-outset p-1">
+        <!-- Title Bar -->
+        <div class="bg-navy px-2 py-1 flex justify-between items-center select-none">
+            <div class="flex items-center gap-2">
+                <i class="fa fa-cog text-white"></i>
+                <span class="text-white font-bold text-sm tracking-wide">控制面板 \ 分类</span>
+            </div>
+            <div class="flex gap-1">
+                <button onclick="window.location.href='index.html'" class="w-4 h-4 bg-silver shadow-win95-outset flex items-center justify-center active:shadow-win95-inset text-[10px] font-bold pb-1" title="最小化">_</button>
+                <button class="w-4 h-4 bg-silver shadow-win95-outset flex items-center justify-center active:shadow-win95-inset text-[10px] font-bold pb-1" title="最大化">□</button>
+                <button onclick="window.location.href='index.html'" class="w-4 h-4 bg-silver shadow-win95-outset flex items-center justify-center active:shadow-win95-inset text-[10px] font-bold pb-1" title="关闭">×</button>
+            </div>
+        </div>
+
+        <!-- Menu Bar -->
+        <div class="flex px-1 py-1 text-sm select-none border-b border-gray-300">
+            <div class="px-2 py-1 hover:bg-navy hover:text-white cursor-pointer"><span class="underline decoration-1 underline-offset-2">文</span>件(F)</div>
+            <div class="px-2 py-1 hover:bg-navy hover:text-white cursor-pointer"><span class="underline decoration-1 underline-offset-2">编</span>辑(E)</div>
+            <div class="px-2 py-1 hover:bg-navy hover:text-white cursor-pointer"><span class="underline decoration-1 underline-offset-2">查</span>看(V)</div>
+            <div class="px-2 py-1 hover:bg-navy hover:text-white cursor-pointer"><span class="underline decoration-1 underline-offset-2">帮</span>助(H)</div>
+        </div>
+
+        <!-- Address Bar -->
+        <div class="flex items-center gap-2 px-2 py-1 border-b border-gray-300">
+            <span class="text-xs">地址(D)</span>
+            <div class="flex-1 bg-white shadow-win95-inset px-2 py-0.5 text-sm flex items-center gap-2">
+                <i class="fa fa-folder-open text-yellow-400"></i>
+                C:\控制面板\分类
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="flex-1 bg-white shadow-win95-inset m-1 p-4 overflow-y-auto min-h-0">
+            
+            <!-- Java Basics Group -->
+            <fieldset class="border border-gray-400 p-4 mb-4 relative mt-2">
+                <legend class="px-2 text-sm text-navy font-bold">Java 基础</legend>
+                <div class="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-4">
+                    <a href="notes/hello-world.html" class="flex items-center gap-2 p-2 hover:bg-navy hover:text-white cursor-pointer group">
+                        <i class="fa fa-file-text-o text-2xl text-gray-500 group-hover:text-white"></i>
+                        <span class="text-sm">Hello World</span>
+                    </a>
+                    <a href="notes/variables-and-types.html" class="flex items-center gap-2 p-2 hover:bg-navy hover:text-white cursor-pointer group">
+                        <i class="fa fa-file-text-o text-2xl text-gray-500 group-hover:text-white"></i>
+                        <span class="text-sm">Variables & Types</span>
+                    </a>
+                    <a href="notes/java-exception-handling.html" class="flex items-center gap-2 p-2 hover:bg-navy hover:text-white cursor-pointer group">
+                        <i class="fa fa-file-text-o text-2xl text-gray-500 group-hover:text-white"></i>
+                        <span class="text-sm">Exception Handling</span>
+                    </a>
+                    <a href="notes/java-collections-framework.html" class="flex items-center gap-2 p-2 hover:bg-navy hover:text-white cursor-pointer group">
+                        <i class="fa fa-file-text-o text-2xl text-gray-500 group-hover:text-white"></i>
+                        <span class="text-sm">Collections Framework</span>
                     </a>
                 </div>
-                
-                <!-- Desktop Menu -->
-                <div class="hidden md:flex items-center space-x-8">
-                    <nav class="flex space-x-6">
-                        <a href="index.html" class="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">首页</a>
-                        <a href="all-notes.html" class="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">所有笔记</a>
-                        <a href="categories.html" class="text-sm font-medium text-primary-600 dark:text-primary-400 font-bold transition-colors">分类</a>
-                        <a href="index.html#about" class="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">关于我</a>
-                    </nav>
-                    
-                    <!-- Theme Toggle -->
-                    <button id="theme-toggle" class="p-2 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-primary-100 dark:hover:bg-gray-700 transition-colors focus:outline-none">
-                        <i class="fa fa-moon-o dark:hidden"></i>
-                        <i class="fa fa-sun-o hidden dark:block"></i>
-                    </button>
+            </fieldset>
+
+            <!-- Backend Group -->
+            <fieldset class="border border-gray-400 p-4 mb-4 relative mt-2">
+                <legend class="px-2 text-sm text-navy font-bold">后端开发</legend>
+                <div class="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-4">
+                    <a href="notes/spring-boot-rest-api.html" class="flex items-center gap-2 p-2 hover:bg-navy hover:text-white cursor-pointer group">
+                        <i class="fa fa-server text-2xl text-gray-500 group-hover:text-white"></i>
+                        <span class="text-sm">Spring Boot REST API</span>
+                    </a>
+                    <a href="notes/jpa-quickstart.html" class="flex items-center gap-2 p-2 hover:bg-navy hover:text-white cursor-pointer group">
+                        <i class="fa fa-database text-2xl text-gray-500 group-hover:text-white"></i>
+                        <span class="text-sm">JPA Quickstart</span>
+                    </a>
                 </div>
-                
-                <!-- Mobile Menu Button -->
-                <div class="md:hidden flex items-center space-x-4">
-                    <button id="theme-toggle-mobile" class="text-gray-600 dark:text-gray-300 focus:outline-none">
-                        <i class="fa fa-moon-o dark:hidden"></i>
-                        <i class="fa fa-sun-o hidden dark:block"></i>
-                    </button>
-                    <button id="mobile-menu-button" class="text-gray-600 dark:text-gray-300 hover:text-primary-600 focus:outline-none">
-                        <i class="fa fa-bars text-xl"></i>
-                    </button>
+            </fieldset>
+
+            <!-- Tools Group -->
+            <fieldset class="border border-gray-400 p-4 mb-4 relative mt-2">
+                <legend class="px-2 text-sm text-navy font-bold">开发工具</legend>
+                <div class="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-4">
+                    <a href="notes/idea-shortcuts.html" class="flex items-center gap-2 p-2 hover:bg-navy hover:text-white cursor-pointer group">
+                        <i class="fa fa-keyboard-o text-2xl text-gray-500 group-hover:text-white"></i>
+                        <span class="text-sm">IDEA Shortcuts</span>
+                    </a>
+                    <a href="notes/maven-dependency-management.html" class="flex items-center gap-2 p-2 hover:bg-navy hover:text-white cursor-pointer group">
+                        <i class="fa fa-wrench text-2xl text-gray-500 group-hover:text-white"></i>
+                        <span class="text-sm">Maven Dependency</span>
+                    </a>
                 </div>
+            </fieldset>
+
+            <!-- Featured Group -->
+            <fieldset class="border border-gray-400 p-4 mb-4 relative mt-2">
+                <legend class="px-2 text-sm text-navy font-bold">精选</legend>
+                <div class="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-4">
+                    <a href="notes/java-tech-stack.html" class="flex items-center gap-2 p-2 hover:bg-navy hover:text-white cursor-pointer group">
+                        <i class="fa fa-star text-2xl text-yellow-500 group-hover:text-white"></i>
+                        <span class="text-sm">Java Tech Stack</span>
+                    </a>
+                </div>
+            </fieldset>
+
+        </div>
+
+        <!-- Status Bar -->
+        <div class="px-2 py-1 text-xs text-gray-600 border-t border-gray shadow-none flex justify-between">
+            <span>4 个分组</span>
+            <span>本地网络</span>
+        </div>
+    </div>
+
+    <!-- Start Menu -->
+    <div id="start-menu" class="absolute bottom-10 left-1 bg-silver shadow-win95-outset w-48 flex flex-col z-[60] hidden">
+        <div class="flex">
+            <div class="w-8 bg-navy text-white flex items-end justify-center pb-2 relative">
+                 <span class="transform -rotate-90 text-lg font-bold whitespace-nowrap tracking-widest mb-4">RetroOS</span>
+            </div>
+            <div class="flex-1 py-1 text-sm">
+                 <div class="hover:bg-navy hover:text-white px-2 py-1 flex items-center gap-2 cursor-pointer" onclick="window.location.href='index.html'">
+                     <i class="fa fa-desktop"></i> 桌面
+                 </div>
+                 <div class="hover:bg-navy hover:text-white px-2 py-1 flex items-center gap-2 cursor-pointer" onclick="window.location.href='all-notes.html'">
+                     <i class="fa fa-folder-open"></i> 文章
+                 </div>
+                 <div class="hover:bg-navy hover:text-white px-2 py-1 flex items-center gap-2 cursor-pointer" onclick="window.location.href='categories.html'">
+                     <i class="fa fa-cog"></i> 分类
+                 </div>
+                 <div class="hover:bg-navy hover:text-white px-2 py-1 flex items-center gap-2 cursor-pointer" onclick="window.open('https://github.com', '_blank')">
+                     <i class="fa fa-globe"></i> Internet
+                 </div>
+                 <div class="border-t border-gray-400 border-b border-white my-1"></div>
+                 <div class="hover:bg-navy hover:text-white px-2 py-1 flex items-center gap-2 cursor-pointer" onclick="shutdown()">
+                     <i class="fa fa-power-off"></i> 关闭系统...
+                 </div>
             </div>
         </div>
-        
-        <!-- Mobile Menu -->
-        <div id="mobile-menu" class="hidden md:hidden bg-white dark:bg-dark-card border-t border-gray-100 dark:border-gray-800 shadow-lg absolute w-full">
-            <div class="px-4 py-4 space-y-1">
-                <a href="index.html" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-primary-600 transition-colors">首页</a>
-                <a href="all-notes.html" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-primary-600 transition-colors">所有笔记</a>
-                <a href="categories.html" class="block px-3 py-2 rounded-md text-base font-medium text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-gray-800 transition-colors">分类</a>
-                <a href="index.html#about" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-primary-600 transition-colors">关于我</a>
+    </div>
+
+    <!-- Taskbar -->
+    <footer class="h-10 bg-silver shadow-win95-outset flex items-center px-1 py-1 gap-1 z-50">
+        <button id="start-btn" onclick="toggleStartMenu()" class="flex items-center gap-1 px-2 py-1 bg-silver shadow-win95-outset active:shadow-win95-inset font-bold text-sm win-btn">
+            <img src="https://win98icons.alexmeub.com/icons/png/windows-0.png" class="w-5 h-5" alt="win">
+            开始
+        </button>
+        <!-- Active Window Tab -->
+        <div class="flex-1 flex justify-start">
+            <div class="px-4 py-1 bg-silver shadow-win95-inset font-bold text-sm flex items-center gap-2 w-48 bg-gray/20">
+                <i class="fa fa-cog"></i> 分类
             </div>
         </div>
-    </header>
-
-    <main class="pt-32 pb-20 min-h-screen">
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16 animate-fade-in-up">
-                <h1 class="text-4xl font-extrabold text-gray-900 dark:text-white mb-4">按分类探索</h1>
-                <p class="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">知识的海洋浩瀚无垠，良好的分类是航行的指南针。</p>
-            </div>
-
-            <div class="max-w-6xl mx-auto space-y-16">
-                <!-- Java 基础 -->
-                <section id="java-basics" class="animate-fade-in-up" style="animation-delay: 0.1s;">
-                    <h2 class="section-title">Java 基础</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <article class="card-glass rounded-xl p-6 group cursor-pointer" onclick="location.href='notes/hello-world.html'">
-                            <div class="flex items-center mb-4">
-                                <div class="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 flex items-center justify-center text-lg mr-3">
-                                    <i class="fa fa-coffee"></i>
-                                </div>
-                                <h3 class="text-lg font-bold text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">Java 入门</h3>
-                            </div>
-                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">Hello World 详解与环境配置，记录常见坑与解法。</p>
-                            <span class="text-primary-600 dark:text-primary-400 text-sm font-medium group-hover:translate-x-1 transition-transform inline-flex items-center">
-                                阅读更多 <i class="fa fa-angle-right ml-1"></i>
-                            </span>
-                        </article>
-
-                        <article class="card-glass rounded-xl p-6 group cursor-pointer" onclick="location.href='notes/variables-and-types.html'">
-                            <div class="flex items-center mb-4">
-                                <div class="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 flex items-center justify-center text-lg mr-3">
-                                    <i class="fa fa-cube"></i>
-                                </div>
-                                <h3 class="text-lg font-bold text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">变量与类型</h3>
-                            </div>
-                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">理解基本与引用类型、常量与类型转换。</p>
-                            <span class="text-primary-600 dark:text-primary-400 text-sm font-medium group-hover:translate-x-1 transition-transform inline-flex items-center">
-                                阅读更多 <i class="fa fa-angle-right ml-1"></i>
-                            </span>
-                        </article>
-
-                        <article class="card-glass rounded-xl p-6 group cursor-pointer" onclick="location.href='notes/java-exception-handling.html'">
-                            <div class="flex items-center mb-4">
-                                <div class="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 flex items-center justify-center text-lg mr-3">
-                                    <i class="fa fa-exclamation-triangle"></i>
-                                </div>
-                                <h3 class="text-lg font-bold text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">异常处理</h3>
-                            </div>
-                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">全面解析异常体系结构、try-catch-finally、自定义异常。</p>
-                            <span class="text-primary-600 dark:text-primary-400 text-sm font-medium group-hover:translate-x-1 transition-transform inline-flex items-center">
-                                阅读更多 <i class="fa fa-angle-right ml-1"></i>
-                            </span>
-                        </article>
-
-                        <article class="card-glass rounded-xl p-6 group cursor-pointer" onclick="location.href='notes/java-collections-framework.html'">
-                            <div class="flex items-center mb-4">
-                                <div class="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 flex items-center justify-center text-lg mr-3">
-                                    <i class="fa fa-list"></i>
-                                </div>
-                                <h3 class="text-lg font-bold text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">集合框架</h3>
-                            </div>
-                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">深入理解 List、Set、Map 等核心接口及其实现类。</p>
-                            <span class="text-primary-600 dark:text-primary-400 text-sm font-medium group-hover:translate-x-1 transition-transform inline-flex items-center">
-                                阅读更多 <i class="fa fa-angle-right ml-1"></i>
-                            </span>
-                        </article>
-                    </div>
-                </section>
-
-                <!-- 后端开发 -->
-                <section id="backend" class="animate-fade-in-up" style="animation-delay: 0.2s;">
-                    <h2 class="section-title">后端开发</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <article class="card-glass rounded-xl p-6 group cursor-pointer" onclick="location.href='notes/spring-boot-rest-api.html'">
-                            <div class="flex items-center mb-4">
-                                <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center text-lg mr-3">
-                                    <i class="fa fa-server"></i>
-                                </div>
-                                <h3 class="text-lg font-bold text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">Spring Boot REST API</h3>
-                            </div>
-                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">最小控制器与运行测试建议，快速搭建可用接口。</p>
-                            <span class="text-primary-600 dark:text-primary-400 text-sm font-medium group-hover:translate-x-1 transition-transform inline-flex items-center">
-                                阅读更多 <i class="fa fa-angle-right ml-1"></i>
-                            </span>
-                        </article>
-
-                        <article class="card-glass rounded-xl p-6 group cursor-pointer" onclick="location.href='notes/jpa-quickstart.html'">
-                            <div class="flex items-center mb-4">
-                                <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center text-lg mr-3">
-                                    <i class="fa fa-database"></i>
-                                </div>
-                                <h3 class="text-lg font-bold text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">JPA 快速上手</h3>
-                            </div>
-                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">完成实体与仓库的最小实践，掌握常见查询方式。</p>
-                            <span class="text-primary-600 dark:text-primary-400 text-sm font-medium group-hover:translate-x-1 transition-transform inline-flex items-center">
-                                阅读更多 <i class="fa fa-angle-right ml-1"></i>
-                            </span>
-                        </article>
-                    </div>
-                </section>
-
-                <!-- 开发工具 -->
-                <section id="tools" class="animate-fade-in-up" style="animation-delay: 0.3s;">
-                    <h2 class="section-title">开发工具</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <article class="card-glass rounded-xl p-6 group cursor-pointer" onclick="location.href='notes/idea-shortcuts.html'">
-                            <div class="flex items-center mb-4">
-                                <div class="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 flex items-center justify-center text-lg mr-3">
-                                    <i class="fa fa-keyboard-o"></i>
-                                </div>
-                                <h3 class="text-lg font-bold text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">IDEA 快捷键</h3>
-                            </div>
-                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">整理高频快捷键与提升效率的小技巧。</p>
-                            <span class="text-primary-600 dark:text-primary-400 text-sm font-medium group-hover:translate-x-1 transition-transform inline-flex items-center">
-                                阅读更多 <i class="fa fa-angle-right ml-1"></i>
-                            </span>
-                        </article>
-
-                        <article class="card-glass rounded-xl p-6 group cursor-pointer" onclick="location.href='notes/maven-dependency-management.html'">
-                            <div class="flex items-center mb-4">
-                                <div class="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 flex items-center justify-center text-lg mr-3">
-                                    <i class="fa fa-wrench"></i>
-                                </div>
-                                <h3 class="text-lg font-bold text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">Maven 依赖管理</h3>
-                            </div>
-                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">深入理解依赖范围、传递性依赖、依赖冲突解决。</p>
-                            <span class="text-primary-600 dark:text-primary-400 text-sm font-medium group-hover:translate-x-1 transition-transform inline-flex items-center">
-                                阅读更多 <i class="fa fa-angle-right ml-1"></i>
-                            </span>
-                        </article>
-                    </div>
-                </section>
-                
-                 <!-- 精选文章 -->
-                <section id="featured" class="animate-fade-in-up" style="animation-delay: 0.4s;">
-                    <h2 class="section-title">精选文章</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <article class="card-glass rounded-xl p-6 group cursor-pointer" onclick="location.href='notes/java-tech-stack.html'">
-                            <div class="flex items-center mb-4">
-                                <div class="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 flex items-center justify-center text-lg mr-3">
-                                    <i class="fa fa-star"></i>
-                                </div>
-                                <h3 class="text-lg font-bold text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">Java 技术栈概览</h3>
-                            </div>
-                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">纵览语言、框架与配套工具，给出循序渐进的实践路线。</p>
-                            <span class="text-primary-600 dark:text-primary-400 text-sm font-medium group-hover:translate-x-1 transition-transform inline-flex items-center">
-                                阅读更多 <i class="fa fa-angle-right ml-1"></i>
-                            </span>
-                        </article>
-                    </div>
-                </section>
-            </div>
-        </div>
-    </main>
-
-    <footer class="bg-white dark:bg-dark-card border-t border-gray-200 dark:border-gray-800 py-12">
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-col md:flex-row justify-between items-center">
-                <div class="mb-4 md:mb-0 text-center md:text-left">
-                    <span class="font-bold text-lg text-gray-900 dark:text-white">想当 Java 高手</span>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">记录学习，分享成长</p>
-                </div>
-                <div class="flex space-x-6 text-sm text-gray-500 dark:text-gray-400">
-                    <a href="index.html" class="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">首页</a>
-                    <a href="all-notes.html" class="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">笔记</a>
-                    <a href="categories.html" class="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">分类</a>
-                </div>
-            </div>
-            <div class="mt-8 pt-8 border-t border-gray-100 dark:border-gray-800 text-center text-sm text-gray-400 dark:text-gray-500">
-                &copy; <span id="current-year"></span> YF. All rights reserved.
-            </div>
+        <div class="px-3 py-1 bg-silver shadow-win95-inset flex items-center gap-2 text-xs min-w-[80px] justify-end">
+            <span id="clock">12:00 PM</span>
         </div>
     </footer>
 
     <script>
-        document.getElementById('current-year').textContent = new Date().getFullYear();
-        const mobileMenuButton = document.getElementById('mobile-menu-button');
-        const mobileMenu = document.getElementById('mobile-menu');
-        mobileMenuButton.addEventListener('click', () => { mobileMenu.classList.toggle('hidden'); });
-        
-        const navbar = document.getElementById('navbar');
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > 20) { navbar.classList.add('shadow-md'); }
-            else { navbar.classList.remove('shadow-md'); }
-        });
-        
-        const root = document.documentElement;
-        const savedTheme = localStorage.getItem('theme');
-        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-        
-        if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
-            root.classList.add('dark');
+        // Start Menu Logic
+        function toggleStartMenu() {
+            const menu = document.getElementById('start-menu');
+            menu.classList.toggle('hidden');
+            const btn = document.getElementById('start-btn');
+            btn.classList.toggle('shadow-win95-inset');
+            btn.classList.toggle('shadow-win95-outset');
         }
 
-        const toggleTheme = () => {
-            root.classList.toggle('dark');
-            localStorage.setItem('theme', root.classList.contains('dark') ? 'dark' : 'light');
-        };
-
-        document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
-        document.getElementById('theme-toggle-mobile').addEventListener('click', toggleTheme);
-
-        // Scroll Animation Observer
-        const observerOptions = {
-            root: null,
-            rootMargin: '0px',
-            threshold: 0.1
-        };
-
-        const observer = new IntersectionObserver((entries, observer) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('animate-fade-in-up');
-                    entry.target.style.opacity = '1';
-                    observer.unobserve(entry.target);
-                }
-            });
-        }, observerOptions);
-
-        document.querySelectorAll('article, .section-title').forEach((el) => {
-            el.style.opacity = '0';
-            observer.observe(el);
+        document.addEventListener('click', function(e) {
+            const menu = document.getElementById('start-menu');
+            const btn = document.getElementById('start-btn');
+            if (menu && !menu.contains(e.target) && !btn.contains(e.target) && !menu.classList.contains('hidden')) {
+                toggleStartMenu();
+            }
         });
+
+        function shutdown() {
+            document.body.innerHTML = `
+                <div class="h-screen w-screen bg-black flex items-center justify-center flex-col gap-4">
+                    <div class="text-[#ff6600] font-bold text-2xl" style="font-family: 'Courier New', monospace;">It is now safe to turn off your computer.</div>
+                    <div class="text-[#ff6600] text-sm" style="font-family: 'Courier New', monospace;">(现在可以安全地关闭浏览器了)</div>
+                    <button onclick="window.close()" class="px-4 py-2 bg-silver text-black border-2 border-white shadow-win95-outset active:shadow-win95-inset cursor-pointer font-bold">关闭页面</button>
+                </div>
+            `;
+            window.close();
+        }
+
+        function updateClock() {
+            const now = new Date();
+            let hours = now.getHours();
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12; 
+            document.getElementById('clock').textContent = `${hours}:${minutes} ${ampm}`;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
     </script>
 </body>
 </html>

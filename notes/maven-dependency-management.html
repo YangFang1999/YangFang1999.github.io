@@ -3,318 +3,230 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Maven 依赖管理详解 | Java 新手成长记</title>
-    <meta name="description" content="深入理解 Maven 依赖管理机制，包括依赖范围、传递性依赖、依赖冲突解决等核心概念。">
-    <!-- Tailwind CSS -->
+    <title>Maven Dependency - Notepad</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome -->
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
-    <!-- Google Fonts - Noto Sans SC -->
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
-    
-    <!-- Tailwind 配置 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism.min.css">
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        primary: '#3B82F6',
-                        secondary: '#60A5FA',
-                        accent: '#F59E0B',
-                        dark: '#1E293B',
-                        light: '#F8FAFC'
+                        teal: '#008080',
+                        silver: '#c0c0c0',
+                        gray: '#808080',
+                        navy: '#000080',
+                        win_black: '#000000',
+                        win_white: '#ffffff',
                     },
                     fontFamily: {
-                        sans: ['Noto Sans SC', 'sans-serif'],
+                        sans: ['"MS Sans Serif"', 'Tahoma', 'sans-serif'],
+                        mono: ['"Courier New"', 'monospace'],
                     },
+                    boxShadow: {
+                        'win95-outset': 'inset -1px -1px #0a0a0a, inset 1px 1px #dfdfdf, inset -2px -2px #808080, inset 2px 2px #ffffff',
+                        'win95-inset': 'inset -1px -1px #ffffff, inset 1px 1px #0a0a0a, inset -2px -2px #dfdfdf, inset 2px 2px #808080',
+                    }
                 }
             }
         }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" data-autoloader-path="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/"></script>
-    
-    <style type="text/tailwindcss">
-        @layer utilities {
-            .content-auto {
-                content-visibility: auto;
-            }
-            .code-block {
-                background-color: #1E293B;
-                color: #E2E8F0;
-                border-radius: 0.5rem;
-                padding: 1rem;
-                margin: 1rem 0;
-                overflow-x: auto;
-                font-family: 'Fira Code', monospace;
-                font-size: 0.9rem;
-            }
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <style>
+        body {
+            font-family: 'MS Sans Serif', 'Tahoma', sans-serif;
+            -webkit-font-smoothing: none;
+            image-rendering: pixelated;
+            background-image: url('../wallpaper.jpg');
+            background-size: cover;
+            background-position: center;
         }
+        .win-btn:active {
+            box-shadow: inset -1px -1px #ffffff, inset 1px 1px #0a0a0a, inset -2px -2px #dfdfdf, inset 2px 2px #808080;
+            padding-top: 2px;
+            padding-left: 2px;
+        }
+        /* Notepad specific styles */
+        .notepad-content {
+            font-family: 'Courier New', monospace;
+            line-height: 1.5;
+        }
+        .notepad-content h1 { font-size: 1.5em; font-weight: bold; margin-bottom: 1em; }
+        .notepad-content h2 { font-size: 1.2em; font-weight: bold; margin-top: 1.5em; margin-bottom: 0.5em; }
+        .notepad-content h3 { font-size: 1.1em; font-weight: bold; margin-top: 1em; margin-bottom: 0.5em; }
+        .notepad-content p { margin-bottom: 1em; }
+        .notepad-content ul, .notepad-content ol { margin-left: 2em; margin-bottom: 1em; list-style-type: disc; }
+        .notepad-content li { margin-bottom: 0.5em; }
+        .notepad-content code { background: #eee; padding: 0 4px; }
+        .notepad-content pre { background: #f5f5f5; border: 1px solid #ccc; padding: 10px; margin-bottom: 1em; overflow-x: auto; }
+        
+        /* Scrollbar styling for textarea feel */
+        ::-webkit-scrollbar { width: 16px; height: 16px; background: #c0c0c0; }
+        ::-webkit-scrollbar-thumb { background: #c0c0c0; border: 2px solid; border-color: #fff #808080 #808080 #fff; }
+        ::-webkit-scrollbar-button { background: #c0c0c0; border: 2px solid; border-color: #fff #808080 #808080 #fff; width: 16px; height: 16px; }
     </style>
 </head>
-<body class="font-sans bg-light text-dark dark:bg-dark dark:text-white">
-    <!-- 导航栏 -->
-    <header id="navbar" class="fixed w-full bg-white/90 dark:bg-dark/90 backdrop-blur-md shadow-sm z-50 transition-all duration-300">
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-16">
-                <div class="flex items-center">
-                    <a href="../index.html" class="flex items-center space-x-2">
-                        <span class="text-primary text-2xl"><i class="fa fa-code"></i></span>
-                        <span class="font-bold text-xl tracking-wide text-primary">Java 新手成长记</span>
-                    </a>
-                </div>
-                
-                <div class="hidden md:flex items-center space-x-6">
-                    <nav class="flex space-x-8">
-                        <a href="../index.html#home" class="text-gray-700 dark:text-gray-200 hover:text-primary font-medium transition-colors">首页</a>
-                        <a href="../all-notes.html" class="text-gray-700 dark:text-gray-200 hover:text-primary font-medium transition-colors">所有笔记</a>
-                        <a href="../categories.html" class="text-gray-700 dark:text-gray-200 hover:text-primary font-medium transition-colors">分类</a>
-                        <a href="../index.html#about" class="text-gray-700 dark:text-gray-200 hover:text-primary font-medium transition-colors">关于我</a>
-                    </nav>
-                    <button id="theme-toggle" class="inline-flex items-center px-3 py-1.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" title="切换主题">
-                        <i class="fa fa-moon-o"></i>
-                    </button>
-                </div>
-                
-                <div class="md:hidden flex items-center space-x-3">
-                    <button id="theme-toggle-mobile" class="text-gray-700 dark:text-gray-200 hover:text-primary focus:outline-none" title="切换主题">
-                        <i class="fa fa-moon-o text-xl"></i>
-                    </button>
-                    <button id="mobile-menu-button" class="text-gray-700 hover:text-primary focus:outline-none">
-                        <i class="fa fa-bars text-xl"></i>
-                    </button>
-                </div>
+<body class="h-screen w-screen overflow-hidden flex flex-col">
+
+    <!-- Main Window -->
+    <div class="flex-1 m-1 flex flex-col bg-silver shadow-win95-outset p-1 min-h-0">
+        <!-- Title Bar -->
+        <div class="bg-navy px-2 py-1 flex justify-between items-center select-none">
+            <div class="flex items-center gap-2">
+                <i class="fa fa-file-text-o text-white"></i>
+                <span class="text-white font-bold text-sm tracking-wide">Maven Guide.html - 记事本</span>
             </div>
+            <div class="flex gap-1">
+                <button onclick="window.location.href='../all-notes.html'" class="w-4 h-4 bg-silver shadow-win95-outset flex items-center justify-center active:shadow-win95-inset text-[10px] font-bold pb-1" title="最小化">_</button>
+                <button class="w-4 h-4 bg-silver shadow-win95-outset flex items-center justify-center active:shadow-win95-inset text-[10px] font-bold pb-1" title="最大化">□</button>
+                <button onclick="window.location.href='../all-notes.html'" class="w-4 h-4 bg-silver shadow-win95-outset flex items-center justify-center active:shadow-win95-inset text-[10px] font-bold pb-1" title="关闭">×</button>
+            </div>
+        </div>
+
+        <!-- Menu Bar -->
+        <div class="flex px-1 py-1 text-sm select-none">
+            <div class="px-2 py-1 hover:bg-navy hover:text-white cursor-pointer"><span class="underline decoration-1 underline-offset-2">文</span>件(F)</div>
+            <div class="px-2 py-1 hover:bg-navy hover:text-white cursor-pointer"><span class="underline decoration-1 underline-offset-2">编</span>辑(E)</div>
+            <div class="px-2 py-1 hover:bg-navy hover:text-white cursor-pointer"><span class="underline decoration-1 underline-offset-2">搜</span>索(S)</div>
+            <div class="px-2 py-1 hover:bg-navy hover:text-white cursor-pointer"><span class="underline decoration-1 underline-offset-2">帮</span>助(H)</div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="flex-1 bg-white shadow-win95-inset m-1 p-4 overflow-y-auto notepad-content text-win_black min-h-0">
+            <h1>Maven 依赖管理详解</h1>
+            
+            <p>深入了解 Maven 的依赖管理核心概念。</p>
+            
+            <h2>1. 什么是依赖管理？</h2>
+            <p>Maven 自动下载并管理项目声明的依赖及其传递性依赖。</p>
+            
+            <h2>2. 基本依赖声明</h2>
+            <div class="code-block"><pre><code class="language-xml">&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-core&lt;/artifactId&gt;
+    &lt;version&gt;5.3.21&lt;/version&gt;
+&lt;/dependency&gt;</code></pre></div>
+            
+            <h2>3. 依赖范围（Scope）</h2>
+            <ul>
+                <li><strong>compile</strong>：默认，编译、测试、运行都需要。</li>
+                <li><strong>provided</strong>：编译测试需要，运行时由容器提供。</li>
+                <li><strong>runtime</strong>：运行测试需要，编译不需要。</li>
+                <li><strong>test</strong>：只在测试时需要。</li>
+            </ul>
+            
+            <h2>4. 传递性依赖与冲突解决</h2>
+            <p>Maven 自动处理传递依赖。遇到冲突时，原则是：路径最近者优先，第一声明者优先。</p>
+            <p>手动解决：使用 <code>&lt;exclusions&gt;</code> 排除依赖，或 <code>&lt;dependencyManagement&gt;</code> 锁定版本。</p>
+
+            <hr class="border-t border-dashed border-gray-400 my-8">
+            <p class="text-center">
+                <a href="../all-notes.html" class="underline text-blue-800 hover:text-blue-600">[ Return to Notes List ]</a>
+            </p>
         </div>
         
-        <!-- 移动端菜单 -->
-        <div id="mobile-menu" class="hidden md:hidden bg-white dark:bg-dark shadow-lg absolute w-full">
-            <div class="px-4 py-4 space-y-3">
-                <a href="../index.html#home" class="block text-gray-700 dark:text-gray-200 hover:text-primary font-medium py-2 transition-colors">首页</a>
-                <a href="../all-notes.html" class="block text-gray-700 dark:text-gray-200 hover:text-primary font-medium py-2 transition-colors">所有笔记</a>
-                <a href="../categories.html" class="block text-gray-700 dark:text-gray-200 hover:text-primary font-medium py-2 transition-colors">分类</a>
-                <a href="../index.html#about" class="block text-gray-700 dark:text-gray-200 hover:text-primary font-medium py-2 transition-colors">关于我</a>
+        <!-- Status Bar -->
+        <div class="px-2 py-1 text-xs text-gray-600 border-t border-gray shadow-none flex justify-between">
+            <span>第 1 行，第 1 列</span>
+            <span>100%</span>
+        </div>
+    </div>
+
+    <!-- Start Menu -->
+    <div id="start-menu" class="absolute bottom-10 left-1 bg-silver shadow-win95-outset w-48 flex flex-col z-[60] hidden">
+        <div class="flex">
+            <div class="w-8 bg-navy text-white flex items-end justify-center pb-2 relative">
+                 <span class="transform -rotate-90 text-lg font-bold whitespace-nowrap tracking-widest mb-4">RetroOS</span>
+            </div>
+            <div class="flex-1 py-1 text-sm">
+                 <div class="hover:bg-navy hover:text-white px-2 py-1 flex items-center gap-2 cursor-pointer" onclick="window.location.href='../index.html'">
+                     <i class="fa fa-desktop"></i> 桌面
+                 </div>
+                 <div class="hover:bg-navy hover:text-white px-2 py-1 flex items-center gap-2 cursor-pointer" onclick="window.location.href='../all-notes.html'">
+                     <i class="fa fa-folder-open"></i> 文章
+                 </div>
+                 <div class="hover:bg-navy hover:text-white px-2 py-1 flex items-center gap-2 cursor-pointer" onclick="window.location.href='../categories.html'">
+                     <i class="fa fa-cog"></i> 分类
+                 </div>
+                 <div class="hover:bg-navy hover:text-white px-2 py-1 flex items-center gap-2 cursor-pointer" onclick="window.open('https://github.com', '_blank')">
+                     <i class="fa fa-globe"></i> Internet
+                 </div>
+                 <div class="border-t border-gray-400 border-b border-white my-1"></div>
+                 <div class="hover:bg-navy hover:text-white px-2 py-1 flex items-center gap-2 cursor-pointer" onclick="shutdown()">
+                     <i class="fa fa-power-off"></i> 关闭系统...
+                 </div>
             </div>
         </div>
-    </header>
+    </div>
 
-    <!-- 笔记内容区域 -->
-    <section class="pt-28 pb-20 bg-white">
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="max-w-3xl mx-auto">
-                <!-- 笔记标题和元信息 -->
-                <div class="mb-10 text-center">
-                    <span class="inline-block bg-secondary/10 text-secondary text-xs font-bold px-3 py-1 rounded-full mb-4">构建工具</span>
-                    <h1 class="text-[clamp(1.8rem,4vw,2.5rem)] font-bold text-dark dark:text-white mb-4">Maven 依赖管理详解</h1>
-                    <div class="flex items-center justify-center text-sm text-gray-500 space-x-4">
-                        <span class="flex items-center"><i class="fa fa-calendar-o mr-2"></i> 2024-06-15</span>
-                        <span class="flex items-center"><i class="fa fa-clock-o mr-2"></i> 阅读时间: 约 12 分钟</span>
-                    </div>
-                </div>
-                
-                <!-- 笔记正文 -->
-                <div class="prose prose-lg max-w-none text-gray-700 dark:text-gray-300">
-                    <p>大家好！在 Java 项目开发中，依赖管理是一个至关重要的环节。Maven 作为最流行的构建工具之一，其依赖管理机制帮助我们轻松管理项目所需的各种库。今天，让我们深入了解 Maven 的依赖管理核心概念。</p>
-                    
-                    <h2>1. 什么是依赖管理？</h2>
-                    <p>依赖管理就是管理项目所需的外部库（JAR 包）的过程。在 Maven 中，我们只需要在 <code>pom.xml</code> 文件中声明依赖，Maven 就会自动下载并管理这些依赖及其传递性依赖。</p>
-                    
-                    <h2>2. 基本依赖声明</h2>
-                    <p>在 Maven 中声明一个依赖的基本格式如下：</p>
-                    <div class="code-block">
-<pre><code class="language-xml">&lt;dependency&gt;
-    &lt;groupId&gt;org.springframework&lt;/groupId&gt;
-    &lt;artifactId&gt;spring-core&lt;/artifactId&gt;
-    &lt;version&gt;5.3.21&lt;/version&gt;
-&lt;/dependency&gt;</code></pre>
-                    </div>
-                    
-                    <h3>依赖坐标三要素</h3>
-                    <ul>
-                        <li><strong>groupId</strong>：组织或团体的标识，通常是公司域名的反写</li>
-                        <li><strong>artifactId</strong>：项目的唯一标识</li>
-                        <li><strong>version</strong>：项目的版本号</li>
-                    </ul>
-                    
-                    <h2>3. 依赖范围（Scope）</h2>
-                    <p>依赖范围决定了依赖在什么时候被使用。Maven 提供了以下几种依赖范围：</p>
-                    
-                    <h3>compile（编译范围）</h3>
-                    <p>默认范围，依赖在编译、测试、运行时都需要。</p>
-                    <div class="code-block">
-<pre><code class="language-xml">&lt;dependency&gt;
-    &lt;groupId&gt;org.apache.commons&lt;/groupId&gt;
-    &lt;artifactId&gt;commons-lang3&lt;/artifactId&gt;
-    &lt;version&gt;3.12.0&lt;/version&gt;
-    &lt;scope&gt;compile&lt;/scope&gt; &lt;!-- 可以省略，默认就是 compile --&gt;
-&lt;/dependency&gt;</code></pre>
-                    </div>
-                    
-                    <h3>provided（已提供范围）</h3>
-                    <p>依赖在编译和测试时需要，但在运行时由 JDK 或容器提供。</p>
-                    <div class="code-block">
-<pre><code class="language-xml">&lt;dependency&gt;
-    &lt;groupId&gt;javax.servlet&lt;/groupId&gt;
-    &lt;artifactId&gt;javax.servlet-api&lt;/artifactId&gt;
-    &lt;version&gt;4.0.1&lt;/version&gt;
-    &lt;scope&gt;provided&lt;/scope&gt;
-&lt;/dependency&gt;</code></pre>
-                    </div>
-                    
-                    <h3>runtime（运行时范围）</h3>
-                    <p>依赖在运行和测试时需要，但在编译时不需要。</p>
-                    <div class="code-block">
-<pre><code class="language-xml">&lt;dependency&gt;
-    &lt;groupId&gt;mysql&lt;/groupId&gt;
-    &lt;artifactId&gt;mysql-connector-java&lt;/artifactId&gt;
-    &lt;version&gt;8.0.29&lt;/version&gt;
-    &lt;scope&gt;runtime&lt;/scope&gt;
-&lt;/dependency&gt;</code></pre>
-                    </div>
-                    
-                    <h3>test（测试范围）</h3>
-                    <p>依赖只在测试时需要，在正常运行时不需要。</p>
-                    <div class="code-block">
-<pre><code class="language-xml">&lt;dependency&gt;
-    &lt;groupId&gt;junit&lt;/groupId&gt;
-    &lt;artifactId&gt;junit&lt;/artifactId&gt;
-    &lt;version&gt;4.13.2&lt;/version&gt;
-    &lt;scope&gt;test&lt;/scope&gt;
-&lt;/dependency&gt;</code></pre>
-                    </div>
-                    
-                    <h2>4. 传递性依赖</h2>
-                    <p>传递性依赖是 Maven 的一个重要特性。如果 A 依赖 B，B 依赖 C，那么 A 会自动依赖 C。</p>
-                    
-                    <h3>依赖调解</h3>
-                    <p>当存在多个版本的同一个依赖时，Maven 使用以下原则进行调解：</p>
-                    <ol>
-                        <li><strong>路径最近者优先</strong>：依赖路径短的优先</li>
-                        <li><strong>第一声明者优先</strong>：如果路径长度相同，先声明的优先</li>
-                    </ol>
-                    
-                    <h2>5. 依赖冲突解决</h2>
-                    <p>当遇到依赖冲突时，我们可以使用以下方法解决：</p>
-                    
-                    <h3>使用 exclusions 排除依赖</h3>
-                    <div class="code-block">
-<pre><code class="language-xml">&lt;dependency&gt;
-    &lt;groupId&gt;org.springframework&lt;/groupId&gt;
-    &lt;artifactId&gt;spring-core&lt;/artifactId&gt;
-    &lt;version&gt;5.3.21&lt;/version&gt;
-    &lt;exclusions&gt;
-        &lt;exclusion&gt;
-            &lt;groupId&gt;commons-logging&lt;/groupId&gt;
-            &lt;artifactId&gt;commons-logging&lt;/artifactId&gt;
-        &lt;/exclusion&gt;
-    &lt;/exclusions&gt;
-&lt;/dependency&gt;</code></pre>
-                    </div>
-                    
-                    <h3>使用 dependencyManagement 统一管理版本</h3>
-                    <div class="code-block">
-<pre><code class="language-xml">&lt;dependencyManagement&gt;
-    &lt;dependencies&gt;
-        &lt;dependency&gt;
-            &lt;groupId&gt;org.springframework&lt;/groupId&gt;
-            &lt;artifactId&gt;spring-core&lt;/artifactId&gt;
-            &lt;version&gt;5.3.21&lt;/version&gt;
-        &lt;/dependency&gt;
-    &lt;/dependencies&gt;
-&lt;/dependencyManagement&gt;</code></pre>
-                    </div>
-                    
-                    <h2>6. 查看依赖树</h2>
-                    <p>使用以下命令可以查看项目的依赖树：</p>
-                    <div class="code-block">
-<pre><code class="language-bash">mvn dependency:tree</code></pre>
-                    </div>
-                    
-                    <p>这个命令会显示所有依赖及其传递性依赖的层次结构，帮助我们分析依赖关系。</p>
-                    
-                    <h2>7. 最佳实践</h2>
-                    <ul>
-                        <li><strong>显式声明依赖</strong>：不要依赖传递性依赖，应该显式声明需要的依赖</li>
-                        <li><strong>使用 dependencyManagement</strong>：统一管理依赖版本，避免版本冲突</li>
-                        <li><strong>定期清理</strong>：移除未使用的依赖，保持 pom.xml 的整洁</li>
-                        <li><strong>使用 Maven Helper 插件</strong>：在 IDEA 中安装 Maven Helper 插件，可以直观地查看和解决依赖冲突</li>
-                    </ul>
-                    
-                    <h2>总结</h2>
-                    <p>掌握 Maven 依赖管理是 Java 开发的基本技能。通过合理使用依赖范围、正确处理依赖冲突、统一管理依赖版本，我们可以构建更加稳定和可维护的项目。记住，依赖管理不仅仅是添加依赖，更重要的是理解依赖之间的关系和影响。</p>
-                </div>
-                
-                <!-- 返回按钮 -->
-                <div class="mt-16 text-center">
-                    <a href="../index.html#articles" class="inline-flex items-center justify-center bg-white border-2 border-primary text-primary hover:bg-primary hover:text-white font-bold px-8 py-3 rounded-full transition-all shadow-sm hover:shadow-lg">
-                        <i class="fa fa-arrow-left mr-2"></i> 返回笔记列表
-                    </a>
-                </div>
+    <!-- Taskbar -->
+    <footer class="h-10 bg-silver shadow-win95-outset flex items-center px-1 py-1 gap-1 z-50">
+        <button id="start-btn" onclick="toggleStartMenu()" class="flex items-center gap-1 px-2 py-1 bg-silver shadow-win95-outset active:shadow-win95-inset font-bold text-sm win-btn">
+            <img src="https://win98icons.alexmeub.com/icons/png/windows-0.png" class="w-5 h-5" alt="win">
+            开始
+        </button>
+
+        <!-- Divider -->
+        <div class="w-[2px] h-6 bg-gray border-r border-white mx-1"></div>
+
+        <!-- Taskbar Items Container -->
+        <div class="flex-1 flex justify-start gap-1 overflow-x-auto">
+            <!-- Parent Folder (Inactive) -->
+             <div class="px-2 py-1 bg-silver shadow-win95-outset font-bold text-sm flex items-center gap-2 w-40 cursor-pointer" onclick="window.location.href='../all-notes.html'">
+                <i class="fa fa-folder-open"></i> 我的文档
+            </div>
+            <!-- Current File (Active) -->
+             <div class="px-2 py-1 bg-silver shadow-win95-inset font-bold text-sm flex items-center gap-2 w-40 bg-gray/20 border border-dotted border-gray-400">
+                <i class="fa fa-file-text-o"></i> Maven Guide.html
             </div>
         </div>
-    </section>
 
-    <!-- 页脚 -->
-    <footer class="bg-dark text-white py-16">
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-col items-center text-center">
-                <div class="flex items-center space-x-2 mb-6">
-                    <span class="text-primary text-2xl"><i class="fa fa-code"></i></span>
-                    <span class="font-bold text-xl tracking-wide text-white">Java 新手成长记</span>
-                </div>
-                <p class="text-gray-400 mb-8 max-w-md">
-                    记录 Java 学习路上的点点滴滴，与万千开发者一起成长。
-                </p>
-                <div class="border-t border-gray-800 w-full pt-8">
-                    <p class="text-gray-500">
-                        &copy; <span id="current-year"></span> Java 新手成长记. 保留所有权利.
-                    </p>
-                </div>
-            </div>
+        <div class="px-3 py-1 bg-silver shadow-win95-inset flex items-center gap-2 text-xs min-w-[80px] justify-end">
+            <span id="clock">12:00 PM</span>
         </div>
     </footer>
 
-    <!-- JavaScript -->
     <script>
-        const root = document.documentElement;
-        const savedTheme = localStorage.getItem('theme');
-        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-        if (savedTheme === 'dark' || (!savedTheme && prefersDark)) { root.classList.add('dark'); }
-        const themeToggle = document.getElementById('theme-toggle');
-        const themeToggleMobile = document.getElementById('theme-toggle-mobile');
-        const toggleTheme = () => {
-            root.classList.toggle('dark');
-            localStorage.setItem('theme', root.classList.contains('dark') ? 'dark' : 'light');
-        };
-        themeToggle && themeToggle.addEventListener('click', toggleTheme);
-        themeToggleMobile && themeToggleMobile.addEventListener('click', toggleTheme);
-        // 设置当前年份
-        document.getElementById('current-year').textContent = new Date().getFullYear();
-        
-        // 移动端菜单切换
-        const mobileMenuButton = document.getElementById('mobile-menu-button');
-        const mobileMenu = document.getElementById('mobile-menu');
-        
-        mobileMenuButton.addEventListener('click', () => {
-            mobileMenu.classList.toggle('hidden');
-        });
-        
-        // 导航栏滚动效果
-        const navbar = document.getElementById('navbar');
-        
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > 50) {
-                navbar.classList.add('shadow-md');
-                navbar.classList.remove('shadow-sm');
-                navbar.classList.add('bg-white/95');
-                navbar.classList.add('dark:bg-dark/95');
-            } else {
-                navbar.classList.remove('shadow-md');
-                navbar.classList.add('shadow-sm');
-                navbar.classList.remove('bg-white/95');
+        // Start Menu Logic
+        function toggleStartMenu() {
+            const menu = document.getElementById('start-menu');
+            menu.classList.toggle('hidden');
+            const btn = document.getElementById('start-btn');
+            btn.classList.toggle('shadow-win95-inset');
+            btn.classList.toggle('shadow-win95-outset');
+        }
+
+        document.addEventListener('click', function(e) {
+            const menu = document.getElementById('start-menu');
+            const btn = document.getElementById('start-btn');
+            if (menu && !menu.contains(e.target) && !btn.contains(e.target) && !menu.classList.contains('hidden')) {
+                toggleStartMenu();
             }
         });
+
+        function shutdown() {
+            document.body.innerHTML = `
+                <div class="h-screen w-screen bg-black flex items-center justify-center flex-col gap-4">
+                    <div class="text-[#ff6600] font-bold text-2xl" style="font-family: 'Courier New', monospace;">It is now safe to turn off your computer.</div>
+                    <div class="text-[#ff6600] text-sm" style="font-family: 'Courier New', monospace;">(现在可以安全地关闭浏览器了)</div>
+                    <button onclick="window.close()" class="px-4 py-2 bg-silver text-black border-2 border-white shadow-win95-outset active:shadow-win95-inset cursor-pointer font-bold">关闭页面</button>
+                </div>
+            `;
+            window.close();
+        }
+
+        function updateClock() {
+            const now = new Date();
+            let hours = now.getHours();
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12; 
+            document.getElementById('clock').textContent = `${hours}:${minutes} ${ampm}`;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
     </script>
 </body>
 </html>
