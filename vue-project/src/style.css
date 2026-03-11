@@ -1,0 +1,29 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: 'Pixel';
+  src: local('Tahoma'), local('Verdana');
+}
+
+body {
+  font-family: 'MS Sans Serif', 'Tahoma', sans-serif;
+  -webkit-font-smoothing: none;
+  image-rendering: pixelated;
+  background-color: #008080;
+}
+
+/* Custom Scrollbar for Webkit browsers */
+::-webkit-scrollbar { width: 16px; height: 16px; background: #c0c0c0; }
+::-webkit-scrollbar-thumb { background: #c0c0c0; border: 2px solid; border-color: #fff #808080 #808080 #fff; }
+::-webkit-scrollbar-button { background: #c0c0c0; border: 2px solid; border-color: #fff #808080 #808080 #fff; width: 16px; height: 16px; }
+
+/* Win95 Button Active State */
+.win-btn:active {
+  box-shadow: inset -1px -1px #fff, inset 1px 1px #000, inset -2px -2px #dfdfdf, inset 2px 2px #808080 !important;
+  padding-top: 5px !important;
+  padding-bottom: 3px !important;
+  padding-left: 9px !important;
+  padding-right: 7px !important;
+}
