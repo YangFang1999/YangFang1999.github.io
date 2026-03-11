@@ -37,10 +37,6 @@ const goUp = () => {
   }
 };
 
-const activateWindow = (id: string) => {
-  // Logic handled by App.vue
-};
-
 </script>
 
 <template>
@@ -50,7 +46,6 @@ const activateWindow = (id: string) => {
       :isOpen="true"
       :isActive="true"
       @close="router.push('/')"
-      @focus="activateWindow('my-documents')"
     >
       <!-- Address Bar -->
       <div class="flex items-center gap-2 px-2 py-1 border-b border-gray-300 mb-2">

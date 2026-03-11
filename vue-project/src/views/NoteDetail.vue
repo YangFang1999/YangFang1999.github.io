@@ -243,19 +243,14 @@ onMounted(() => {
   setTimeout(() => Prism.highlightAll(), 100);
 });
 
-const activateWindow = (id: string) => {
-    if (id === 'my-documents') {
-        router.push('/all-notes');
-    }
-};
 </script>
 
 <template>
     <Window 
       :title="noteTitle" 
       icon="fa fa-file-text-o" 
-      :isOpen="true"
-      :isActive="true"
+      isOpen
+      isActive
       @close="router.push('/all-notes')"
     >
       <div class="notepad-content font-sans" v-html="noteContent"></div>

@@ -80,6 +80,10 @@ const closeWindow = (id: string) => {
   openWindows.value = openWindows.value.filter(w => w.id !== id);
 };
 
+// Use variables to avoid TS unused errors (though they are used in template or logic)
+// console.log(activateWindow, closeWindow, currentWindow); 
+
+
 const isShutdown = ref(false);
 
 const handleShutdown = () => {
@@ -99,6 +103,10 @@ const currentWindow = computed(() => {
   return route.path;
 });
 
+const showAlert = (message: string) => {
+  alert(message);
+};
+
 </script>
 
 <template>
@@ -108,9 +116,9 @@ const currentWindow = computed(() => {
     <main class="absolute top-0 left-0 bottom-10 w-full p-4 flex flex-col gap-4 flex-wrap content-start z-0">
       <DesktopIcon label="我的电脑" iconClass="fa fa-desktop" color="text-white" @click="navigateTo('/computer')" />
       <DesktopIcon label="我的文档" iconClass="fa fa-folder-open" color="text-yellow-400" @click="navigateTo('/all-notes')" />
-      <DesktopIcon label="回收站" iconClass="fa fa-trash-o" color="text-gray-400" @click="alert('回收站是空的。')" />
+      <DesktopIcon label="回收站" iconClass="fa fa-trash-o" color="text-gray-400" @click="showAlert('回收站是空的。')" />
       <DesktopIcon label="Internet 浏览器" iconClass="fa fa-globe" color="text-blue-300" @click="navigateTo('https://github.com')" />
-      <DesktopIcon label="电子邮件" iconClass="fa fa-envelope-o" color="text-white" @click="alert('未配置邮件客户端。')" />
+      <DesktopIcon label="电子邮件" iconClass="fa fa-envelope-o" color="text-white" @click="showAlert('未配置邮件客户端。')" />
     </main>
 
     <!-- Router View (Windows) -->
