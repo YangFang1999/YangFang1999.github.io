@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import { ref, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import DesktopIcon from './components/DesktopIcon.vue';
 import Taskbar from './components/Taskbar.vue';
@@ -76,18 +76,6 @@ const activateWindow = (id: string) => {
   openWindows.value.forEach(w => w.isActive = w.id === id);
 };
 
-const closeWindow = (id: string) => {
-  openWindows.value = openWindows.value.filter(w => w.id !== id);
-};
-
-// Use variables to avoid TS unused errors
-// In a real app, you would use these in the template or pass them as props
-// For now, we just log them to satisfy the linter
-if (process.env.NODE_ENV === 'development') {
-  console.log(closeWindow, currentWindow);
-}
-
-
 const isShutdown = ref(false);
 
 const handleShutdown = () => {
@@ -99,13 +87,6 @@ const closeTab = () => {
   // Fallback for browsers that block window.close()
   window.location.href = "about:blank";
 };
-
-// Sync active window state based on route
-const currentWindow = computed(() => {
-  // Logic to determine which window is active based on route
-  // For simplicity, we can rely on route path
-  return route.path;
-});
 
 const showAlert = (message: string) => {
   alert(message);
