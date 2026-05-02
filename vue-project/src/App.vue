@@ -101,8 +101,10 @@ const showAlert = (message: string) => {
     <main class="absolute top-0 left-0 bottom-10 w-full p-4 flex flex-col gap-4 flex-wrap content-start z-0">
       <DesktopIcon label="我的电脑" iconClass="fa fa-desktop" color="text-white" @click="navigateTo('/computer')" />
       <DesktopIcon label="我的文档" iconClass="fa fa-folder-open" color="text-yellow-400" @click="navigateTo('/all-notes')" />
-      <DesktopIcon label="回收站" iconClass="fa fa-trash-o" color="text-gray-400" @click="showAlert('回收站是空的。')" />
+      <DesktopIcon label="控制面板" iconClass="fa fa-cog" color="text-pink-300" @click="navigateTo('/categories')" />
       <DesktopIcon label="Internet 浏览器" iconClass="fa fa-globe" color="text-blue-300" @click="navigateTo('https://github.com')" />
+      <DesktopIcon label="记事本" iconClass="fa fa-pencil-square-o" color="text-white" @click="navigateTo('/notes/hello-world')" />
+      <DesktopIcon label="回收站" iconClass="fa fa-trash-o" color="text-gray-400" @click="showAlert('回收站是空的。')" />
       <DesktopIcon label="电子邮件" iconClass="fa fa-envelope-o" color="text-white" @click="showAlert('未配置邮件客户端。')" />
     </main>
 
@@ -124,10 +126,20 @@ const showAlert = (message: string) => {
     />
 
     <!-- Shutdown Screen -->
-    <div v-if="isShutdown" class="fixed inset-0 bg-black z-[100] flex flex-col items-center justify-center gap-4 text-[#ff6600] font-bold font-mono">
-      <div class="text-2xl">It is now safe to turn off your computer.</div>
-      <div class="text-sm">(现在可以安全地关闭浏览器了)</div>
-      <button @click="closeTab" class="px-4 py-2 bg-silver text-black border-2 border-white shadow-win95-outset active:shadow-win95-inset cursor-pointer font-bold font-sans mt-4">
+    <div v-if="isShutdown" class="fixed inset-0 bg-[#008080] z-[100] flex flex-col items-center justify-center gap-6 font-bold font-mono">
+      <div class="bg-[#c0c0c0] p-8 shadow-[inset_-1px_-1px_#0a0a0a,inset_1px_1px_#ffffff,inset_-2px_-2px_#808080,inset_2px_2px_#dfdfdf] text-center border-2 border-t-[#ffffff] border-l-[#ffffff] border-r-[#0a0a0a] border-b-[#0a0a0a]">
+        <div class="flex items-center gap-4 mb-4">
+          <img src="https://win98icons.alexmeub.com/icons/png/windows-0.png" class="w-12 h-12" alt="windows">
+          <div>
+            <div class="text-xl text-black">Windows 98</div>
+            <div class="text-sm text-gray-600">正在关机...</div>
+          </div>
+        </div>
+        <hr class="border-t-[#808080] border-b-[#ffffff] mb-4">
+        <div class="text-lg text-black">It is now safe to turn off your computer.</div>
+        <div class="text-xs text-gray-600 mt-1">(现在可以安全地关闭浏览器了)</div>
+      </div>
+      <button @click="closeTab" class="px-6 py-2 bg-[#c0c0c0] text-black shadow-[inset_-1px_-1px_#0a0a0a,inset_1px_1px_#ffffff,inset_-2px_-2px_#808080,inset_2px_2px_#dfdfdf] active:shadow-[inset_-1px_-1px_#ffffff,inset_1px_1px_#0a0a0a] cursor-pointer font-bold font-sans border-2 border-t-[#ffffff] border-l-[#ffffff] border-r-[#0a0a0a] border-b-[#0a0a0a]">
         关闭页面
       </button>
     </div>

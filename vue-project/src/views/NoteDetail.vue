@@ -232,6 +232,511 @@ UPDATE users SET email = 'new@example.com' WHERE id = 1;
 -- Delete
 DELETE FROM users WHERE id = 1;</code></pre>
     `;
+  } else if (noteId === 'git-basics') {
+    noteTitle.value = 'Git 常用命令';
+    noteContent.value = `
+      <h1>Git 常用命令速查手册</h1>
+      <p>Git 是目前最流行的分布式版本控制系统。无论是个人项目还是团队协作，掌握 Git 都是程序员的必备技能。</p>
+
+      <h2>1. 基础配置</h2>
+      <pre><code class="language-bash"># 设置用户名和邮箱
+git config --global user.name "Your Name"
+git config --global user.email "your@email.com"
+
+# 查看配置
+git config --list</code></pre>
+
+      <h2>2. 仓库操作</h2>
+      <pre><code class="language-bash"># 初始化新仓库
+git init
+
+# 克隆远程仓库
+git clone https://github.com/user/repo.git
+
+# 查看仓库状态
+git status
+
+# 查看提交历史
+git log --oneline --graph --all</code></pre>
+
+      <h2>3. 暂存与提交</h2>
+      <pre><code class="language-bash"># 添加文件到暂存区
+git add filename.txt
+git add .                    # 添加所有文件
+
+# 提交
+git commit -m "commit message"
+
+# 合并 add 和 commit（已跟踪文件）
+git commit -am "commit message"</code></pre>
+
+      <h2>4. 分支管理</h2>
+      <pre><code class="language-bash"># 查看分支
+git branch
+
+# 创建分支
+git branch feature-login
+
+# 切换分支
+git checkout feature-login
+# 或使用新命令
+git switch feature-login
+
+# 创建并切换
+git checkout -b feature-payment
+
+# 合并分支
+git merge feature-login
+
+# 删除分支
+git branch -d feature-login</code></pre>
+
+      <h2>5. 远程操作</h2>
+      <pre><code class="language-bash"># 添加远程仓库
+git remote add origin https://github.com/user/repo.git
+
+# 推送
+git push origin main
+
+# 拉取
+git pull origin main
+
+# 查看远程仓库
+git remote -v</code></pre>
+
+      <h2>6. 撤销与回退</h2>
+      <pre><code class="language-bash"># 撤销工作区修改
+git checkout -- filename.txt
+
+# 撤销暂存区
+git reset HEAD filename.txt
+
+# 回退到某个版本
+git reset --hard HEAD~1
+
+# 新建提交来撤销
+git revert HEAD</code></pre>
+    `;
+  } else if (noteId === 'docker-intro') {
+    noteTitle.value = 'Docker 入门指南';
+    noteContent.value = `
+      <h1>Docker 容器化入门指南</h1>
+      <p>Docker 是一个开源的容器化平台，让你可以将应用程序及其依赖打包到一个轻量级、可移植的容器中，实现"一次构建，到处运行"。</p>
+
+      <h2>1. 核心概念</h2>
+      <ul>
+        <li><strong>镜像 (Image)</strong>: 一个只读的模板，包含运行应用的代码、运行时、库和配置。</li>
+        <li><strong>容器 (Container)</strong>: 镜像的运行实例，可以启动、停止、移动和删除。</li>
+        <li><strong>Dockerfile</strong>: 用来构建镜像的文本文件，包含一系列指令。</li>
+        <li><strong>仓库 (Registry)</strong>: 存放镜像的地方，如 Docker Hub。</li>
+      </ul>
+
+      <h2>2. 常用命令</h2>
+      <pre><code class="language-bash"># 查看运行中的容器
+docker ps
+
+# 查看所有容器
+docker ps -a
+
+# 查看本地镜像
+docker images
+
+# 拉取镜像
+docker pull nginx:latest
+
+# 运行容器
+docker run -d -p 8080:80 --name my-nginx nginx
+
+# 停止/启动/重启容器
+docker stop my-nginx
+docker start my-nginx
+docker restart my-nginx
+
+# 删除容器
+docker rm my-nginx
+
+# 删除镜像
+docker rmi nginx:latest</code></pre>
+
+      <h2>3. 编写 Dockerfile</h2>
+      <pre><code class="language-bash"># 基于 Node.js 的应用
+FROM node:18-alpine
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm install
+
+COPY . .
+
+EXPOSE 3000
+
+CMD ["node", "index.js"]</code></pre>
+
+      <h2>4. Docker Compose</h2>
+      <p>用于定义和运行多容器 Docker 应用。</p>
+      <pre><code class="language-bash"># docker-compose.yml
+version: '3.8'
+services:
+  web:
+    build: .
+    ports:
+      - "3000:3000"
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root123</code></pre>
+    `;
+  } else if (noteId === 'linux-commands') {
+    noteTitle.value = 'Linux 基础命令';
+    noteContent.value = `
+      <h1>Linux 基础命令速查</h1>
+      <p>Linux 是服务器端最常用的操作系统。掌握基本的 Linux 命令是后端开发和运维的基础。</p>
+
+      <h2>1. 文件和目录操作</h2>
+      <pre><code class="language-bash"># 列出文件
+ls -la
+
+# 切换目录
+cd /path/to/dir
+cd ..         # 上级目录
+cd ~          # 回到主目录
+
+# 创建目录
+mkdir my-project
+
+# 创建文件
+touch README.md
+
+# 复制
+cp source.txt dest.txt
+cp -r dir1 dir2      # 复制目录
+
+# 移动/重命名
+mv old.txt new.txt
+
+# 删除
+rm file.txt
+rm -rf directory/     # 递归强制删除</code></pre>
+
+      <h2>2. 文件查看</h2>
+      <pre><code class="language-bash"># 查看文件内容
+cat file.txt
+
+# 分页查看
+less file.txt
+
+# 查看前/后 N 行
+head -n 10 file.txt
+tail -n 10 file.txt
+
+# 实时查看日志
+tail -f app.log</code></pre>
+
+      <h2>3. 权限管理</h2>
+      <pre><code class="language-bash"># 查看权限
+ls -l filename
+
+# 修改权限 (r=4, w=2, x=1)
+chmod 755 script.sh     # rwx r-x r-x
+chmod +x script.sh      # 添加执行权限
+
+# 修改所有者
+chown user:group filename</code></pre>
+
+      <h2>4. 进程管理</h2>
+      <pre><code class="language-bash"># 查看进程
+ps aux
+ps aux | grep java
+
+# 实时进程信息
+top
+htop
+
+# 结束进程
+kill -9 PID
+pkill -f process-name</code></pre>
+
+      <h2>5. 系统信息</h2>
+      <pre><code class="language-bash"># 磁盘空间
+df -h
+
+# 目录大小
+du -sh /path/
+
+# 内存使用
+free -h
+
+# 查看内核版本
+uname -a</code></pre>
+
+      <h2>6. 网络操作</h2>
+      <pre><code class="language-bash"># 测试连通性
+ping baidu.com
+
+# 查看端口占用
+netstat -tlnp
+ss -tlnp
+
+# 下载文件
+wget https://example.com/file.tar.gz
+curl -O https://example.com/file.tar.gz</code></pre>
+    `;
+  } else if (noteId === 'javascript-es6') {
+    noteTitle.value = 'JavaScript ES6+ 新特性';
+    noteContent.value = `
+      <h1>JavaScript ES6+ 常用新特性总结</h1>
+      <p>ES6 (ECMAScript 2015) 及其后续版本为 JavaScript 带来了大量新特性，极大地提升了开发体验。本文总结最常用的特性。</p>
+
+      <h2>1. let 和 const</h2>
+      <pre><code class="language-java">// let: 块级作用域变量
+for (let i = 0; i < 5; i++) { ... }
+
+// const: 常量，不可重新赋值
+const PI = 3.14159;
+const arr = [1, 2, 3];
+arr.push(4);  // 可以修改内容</code></pre>
+
+      <h2>2. 箭头函数</h2>
+      <pre><code class="language-java">// 传统函数
+function add(a, b) {
+    return a + b;
+}
+
+// 箭头函数
+const add = (a, b) => a + b;
+const greet = name => \`Hello, \${name}\`;
+
+// 不绑定自己的 this
+const obj = {
+    name: 'JS',
+    sayHi: () => console.log(this.name) // undefined
+};</code></pre>
+
+      <h2>3. 模板字符串</h2>
+      <pre><code class="language-java">const name = 'World';
+const msg = \`Hello, \${name}!\`;
+
+// 多行字符串
+const html = \`
+    <div>
+        <p>Line 1</p>
+        <p>Line 2</p>
+    </div>
+\`;</code></pre>
+
+      <h2>4. 解构赋值</h2>
+      <pre><code class="language-java">// 数组解构
+const [a, b, c] = [1, 2, 3];
+const [first, ...rest] = [1, 2, 3, 4];  // first=1, rest=[2,3,4]
+
+// 对象解构
+const { name, age } = { name: 'John', age: 30 };
+const { name: userName } = { name: 'John' };  // 重命名</code></pre>
+
+      <h2>5. 扩展运算符</h2>
+      <pre><code class="language-java">// 合并数组
+const arr = [1, 2, ...otherArr, 5];
+
+// 复制对象
+const newObj = { ...oldObj, newProp: 'value' };
+
+// 函数参数
+function sum(...numbers) {
+    return numbers.reduce((a, b) => a + b, 0);
+}</code></pre>
+
+      <h2>6. Promise 与 Async/Await</h2>
+      <pre><code class="language-java">// Promise
+fetch('/api/data')
+    .then(res => res.json())
+    .then(data => console.log(data))
+    .catch(err => console.error(err));
+
+// Async/Await (ES2017)
+async function getData() {
+    try {
+        const res = await fetch('/api/data');
+        const data = await res.json();
+        return data;
+    } catch (err) {
+        console.error(err);
+    }
+}</code></pre>
+    `;
+  } else if (noteId === 'design-patterns') {
+    noteTitle.value = '设计模式入门';
+    noteContent.value = `
+      <h1>设计模式入门：常用模式速览</h1>
+      <p>设计模式是软件开发中经过验证的、可复用的解决方案。GoF (Gang of Four) 总结了 23 种经典设计模式，本文介绍最常用的几种。</p>
+
+      <h2>1. 单例模式 (Singleton)</h2>
+      <p>确保一个类只有一个实例，并提供全局访问点。</p>
+      <pre><code class="language-java">public class Singleton {
+    private static Singleton instance;
+
+    private Singleton() {}
+
+    public static Singleton getInstance() {
+        if (instance == null) {
+            instance = new Singleton();
+        }
+        return instance;
+    }
+}</code></pre>
+
+      <h2>2. 工厂模式 (Factory)</h2>
+      <p>定义一个创建对象的接口，由子类决定实例化哪个类。</p>
+      <pre><code class="language-java">interface Animal { void speak(); }
+
+class Dog implements Animal {
+    public void speak() { System.out.println("Woof!"); }
+}
+
+class Cat implements Animal {
+    public void speak() { System.out.println("Meow!"); }
+}
+
+class AnimalFactory {
+    public Animal createAnimal(String type) {
+        return switch (type) {
+            case "dog" -> new Dog();
+            case "cat" -> new Cat();
+            default -> throw new IllegalArgumentException();
+        };
+    }
+}</code></pre>
+
+      <h2>3. 建造者模式 (Builder)</h2>
+      <pre><code class="language-java">public class User {
+    private String name;
+    private int age;
+    private String email;
+
+    public static class Builder {
+        private String name;
+        private int age;
+        private String email;
+
+        public Builder name(String name) {
+            this.name = name; return this; }
+        public Builder age(int age) {
+            this.age = age; return this; }
+        public Builder email(String email) {
+            this.email = email; return this; }
+        public User build() { return new User(this); }
+    }
+
+    private User(Builder b) {
+        this.name = b.name;
+        this.age = b.age;
+        this.email = b.email;
+    }
+}
+
+// 使用
+User user = new User.Builder()
+    .name("张三")
+    .age(25)
+    .email("zhangsan@example.com")
+    .build();</code></pre>
+
+      <h2>4. 观察者模式 (Observer)</h2>
+      <p>定义一对多依赖关系，当对象状态改变时，所有依赖者自动收到通知。</p>
+      <pre><code class="language-java">// Spring 事件机制就是经典的观察者模式
+@Component
+public class OrderListener {
+    @EventListener
+    public void handleOrder(OrderEvent event) {
+        // 发送通知、记录日志等
+    }
+}</code></pre>
+    `;
+  } else if (noteId === 'redis-basics') {
+    noteTitle.value = 'Redis 基础入门';
+    noteContent.value = `
+      <h1>Redis 缓存数据库基础入门</h1>
+      <p>Redis (Remote Dictionary Server) 是一个开源的、基于内存的键值存储数据库。它支持多种数据结构，常用作缓存、消息队列和会话管理。</p>
+
+      <h2>1. 核心特性</h2>
+      <ul>
+        <li><strong>基于内存</strong>: 读写速度极快，适合作为缓存。</li>
+        <li><strong>丰富的数据类型</strong>: String, Hash, List, Set, Sorted Set。</li>
+        <li><strong>持久化</strong>: RDB 快照和 AOF 日志两种方式。</li>
+        <li><strong>支持事务</strong>: 命令原子执行。</li>
+        <li><strong>发布/订阅</strong>: 消息系统。</li>
+      </ul>
+
+      <h2>2. 基本数据类型操作</h2>
+      <pre><code class="language-bash"># String
+SET key "value"
+GET key
+SETEX token 3600 "abc123"    # 带过期时间 (秒)
+
+# Hash
+HSET user:1 name "张三" age "25"
+HGET user:1 name
+HGETALL user:1
+
+# List
+LPUSH queue "task1" "task2"
+RPOP queue
+LRANGE queue 0 -1           # 查看全部
+
+# Set
+SADD tags "java" "redis"
+SISMEMBER tags "java"
+
+# Sorted Set
+ZADD leaderboard 100 "player1" 200 "player2"
+ZRANGE leaderboard 0 -1 REV</code></pre>
+
+      <h2>3. Spring Boot 集成</h2>
+      <pre><code class="language-java">// 依赖
+// spring-boot-starter-data-redis
+
+@Configuration
+public class RedisConfig {
+    @Bean
+    public RedisTemplate<String, Object> redisTemplate(
+            RedisConnectionFactory factory) {
+        RedisTemplate<String, Object> template = new RedisTemplate<>();
+        template.setConnectionFactory(factory);
+        template.setKeySerializer(new StringRedisSerializer());
+        template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+        return template;
+    }
+}
+
+@Service
+public class CacheService {
+    @Autowired
+    private RedisTemplate<String, Object> redisTemplate;
+
+    public void set(String key, Object value, long timeout) {
+        redisTemplate.opsForValue().set(key, value, timeout, TimeUnit.SECONDS);
+    }
+
+    public Object get(String key) {
+        return redisTemplate.opsForValue().get(key);
+    }
+}</code></pre>
+
+      <h2>4. 缓存策略</h2>
+      <ul>
+        <li><strong>Cache Aside</strong>: 先查缓存，缓存没有则查数据库，并回填缓存。</li>
+        <li><strong>Read Through</strong>: 缓存层代理数据读取。</li>
+        <li><strong>Write Through</strong>: 同步更新缓存和数据库。</li>
+        <li><strong>Write Behind</strong>: 先更新缓存，异步更新数据库。</li>
+      </ul>
+
+      <h2>5. 常见问题</h2>
+      <ul>
+        <li><strong>缓存穿透</strong>: 查询不存在的数据 → 缓存空值或布隆过滤器。</li>
+        <li><strong>缓存击穿</strong>: 热点 Key 过期 → 互斥锁或永不过期。</li>
+        <li><strong>缓存雪崩</strong>: 大量 Key 同时过期 → 随机化过期时间。</li>
+      </ul>
+    `;
   } else {
     noteTitle.value = noteId;
     noteContent.value = `<p>Content for ${noteId} not migrated yet.</p>`;

@@ -7,17 +7,64 @@
   src: local('Tahoma'), local('Verdana');
 }
 
+* {
+  box-sizing: border-box;
+}
+
 body {
-  font-family: 'MS Sans Serif', 'Tahoma', sans-serif;
+  font-family: 'MS Sans Serif', 'Tahoma', 'Microsoft YaHei', sans-serif;
   -webkit-font-smoothing: none;
   image-rendering: pixelated;
   background-color: #008080;
+  margin: 0;
+  overflow: hidden;
 }
 
-/* Custom Scrollbar for Webkit browsers */
-::-webkit-scrollbar { width: 16px; height: 16px; background: #c0c0c0; }
-::-webkit-scrollbar-thumb { background: #c0c0c0; border: 2px solid; border-color: #fff #808080 #808080 #fff; }
-::-webkit-scrollbar-button { background: #c0c0c0; border: 2px solid; border-color: #fff #808080 #808080 #fff; width: 16px; height: 16px; }
+::selection {
+  background: #000080;
+  color: #ffffff;
+}
+
+/* Custom Scrollbar for Webkit — retro Win95 style */
+::-webkit-scrollbar {
+  width: 16px;
+  height: 16px;
+  background: #c0c0c0;
+}
+::-webkit-scrollbar-thumb {
+  background: #c0c0c0;
+  border: 2px solid;
+  border-color: #ffffff #808080 #808080 #ffffff;
+}
+::-webkit-scrollbar-button {
+  background: #c0c0c0;
+  border: 2px solid;
+  border-color: #ffffff #808080 #808080 #ffffff;
+  width: 16px;
+  height: 16px;
+  display: block;
+}
+::-webkit-scrollbar-button:vertical:decrement {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M4 1L1 6h6z' fill='%23000'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+}
+::-webkit-scrollbar-button:vertical:increment {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M1 2l3 5 3-5z' fill='%23000'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+}
+::-webkit-scrollbar-corner {
+  background: #c0c0c0;
+}
+
+/* Win95 3D shadow utilities */
+.win95-raised {
+  box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #ffffff, inset -2px -2px #808080, inset 2px 2px #dfdfdf;
+}
+.win95-sunken {
+  box-shadow: inset -1px -1px #ffffff, inset 1px 1px #0a0a0a, inset -2px -2px #dfdfdf, inset 2px 2px #808080;
+}
 
 /* Win95 Button Active State */
 .win-btn:active {
@@ -26,4 +73,32 @@ body {
   padding-bottom: 3px !important;
   padding-left: 9px !important;
   padding-right: 7px !important;
+}
+
+/* Improve Prism.js code block styling to fit retro theme */
+pre[class*="language-"] {
+  background: #ffffff !important;
+  border: 2px solid;
+  border-color: #808080 #ffffff #ffffff #808080;
+  box-shadow: inset 1px 1px 0 #dfdfdf, inset -1px -1px 0 #0a0a0a;
+  border-radius: 0 !important;
+  font-size: 13px !important;
+  padding: 12px !important;
+  margin: 0 0 1em 0 !important;
+}
+
+code[class*="language-"] {
+  font-family: 'Courier New', 'Consolas', monospace !important;
+  font-size: 13px !important;
+}
+
+/* Desktop icon text shadow */
+.desktop-icon {
+  text-shadow: 1px 1px 0 #000;
+}
+
+/* Focus visible style */
+:focus-visible {
+  outline: 1px dotted #000;
+  outline-offset: 1px;
 }
