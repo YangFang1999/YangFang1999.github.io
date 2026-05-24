@@ -1,7 +1,26 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "WebSearch",
+      "Bash(python -c ' *)",
+      "Bash(python rewrite_articles.py)",
+      "Bash(python rewrite_article2.py)",
+      "Bash(python rewrite_article3.py)",
+      "Bash(python rewrite_article4.py)",
+      "Bash(python rewrite_article5.py)",
+      "Bash(python rewrite_article6.py)",
+      "Bash(python rewrite_article7.py)",
+      "Bash(python rewrite_article8.py)",
+      "Bash(python rewrite_article9.py)",
+      "Bash(python rewrite_article10.py)",
+      "Bash(python rewrite_article11.py)",
+      "Bash(python rewrite_article12.py)",
+      "Bash(python check_file.py)",
+      "Bash(python find_bare_bt.py)",
+      "Bash(python fix_article10.py)",
+      "Bash(python fix_article10_v2.py)",
+      "Bash(python fix_dollar.py)"
     ]
   }
 }
