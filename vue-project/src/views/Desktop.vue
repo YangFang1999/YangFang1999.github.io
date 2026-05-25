@@ -1,11 +1,37 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, inject, watch, computed, onMounted, type ComputedRef } from 'vue';
 import Window from '../components/Window.vue';
 
-const isWelcomeOpen = ref(true);
+const hasVisited = localStorage.getItem('has-visited');
+const isWelcomeOpen = ref(!hasVisited);
+const isWelcomeMinimized = ref(false);
+const isWelcomeActive = ref(!hasVisited);
+
+onMounted(() => {
+  localStorage.setItem('has-visited', '1');
+});
+
+const activeWindowId = inject<ComputedRef<string | null>>('activeWindowId', computed(() => null));
+watch(activeWindowId!, (id) => {
+  if (id === 'welcome') {
+    focusWindow();
+  }
+});
 
 const closeWindow = () => {
   isWelcomeOpen.value = false;
+};
+
+const minimizeWindow = () => {
+  isWelcomeMinimized.value = true;
+  isWelcomeActive.value = false;
+};
+
+const focusWindow = () => {
+  if (isWelcomeMinimized.value) {
+    isWelcomeMinimized.value = false;
+  }
+  isWelcomeActive.value = true;
 };
 </script>
 
@@ -16,8 +42,10 @@ const closeWindow = () => {
     title="欢迎来到 YF 的 Blog.exe"
     icon="fa fa-info-circle"
     :isOpen="isWelcomeOpen"
-    :isActive="true"
+    :isActive="isWelcomeActive"
     @close="closeWindow"
+    @minimize="minimizeWindow"
+    @focus="focusWindow"
   >
     <div class="flex flex-col items-center text-center gap-3">
       <div class="flex items-center gap-4">

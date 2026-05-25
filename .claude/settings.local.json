@@ -20,7 +20,9 @@
       "Bash(python find_bare_bt.py)",
       "Bash(python fix_article10.py)",
       "Bash(python fix_article10_v2.py)",
-      "Bash(python fix_dollar.py)"
+      "Bash(python fix_dollar.py)",
+      "Bash(npx vite *)",
+      "Bash(curl -s http://localhost:5173)"
     ]
   }
 }

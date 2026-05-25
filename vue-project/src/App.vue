@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, watch, computed, provide } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import DesktopIcon from './components/DesktopIcon.vue';
 import Taskbar from './components/Taskbar.vue';
@@ -11,6 +11,12 @@ const route = useRoute();
 const openWindows = ref<{ id: string; title: string; icon: string; isActive: boolean }[]>([
   { id: 'welcome', title: '欢迎来到 YF 的 Blog.exe', icon: 'fa fa-info-circle', isActive: true }
 ]);
+
+const activeWindowId = computed(() => {
+  const active = openWindows.value.find(w => w.isActive);
+  return active?.id || null;
+});
+provide('activeWindowId', activeWindowId);
 
 // Watch route changes to update taskbar items (simulate window hierarchy)
 watch(() => route.path, (newPath) => {
@@ -50,9 +56,21 @@ watch(() => route.path, (newPath) => {
     const noteId = route.params.id as string;
     const note = notes.find(n => n.id === noteId);
     const title = note ? note.title : 'Note';
-    
+
     newWindows.push({ id: 'docs', title: '我的文档', icon: 'fa fa-folder-open', isActive: false });
     newWindows.push({ id: 'note', title: title, icon: 'fa fa-file-text-o', isActive: true });
+  }
+  else if (newPath === '/airplane') {
+    newWindows.push({ id: 'airplane', title: '飞机大战', icon: 'fa fa-fighter-jet', isActive: true });
+  }
+  else if (newPath === '/notepad') {
+    newWindows.push({ id: 'notepad', title: '记事本 - 未命名', icon: 'fa fa-pencil-square-o', isActive: true });
+  }
+  else if (newPath === '/paint') {
+    newWindows.push({ id: 'paint', title: '画图 - 未命名', icon: 'fa fa-paint-brush', isActive: true });
+  }
+  else if (newPath === '/calculator') {
+    newWindows.push({ id: 'calculator', title: '计算器', icon: 'fa fa-calculator', isActive: true });
   }
 
   openWindows.value = newWindows;
@@ -67,12 +85,14 @@ const navigateTo = (path: string) => {
 };
 
 const activateWindow = (id: string) => {
-  // If user clicks a taskbar item that represents a parent route, navigate to it
   if (id === 'computer') router.push('/computer');
-  if (id === 'docs') router.push('/all-notes');
-  // For 'welcome' or current note, just visual activation (but we are SPA, so maybe nothing needed if already there)
-  
-  // Update visual active state
+  else if (id === 'docs') router.push('/all-notes');
+  else if (id === 'welcome') router.push('/');
+  else if (id === 'airplane') router.push('/airplane');
+  else if (id === 'notepad') router.push('/notepad');
+  else if (id === 'paint') router.push('/paint');
+  else if (id === 'calculator') router.push('/calculator');
+
   openWindows.value.forEach(w => w.isActive = w.id === id);
 };
 
@@ -103,9 +123,11 @@ const showAlert = (message: string) => {
       <DesktopIcon label="我的文档" iconClass="fa fa-folder-open" color="text-yellow-400" @click="navigateTo('/all-notes')" />
       <DesktopIcon label="控制面板" iconClass="fa fa-cog" color="text-pink-300" @click="navigateTo('/categories')" />
       <DesktopIcon label="Internet 浏览器" iconClass="fa fa-globe" color="text-blue-300" @click="navigateTo('https://github.com')" />
-      <DesktopIcon label="记事本" iconClass="fa fa-pencil-square-o" color="text-white" @click="navigateTo('/notes/hello-world')" />
+      <DesktopIcon label="记事本" iconClass="fa fa-pencil-square-o" color="text-white" @click="navigateTo('/notepad')" />
+      <DesktopIcon label="飞机大战" iconClass="fa fa-fighter-jet" color="text-yellow-300" @click="navigateTo('/airplane')" />
+      <DesktopIcon label="画图" iconClass="fa fa-paint-brush" color="text-orange-300" @click="navigateTo('/paint')" />
+      <DesktopIcon label="计算器" iconClass="fa fa-calculator" color="text-white" @click="navigateTo('/calculator')" />
       <DesktopIcon label="回收站" iconClass="fa fa-trash-o" color="text-gray-400" @click="showAlert('回收站是空的。')" />
-      <DesktopIcon label="电子邮件" iconClass="fa fa-envelope-o" color="text-white" @click="showAlert('未配置邮件客户端。')" />
     </main>
 
     <!-- Router View (Windows) -->

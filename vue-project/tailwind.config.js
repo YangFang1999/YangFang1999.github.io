@@ -14,8 +14,8 @@ export default {
         'win_black': '#000000',
       },
       boxShadow: {
-        'win95-outset': 'inset -1px -1px #000, inset 1px 1px #fff, inset -2px -2px #808080, inset 2px 2px #dfdfdf',
-        'win95-inset': 'inset -1px -1px #fff, inset 1px 1px #000, inset -2px -2px #dfdfdf, inset 2px 2px #808080',
+        'win95-outset': 'inset -1px -1px #0a0a0a, inset 1px 1px #ffffff, inset -2px -2px #808080, inset 2px 2px #dfdfdf',
+        'win95-inset': 'inset -1px -1px #ffffff, inset 1px 1px #0a0a0a, inset -2px -2px #dfdfdf, inset 2px 2px #808080',
       },
       fontFamily: {
         'pixel': ['"MS Sans Serif"', 'Tahoma', 'sans-serif'],
