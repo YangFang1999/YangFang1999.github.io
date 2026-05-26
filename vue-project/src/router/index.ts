@@ -1,24 +1,15 @@
 import { createRouter, createWebHashHistory } from 'vue-router';
-import Desktop from '../views/Desktop.vue';
-import AllNotes from '../views/AllNotes.vue';
-import Categories from '../views/Categories.vue';
-import NoteDetail from '../views/NoteDetail.vue';
-import Computer from '../views/Computer.vue';
-import AirplaneApp from '../views/AirplaneApp.vue';
-import NotepadApp from '../views/NotepadApp.vue';
-import PaintApp from '../views/PaintApp.vue';
-import CalculatorApp from '../views/CalculatorApp.vue';
 
 const routes = [
-  { path: '/', component: Desktop },
-  { path: '/computer', component: Computer },
-  { path: '/all-notes', component: AllNotes },
-  { path: '/categories', component: Categories },
-  { path: '/notes/:id', component: NoteDetail },
-  { path: '/airplane', component: AirplaneApp },
-  { path: '/notepad', component: NotepadApp },
-  { path: '/paint', component: PaintApp },
-  { path: '/calculator', component: CalculatorApp },
+  { path: '/', component: () => import('../views/Desktop.vue') },
+  { path: '/computer', component: () => import('../views/Computer.vue') },
+  { path: '/all-notes', component: () => import('../views/AllNotes.vue') },
+  { path: '/categories', component: () => import('../views/Categories.vue') },
+  { path: '/notes/:id', component: () => import('../views/NoteDetail.vue') },
+  { path: '/airplane', component: () => import('../views/AirplaneApp.vue') },
+  { path: '/notepad', component: () => import('../views/NotepadApp.vue') },
+  { path: '/paint', component: () => import('../views/PaintApp.vue') },
+  { path: '/calculator', component: () => import('../views/CalculatorApp.vue') },
 ];
 
 const router = createRouter({
