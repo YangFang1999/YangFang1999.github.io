@@ -23,7 +23,8 @@
       "Bash(python fix_dollar.py)",
       "Bash(npx vite *)",
       "Bash(curl -s http://localhost:5173)",
-      "Bash(npx vue-tsc *)"
+      "Bash(npx vue-tsc *)",
+      "Bash(git *)"
     ]
   }
 }
