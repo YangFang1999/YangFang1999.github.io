@@ -6,6 +6,7 @@ const props = defineProps<{
   icon?: string;
   isOpen: boolean;
   isActive: boolean;
+  defaultMaximized?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -191,6 +192,9 @@ const windowStyle = computed(() => {
 });
 
 onMounted(() => {
+  if (props.defaultMaximized) {
+    isMaximized.value = true;
+  }
   document.addEventListener('click', handleClickOutside, true);
   document.addEventListener('keydown', handleKeydown);
 });
