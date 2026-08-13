@@ -1,4 +1,4 @@
-import{d as Z,e as ee,m as te,w as re,B as oe,j as se,u as ae,r as $,o as ie,a as de}from"./vendor-D3iukU5p.js";import{W as ne}from"./Window-DIWf6eGL.js";import"./index-DMBvxuWJ.js";var K=typeof globalThis!="undefined"?globalThis:typeof window!="undefined"?window:typeof global!="undefined"?global:typeof self!="undefined"?self:{};function le(h){return h&&h.__esModule&&Object.prototype.hasOwnProperty.call(h,"default")?h.default:h}var q={exports:{}};(function(h){var v=typeof window!="undefined"?window:typeof WorkerGlobalScope!="undefined"&&self instanceof WorkerGlobalScope?self:{};/**
+import{d as Z,e as ee,m as te,w as re,B as oe,j as se,u as ae,r as $,o as ie,a as de}from"./vendor-tjluE09b.js";import{W as ne}from"./Window-D8O1ge_W.js";import"./index-Cr4YR6GR.js";var K=typeof globalThis!="undefined"?globalThis:typeof window!="undefined"?window:typeof global!="undefined"?global:typeof self!="undefined"?self:{};function le(h){return h&&h.__esModule&&Object.prototype.hasOwnProperty.call(h,"default")?h.default:h}var q={exports:{}};(function(h){var v=typeof window!="undefined"?window:typeof WorkerGlobalScope!="undefined"&&self instanceof WorkerGlobalScope?self:{};/**
  * Prism: Lightweight, robust, elegant syntax highlighting
  *
  * @license MIT <https://opensource.org/licenses/MIT>
@@ -2276,4 +2276,9 @@ public class RedisConfig {
 	      <p><strong>为什么写操作是"删缓存"而不是"更新缓存"？</strong>因为更新缓存有并发顺序问题：线程 A 更新数据库 → 线程 B 更新数据库 → 线程 B 更新缓存 → 线程 A 更新缓存 → 缓存里的值最终是线程 A 的旧值，而数据库是线程 B 的新值，数据不一致。而删缓存则没有这个问题——下次读自然会回填最新值。</p>
 
 	      <h2>小结</h2>
-	      <p>Redis 入门容易精通难。<strong>会用五种数据类型只是第一层；理解缓存穿透/击穿/雪崩是第二层；深入持久化机制（RDB/AOF）、集群方案（Sentinel/Cluster）、内存淘汰策略、以及分布式锁的正确实现才是真正的进阶之路。</strong>本文覆盖了日常开发中 90% 的 Redis 使用场景，足以应对大多数业务需求。但记住：<strong>缓存不是万能的，加缓存之前先优化 SQL，很多场景下慢查询不是缓存能解决的。</strong></p>`):(c.value=d,g.value=`<p>Content for ${d} not migrated yet.</p>`)};return ee(()=>{E(),setTimeout(()=>pe.highlightAll(),100)}),(i,y)=>(ie(),te(ne,{title:c.value,icon:"fa fa-file-text-o",isOpen:"",isActive:"",onClose:y[0]||(y[0]=C=>oe(a).push("/all-notes"))},{default:re(()=>[de("div",{class:"notepad-content font-sans",innerHTML:g.value},null,8,ge)]),_:1},8,["title"]))}});export{be as default};
+	      <p>Redis 入门容易精通难。<strong>会用五种数据类型只是第一层；理解缓存穿透/击穿/雪崩是第二层；深入持久化机制（RDB/AOF）、集群方案（Sentinel/Cluster）、内存淘汰策略、以及分布式锁的正确实现才是真正的进阶之路。</strong>本文覆盖了日常开发中 90% 的 Redis 使用场景，足以应对大多数业务需求。但记住：<strong>缓存不是万能的，加缓存之前先优化 SQL，很多场景下慢查询不是缓存能解决的。</strong></p>`):(c.value="文章未找到",g.value=`<div style="text-align:center; padding: 48px 12px;">
+      <p style="font-size:48px; margin:0 0 16px;">📄</p>
+      <h2 style="margin:0 0 8px; color:#000080;">文章不存在</h2>
+      <p style="color:#666;">没有找到文章「${d}」，链接可能已失效。</p>
+      <p><a href="#/all-notes" style="color:#000080; font-weight:bold;">← 返回我的文档</a></p>
+    </div>`)};return ee(()=>{E(),setTimeout(()=>pe.highlightAll(),100)}),(i,y)=>(ie(),te(ne,{title:c.value,icon:"fa fa-file-text-o",isOpen:"",isActive:"",onClose:y[0]||(y[0]=C=>oe(a).push("/all-notes"))},{default:re(()=>[de("div",{class:"notepad-content font-sans",innerHTML:g.value},null,8,ge)]),_:1},8,["title"]))}});export{be as default};
