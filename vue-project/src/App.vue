@@ -88,6 +88,7 @@ const activateWindow = (id: string) => {
   if (id === 'computer') router.push('/computer');
   else if (id === 'docs') router.push('/all-notes');
   else if (id === 'welcome') router.push('/');
+  else if (id === 'categories') router.push('/categories');
   else if (id === 'airplane') router.push('/airplane');
   else if (id === 'notepad') router.push('/notepad');
   else if (id === 'paint') router.push('/paint');
@@ -116,7 +117,7 @@ const showAlert = (message: string) => {
 
 <template>
   <div class="h-screen w-screen overflow-hidden flex flex-col relative bg-[url('/wallpaper.jpg')] bg-cover bg-center">
-    
+
     <!-- Persistent Desktop Icons -->
     <main class="absolute top-0 left-0 bottom-10 w-full p-4 flex flex-col gap-4 flex-wrap content-start z-0">
       <DesktopIcon label="我的电脑" iconClass="fa fa-desktop" color="text-white" @click="navigateTo('/computer')" />

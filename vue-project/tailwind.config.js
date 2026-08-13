@@ -7,9 +7,7 @@ export default {
   theme: {
     extend: {
       colors: {
-        'teal': '#008080',
         'silver': '#c0c0c0',
-        'gray': '#808080',
         'navy': '#000080',
         'win_black': '#000000',
       },

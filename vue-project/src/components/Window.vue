@@ -21,6 +21,15 @@ const isMaximized = ref(false);
 const isMinimized = ref(false);
 const isSystemMenuOpen = ref(false);
 
+// Draggable window state
+const windowEl = ref<HTMLElement | null>(null);
+const windowPos = ref<{ left: number; top: number } | null>(null);
+const isDragging = ref(false);
+let dragStartX = 0;
+let dragStartY = 0;
+let dragOrigLeft = 0;
+let dragOrigTop = 0;
+
 watch(() => props.isActive, (active) => {
   if (active && isMinimized.value) {
     isMinimized.value = false;
@@ -180,6 +189,17 @@ const windowStyle = computed(() => {
       maxHeight: 'calc(100vh - 40px)',
     };
   }
+  if (windowPos.value) {
+    return {
+      top: windowPos.value.top + 'px',
+      left: windowPos.value.left + 'px',
+      transform: 'none',
+      width: '95%',
+      maxWidth: '42rem',
+      height: 'auto',
+      maxHeight: '80vh',
+    };
+  }
   return {
     top: '50%',
     left: '50%',
@@ -190,6 +210,42 @@ const windowStyle = computed(() => {
     maxHeight: '80vh',
   };
 });
+
+const startDrag = (e: MouseEvent) => {
+  if (isMaximized.value) return;
+  const el = windowEl.value;
+  if (!el) return;
+  const rect = el.getBoundingClientRect();
+  windowPos.value = { left: rect.left, top: rect.top };
+  dragStartX = e.clientX;
+  dragStartY = e.clientY;
+  dragOrigLeft = rect.left;
+  dragOrigTop = rect.top;
+  isDragging.value = true;
+  document.addEventListener('mousemove', onDrag);
+  document.addEventListener('mouseup', endDrag);
+};
+
+const onDrag = (e: MouseEvent) => {
+  if (!isDragging.value) return;
+  const el = windowEl.value;
+  if (!el) return;
+  const left = Math.min(
+    window.innerWidth - 60,
+    Math.max(-(el.offsetWidth - 60), dragOrigLeft + (e.clientX - dragStartX))
+  );
+  const top = Math.min(
+    window.innerHeight - 30,
+    Math.max(0, dragOrigTop + (e.clientY - dragStartY))
+  );
+  windowPos.value = { left, top };
+};
+
+const endDrag = () => {
+  isDragging.value = false;
+  document.removeEventListener('mousemove', onDrag);
+  document.removeEventListener('mouseup', endDrag);
+};
 
 onMounted(() => {
   if (props.defaultMaximized) {
@@ -208,7 +264,8 @@ onUnmounted(() => {
 <template>
   <div
     v-if="isOpen && !isMinimized"
-    class="win-window fixed bg-[#c0c0c0] flex flex-col z-20 border-2 shadow-win95-outset"
+    ref="windowEl"
+    class="win-window fixed bg-[#c0c0c0] flex flex-col z-20 border-2"
     :class="isActive ? 'border-t-[#ffffff] border-l-[#ffffff] border-r-[#0a0a0a] border-b-[#0a0a0a]' : ''"
     :style="windowStyle"
     @mousedown="emit('focus')"
@@ -219,6 +276,8 @@ onUnmounted(() => {
       :class="isActive
         ? 'bg-[linear-gradient(90deg,#000080,#1084d0)]'
         : 'bg-[linear-gradient(90deg,#808080,#b5b5b5)]'"
+      @mousedown="startDrag"
+      @dblclick="handleMaximize"
     >
       <!-- Window Icon (System Menu trigger) -->
       <button
@@ -238,7 +297,7 @@ onUnmounted(() => {
       </span>
 
       <!-- Window Controls -->
-      <div class="flex gap-[2px] shrink-0">
+      <div class="flex gap-[2px] shrink-0" @mousedown.stop @dblclick.stop>
         <!-- Minimize -->
         <button
           @click.stop="handleMinimize"
@@ -349,6 +408,14 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
+.win-window {
+  box-shadow:
+    0 0 0 1px #000,
+    6px 6px 16px rgba(0, 0, 0, 0.45),
+    inset -1px -1px #0a0a0a, inset 1px 1px #ffffff,
+    inset -2px -2px #808080, inset 2px 2px #dfdfdf;
+}
+
 .win-menu-header u {
   text-decoration: underline;
   text-underline-offset: 2px;

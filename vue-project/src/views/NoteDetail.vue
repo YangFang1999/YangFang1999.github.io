@@ -2325,8 +2325,13 @@ public class RedisConfig {
 	      <h2>小结</h2>
 	      <p>Redis 入门容易精通难。<strong>会用五种数据类型只是第一层；理解缓存穿透/击穿/雪崩是第二层；深入持久化机制（RDB/AOF）、集群方案（Sentinel/Cluster）、内存淘汰策略、以及分布式锁的正确实现才是真正的进阶之路。</strong>本文覆盖了日常开发中 90% 的 Redis 使用场景，足以应对大多数业务需求。但记住：<strong>缓存不是万能的，加缓存之前先优化 SQL，很多场景下慢查询不是缓存能解决的。</strong></p>`;
   } else {
-    noteTitle.value = noteId;
-    noteContent.value = `<p>Content for ${noteId} not migrated yet.</p>`;
+    noteTitle.value = '文章未找到';
+    noteContent.value = `<div style="text-align:center; padding: 48px 12px;">
+      <p style="font-size:48px; margin:0 0 16px;">📄</p>
+      <h2 style="margin:0 0 8px; color:#000080;">文章不存在</h2>
+      <p style="color:#666;">没有找到文章「${noteId}」，链接可能已失效。</p>
+      <p><a href="#/all-notes" style="color:#000080; font-weight:bold;">← 返回我的文档</a></p>
+    </div>`;
   }
 };
 

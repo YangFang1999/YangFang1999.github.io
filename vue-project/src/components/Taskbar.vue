@@ -9,7 +9,8 @@ const updateClock = () => {
   const now = new Date();
   const hours = now.getHours().toString().padStart(2, '0');
   const minutes = now.getMinutes().toString().padStart(2, '0');
-  currentTime.value = `${hours}:${minutes}`;
+  const seconds = now.getSeconds().toString().padStart(2, '0');
+  currentTime.value = `${hours}:${minutes}:${seconds}`;
 
   const y = now.getFullYear();
   const m = (now.getMonth() + 1).toString().padStart(2, '0');
@@ -21,7 +22,7 @@ let intervalId: ReturnType<typeof setInterval>;
 
 onMounted(() => {
   updateClock();
-  intervalId = setInterval(updateClock, 30000);
+  intervalId = setInterval(updateClock, 1000);
   document.addEventListener('click', closeStartMenuOutside);
 });
 
@@ -33,6 +34,11 @@ onUnmounted(() => {
 const toggleStartMenu = (e: Event) => {
   e.stopPropagation();
   isStartMenuOpen.value = !isStartMenuOpen.value;
+};
+
+const handleMenuNavigate = (path: string) => {
+  isStartMenuOpen.value = false;
+  emit('navigate', path);
 };
 
 const closeStartMenuOutside = (e: Event) => {
@@ -71,25 +77,25 @@ defineProps<{
         </div>
         <!-- Menu items -->
         <div class="flex-1 py-1 text-sm text-black">
-          <div class="px-3 py-1.5 flex items-center gap-2.5 cursor-pointer hover:bg-[#000080] hover:text-white transition-colors" @click="emit('navigate', '/')">
+          <div class="px-3 py-1.5 flex items-center gap-2.5 cursor-pointer hover:bg-[#000080] hover:text-white transition-colors" @click="handleMenuNavigate('/')">
             <i class="fa fa-desktop w-4 text-center"></i>
             <span>桌面</span>
           </div>
-          <div class="px-3 py-1.5 flex items-center gap-2.5 cursor-pointer hover:bg-[#000080] hover:text-white transition-colors" @click="emit('navigate', '/all-notes')">
+          <div class="px-3 py-1.5 flex items-center gap-2.5 cursor-pointer hover:bg-[#000080] hover:text-white transition-colors" @click="handleMenuNavigate('/all-notes')">
             <i class="fa fa-folder-open w-4 text-center"></i>
             <span>我的文档</span>
           </div>
-          <div class="px-3 py-1.5 flex items-center gap-2.5 cursor-pointer hover:bg-[#000080] hover:text-white transition-colors" @click="emit('navigate', '/categories')">
+          <div class="px-3 py-1.5 flex items-center gap-2.5 cursor-pointer hover:bg-[#000080] hover:text-white transition-colors" @click="handleMenuNavigate('/categories')">
             <i class="fa fa-cog w-4 text-center"></i>
             <span>控制面板</span>
           </div>
           <hr class="border-t-[#808080] border-b-[#ffffff] my-1.5 mx-1">
-          <div class="px-3 py-1.5 flex items-center gap-2.5 cursor-pointer hover:bg-[#000080] hover:text-white transition-colors" onclick="window.open('https://github.com', '_blank')">
+          <div class="px-3 py-1.5 flex items-center gap-2.5 cursor-pointer hover:bg-[#000080] hover:text-white transition-colors" @click="handleMenuNavigate('https://github.com')">
             <i class="fa fa-globe w-4 text-center"></i>
             <span>Internet 浏览器</span>
           </div>
           <hr class="border-t-[#808080] border-b-[#ffffff] my-1.5 mx-1">
-          <div class="px-3 py-1.5 flex items-center gap-2.5 cursor-pointer hover:bg-[#000080] hover:text-white transition-colors" @click="emit('shutdown')">
+          <div class="px-3 py-1.5 flex items-center gap-2.5 cursor-pointer hover:bg-[#000080] hover:text-white transition-colors" @click="isStartMenuOpen = false; emit('shutdown')">
             <i class="fa fa-power-off w-4 text-center"></i>
             <span>关闭系统...</span>
           </div>

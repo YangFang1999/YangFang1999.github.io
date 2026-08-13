@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { ref, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import Window from '../components/Window.vue';
 import { notes } from '../data/notes';
@@ -8,10 +8,18 @@ const router = useRouter();
 const route = useRoute();
 
 const currentCategory = computed(() => route.query.category as string | undefined);
+const searchQuery = ref('');
 
 const filteredNotes = computed(() => {
-  if (!currentCategory.value) return notes;
-  return notes.filter(note => note.category === currentCategory.value);
+  const q = searchQuery.value.trim().toLowerCase();
+  let list = notes;
+  if (currentCategory.value) {
+    list = list.filter(note => note.category === currentCategory.value);
+  }
+  if (q) {
+    list = list.filter(note => note.title.toLowerCase().includes(q));
+  }
+  return list;
 });
 
 const currentPath = computed(() => {
@@ -59,6 +67,21 @@ const goUp = () => {
         </button>
       </div>
 
+      <!-- Search Bar -->
+      <div class="flex items-center gap-2 px-2 py-1 mb-3">
+        <span class="text-xs">搜索(S)</span>
+        <div class="flex-1 bg-white shadow-win95-inset flex items-center gap-2 px-2 py-0.5">
+          <i class="fa fa-search text-gray-500 text-xs"></i>
+          <input
+            v-model="searchQuery"
+            type="text"
+            placeholder="按标题搜索文章..."
+            class="flex-1 bg-transparent outline-none text-sm text-black placeholder-gray-500 min-w-0"
+          />
+          <button v-if="searchQuery" @click="searchQuery = ''" class="text-xs text-gray-500 hover:text-black cursor-pointer" title="清除">×</button>
+        </div>
+      </div>
+
       <!-- File List -->
       <div class="grid grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3 content-start">
         <div
@@ -79,7 +102,7 @@ const goUp = () => {
       <!-- Empty State -->
       <div v-if="filteredNotes.length === 0" class="text-center text-gray-500 py-8">
         <i class="fa fa-folder-open-o text-4xl mb-2 block"></i>
-        <p>此分类下暂无文章。</p>
+        <p>{{ searchQuery ? '没有找到匹配的文章。' : '此分类下暂无文章。' }}</p>
       </div>
 
       <div class="mt-4 pt-2 text-xs text-gray-500 border-t border-gray-300">

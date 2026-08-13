@@ -85,6 +85,14 @@ interface Meteor {
   life: number; maxLife: number;
 }
 
+interface Planet {
+  x: number; y: number; r: number;
+  ring: boolean;
+  body: string;
+  ringColor: string;
+  vx: number; vy: number;
+}
+
 let player: { x: number; y: number; w: number; h: number; speed: number; lives: number; invincible: number };
 let bullets: Bullet[] = [];
 let enemies: Enemy[] = [];
@@ -98,6 +106,7 @@ let starsMid: Star[] = [];
 let starsNear: Star[] = [];
 let nebulas: Nebula[] = [];
 let meteors: Meteor[] = [];
+let planets: Planet[] = [];
 
 let gameState: GameState = 'menu';
 let score = 0;
@@ -111,8 +120,15 @@ let frameCount = 0;
 let shakeTimer = 0;
 let titleBlink = 0;
 const cheatInvincible = ref(false);
+const bombCount = ref(3);
 
 const keys = new Set<string>();
+
+// Pointer (mouse / touch) control
+let pointerActive = false;
+let pointerX = 0;
+let pointerY = 0;
+let pointerLastFrame = -999;
 
 let permKills = 0;
 let nextLifeScore = 1000;
@@ -145,6 +161,9 @@ function resetGame() {
   speedTimer = 0;
   frameCount = 0;
   shakeTimer = 0;
+  bombCount.value = 3;
+  pointerActive = false;
+  pointerLastFrame = -999;
   permKills = 0;
   nextLifeScore = 1000;
   bulletDamage = 1;
@@ -203,23 +222,31 @@ function initStars() {
   }
 
   const nebulaColors = [
-    { color: 'rgba(20, 10, 80', alpha: 0.04 },
-    { color: 'rgba(10, 20, 60', alpha: 0.03 },
-    { color: 'rgba(30, 5, 50', alpha: 0.035 },
-    { color: 'rgba(5, 15, 55', alpha: 0.03 },
-    { color: 'rgba(15, 5, 40', alpha: 0.025 },
+    { color: 'rgba(96, 40, 160', alpha: 0.12 },
+    { color: 'rgba(40, 70, 190', alpha: 0.10 },
+    { color: 'rgba(160, 40, 110', alpha: 0.09 },
+    { color: 'rgba(30, 110, 150', alpha: 0.10 },
+    { color: 'rgba(70, 30, 130', alpha: 0.11 },
+    { color: 'rgba(180, 60, 60', alpha: 0.07 },
   ];
   for (let i = 0; i < nebulaColors.length; i++) {
     nebulas.push({
       x: Math.random() * CANVAS_W,
       y: Math.random() * CANVAS_H,
-      r: 60 + Math.random() * 100,
+      r: 70 + Math.random() * 130,
       color: nebulaColors[i].color,
       alpha: nebulaColors[i].alpha,
       vx: 0.02 + Math.random() * 0.04,
       vy: 0.03 + Math.random() * 0.06,
     });
   }
+
+  // Distant planets
+  planets = [
+    { x: CANVAS_W * 0.78, y: CANVAS_H * 0.16, r: 46, ring: true, body: 'rgba(150, 175, 235, 0.16)', ringColor: 'rgba(180, 200, 255, 0.20)', vx: -0.02, vy: 0.04 },
+    { x: CANVAS_W * 0.14, y: CANVAS_H * 0.58, r: 20, ring: false, body: 'rgba(220, 155, 125, 0.12)', ringColor: '', vx: -0.05, vy: 0.03 },
+    { x: CANVAS_W * 0.5, y: CANVAS_H * 0.32, r: 12, ring: false, body: 'rgba(120, 200, 180, 0.10)', ringColor: '', vx: -0.03, vy: 0.06 },
+  ];
 }
 
 function spawnMeteor() {
@@ -415,6 +442,26 @@ function aabb(a: Entity, b: Entity): boolean {
 
 // ============ Drawing Functions ============
 
+function drawPlanets() {
+  if (!ctx) return;
+  for (const p of planets) {
+    if (p.ring) {
+      ctx.strokeStyle = p.ringColor;
+      ctx.lineWidth = Math.max(2, p.r * 0.16);
+      ctx.beginPath();
+      ctx.ellipse(p.x, p.y, p.r * 1.45, p.r * 0.38, -0.35, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+    const g = ctx.createRadialGradient(p.x - p.r * 0.35, p.y - p.r * 0.35, p.r * 0.1, p.x, p.y, p.r);
+    g.addColorStop(0, p.body);
+    g.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
 function drawBackground() {
   if (!ctx) return;
 
@@ -435,6 +482,8 @@ function drawBackground() {
     ctx.fillStyle = ng;
     ctx.fillRect(n.x - n.r, n.y - n.r, n.r * 2, n.r * 2);
   }
+
+  drawPlanets();
 
   for (const s of starsFar) {
     const twinkle = s.alpha * (0.7 + 0.3 * Math.sin(frameCount * s.twinkleSpeed + s.twinklePhase));
@@ -1120,10 +1169,14 @@ function drawHUD() {
   ctx.fillText(`Lv.${Math.floor(diff * 10)}`, CANVAS_W - 8, 48);
 
   ctx.fillStyle = '#ff4466';
-  ctx.font = 'bold 16px sans-serif';
+  ctx.font = 'bold 15px sans-serif';
   let livesStr = '';
   for (let i = 0; i < player.lives; i++) livesStr += '♥ ';
-  ctx.fillText(livesStr.trim(), CANVAS_W - 8, 66);
+  ctx.fillText(livesStr.trim(), CANVAS_W - 8, 64);
+
+  ctx.fillStyle = '#ffcc44';
+  ctx.font = 'bold 12px "Microsoft YaHei", sans-serif';
+  ctx.fillText(`💣 x${bombCount.value}`, CANVAS_W - 8, 80);
 
   if (comboDisplayTimer > 0 && comboCount >= 3) {
     const comboAlpha = Math.min(1, comboDisplayTimer / 20);
@@ -1240,8 +1293,8 @@ function drawMenu() {
 
   ctx.fillStyle = '#cccccc';
   ctx.font = '13px "Microsoft YaHei", sans-serif';
-  ctx.fillText('↑↓←→ 或 WASD 移动 · 自动射击', CANVAS_W / 2, 156);
-  ctx.fillText('P 暂停 · I 无敌 · 连杀召唤BOSS', CANVAS_W / 2, 176);
+  ctx.fillText('↑↓←→ / WASD / 鼠标 移动 · 自动射击', CANVAS_W / 2, 156);
+  ctx.fillText('X 炸弹 · P 暂停 · I 无敌 · 连杀召唤BOSS', CANVAS_W / 2, 176);
 
   ctx.strokeStyle = '#555';
   ctx.lineWidth = 1;
@@ -1421,10 +1474,25 @@ function update() {
   // Input: player movement
   const permSpeedBonus = Math.min(2.5, Math.floor(permKills / 5) * 0.4);
   const spd = (player.speed + permSpeedBonus) * (speedTimer > 0 ? 1.6 : 1);
-  if (keys.has('ArrowLeft') || keys.has('a') || keys.has('A')) player.x -= spd;
-  if (keys.has('ArrowRight') || keys.has('d') || keys.has('D')) player.x += spd;
-  if (keys.has('ArrowUp') || keys.has('w') || keys.has('W')) player.y -= spd;
-  if (keys.has('ArrowDown') || keys.has('s') || keys.has('S')) player.y += spd;
+  const usingPointer = pointerActive && (frameCount - pointerLastFrame) < 60;
+  if (usingPointer) {
+    const cx = player.x + player.w / 2;
+    const cy = player.y + player.h / 2;
+    // 目标点在指针上方偏移，避免手指/鼠标遮挡战机
+    const dx = pointerX - cx;
+    const dy = (pointerY - 50) - cy;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    if (dist > 3) {
+      const step = Math.min(dist, spd * 1.6);
+      player.x += (dx / dist) * step;
+      player.y += (dy / dist) * step;
+    }
+  } else {
+    if (keys.has('ArrowLeft') || keys.has('a') || keys.has('A')) player.x -= spd;
+    if (keys.has('ArrowRight') || keys.has('d') || keys.has('D')) player.x += spd;
+    if (keys.has('ArrowUp') || keys.has('w') || keys.has('W')) player.y -= spd;
+    if (keys.has('ArrowDown') || keys.has('s') || keys.has('S')) player.y += spd;
+  }
   player.x = Math.max(0, Math.min(CANVAS_W - player.w, player.x));
   player.y = Math.max(0, Math.min(CANVAS_H - player.h, player.y));
 
@@ -1584,56 +1652,7 @@ function update() {
         spawnExplosion(b.cx, b.cy, 5, '#ffcc44');
 
         if (e.hp <= 0) {
-          score += e.score;
-
-          comboCount++;
-          comboTimer = 60;
-          comboDisplayTimer = 60;
-          if (comboCount > maxCombo) maxCombo = comboCount;
-
-          if (comboCount >= 5) {
-            const bonus = Math.floor(e.score * (comboCount * 0.1));
-            score += bonus;
-            const comboMsg = comboCount >= 10 ? 'PERFECT!' : comboCount >= 7 ? 'GREAT!' : 'NICE!';
-            spawnScorePopup(e.cx, e.cy - 10, `${comboMsg} +${bonus}`, '#ffdd44', 11);
-          }
-
-          permKills++;
-          bulletDamage = Math.min(5, 1 + Math.floor(permKills / 10));
-
-          if (score >= nextLifeScore) {
-            player.lives = Math.min(player.lives + 1, 10);
-            nextLifeScore += 1000;
-            spawnScorePopup(player.x + player.w / 2, player.y, '+1 ♥', '#ff4466', 16);
-          }
-
-          const isBossLarge = e.type === 'boss';
-          spawnExplosion(e.cx, e.cy, isBossLarge ? 30 : 18, e.type === 'boss' ? '#ff6644' : '#ffaa22', isBossLarge);
-          spawnScorePopup(e.cx, e.cy, `+${e.score}`, e.type === 'boss' ? '#ff4444' : (e.type === 'elite' ? '#ff8844' : '#ffffff'),
-            e.type === 'boss' ? 20 : (e.type === 'elite' ? 15 : 13));
-
-          if (e.type !== 'boss') {
-            spawnPowerUp(e.cx, e.cy);
-          }
-
-          if (e.type === 'boss') {
-            bossSpawned = false;
-            shakeTimer = 30;
-            // Boss kill bonus: heal
-            player.lives = Math.min(player.lives + 1, 10);
-            spawnScorePopup(e.cx, e.cy - 20, 'BOSS击败! +1♥', '#ff4466', 16);
-            for (let i = 0; i < 6; i++) {
-              setTimeout(() => {
-                if (gameState === 'playing') {
-                  spawnExplosion(
-                    e.cx + (Math.random() - 0.5) * 100,
-                    e.cy + (Math.random() - 0.5) * 60,
-                    15, '#ffaa22'
-                  );
-                }
-              }, i * 100);
-            }
-          }
+          killEnemy(e);
         }
         break;
       }
@@ -1833,6 +1852,81 @@ function colorForPowerUp(type: PowerUpType): string {
   }
 }
 
+function killEnemy(e: Enemy) {
+  score += e.score;
+
+  comboCount++;
+  comboTimer = 60;
+  comboDisplayTimer = 60;
+  if (comboCount > maxCombo) maxCombo = comboCount;
+
+  if (comboCount >= 5) {
+    const bonus = Math.floor(e.score * (comboCount * 0.1));
+    score += bonus;
+    const comboMsg = comboCount >= 10 ? 'PERFECT!' : comboCount >= 7 ? 'GREAT!' : 'NICE!';
+    spawnScorePopup(e.cx, e.cy - 10, `${comboMsg} +${bonus}`, '#ffdd44', 11);
+  }
+
+  permKills++;
+  bulletDamage = Math.min(5, 1 + Math.floor(permKills / 10));
+
+  if (score >= nextLifeScore) {
+    player.lives = Math.min(player.lives + 1, 10);
+    nextLifeScore += 1000;
+    spawnScorePopup(player.x + player.w / 2, player.y, '+1 ♥', '#ff4466', 16);
+  }
+
+  const isBossLarge = e.type === 'boss';
+  spawnExplosion(e.cx, e.cy, isBossLarge ? 30 : 18, e.type === 'boss' ? '#ff6644' : '#ffaa22', isBossLarge);
+  spawnScorePopup(e.cx, e.cy, `+${e.score}`, e.type === 'boss' ? '#ff4444' : (e.type === 'elite' ? '#ff8844' : '#ffffff'),
+    e.type === 'boss' ? 20 : (e.type === 'elite' ? 15 : 13));
+
+  if (e.type !== 'boss') {
+    spawnPowerUp(e.cx, e.cy);
+  }
+
+  if (e.type === 'boss') {
+    bossSpawned = false;
+    shakeTimer = 30;
+    // Boss kill bonus: heal + refill a bomb
+    player.lives = Math.min(player.lives + 1, 10);
+    bombCount.value = Math.min(5, bombCount.value + 1);
+    spawnScorePopup(e.cx, e.cy - 20, 'BOSS击败! +1♥ +1💣', '#ff4466', 16);
+    for (let i = 0; i < 6; i++) {
+      setTimeout(() => {
+        if (gameState === 'playing') {
+          spawnExplosion(
+            e.cx + (Math.random() - 0.5) * 100,
+            e.cy + (Math.random() - 0.5) * 60,
+            15, '#ffaa22'
+          );
+        }
+      }, i * 100);
+    }
+  }
+}
+
+function useBomb() {
+  if (gameState !== 'playing' || bombCount.value <= 0) return;
+  bombCount.value--;
+
+  // 清除所有敌机子弹
+  bullets = bullets.filter(b => b.isPlayer);
+
+  // 全屏冲击波特效
+  shakeTimer = 25;
+  spawnExplosion(CANVAS_W / 2, CANVAS_H / 2, 40, '#ffffff', true);
+  spawnScorePopup(CANVAS_W / 2, CANVAS_H / 2 - 20, '💣 全屏冲击!', '#ffffff', 18);
+
+  // 对所有敌人造成大量伤害
+  for (const e of [...enemies]) {
+    if (e.entryTimer > 0) continue;
+    e.hp -= 40;
+    spawnExplosion(e.cx, e.cy, 6, '#88ddff');
+    if (e.hp <= 0) killEnemy(e);
+  }
+}
+
 function updateBackground() {
   for (const s of starsFar) {
     s.y += s.speed;
@@ -1854,6 +1948,15 @@ function updateBackground() {
     if (n.x > CANVAS_W + n.r) n.x = -n.r;
     if (n.y < -n.r) n.y = CANVAS_H + n.r;
     if (n.y > CANVAS_H + n.r) n.y = -n.r;
+  }
+
+  for (const p of planets) {
+    p.x += p.vx;
+    p.y += p.vy;
+    if (p.x < -p.r * 2) p.x = CANVAS_W + p.r * 2;
+    if (p.x > CANVAS_W + p.r * 2) p.x = -p.r * 2;
+    if (p.y < -p.r * 2) p.y = CANVAS_H + p.r * 2;
+    if (p.y > CANVAS_H + p.r * 2) p.y = -p.r * 2;
   }
 
   meteorSpawnTimer++;
@@ -2010,6 +2113,9 @@ function handleKeyDown(e: KeyboardEvent) {
   if (e.key === 'I' || e.key === 'i') {
     cheatInvincible.value = !cheatInvincible.value;
   }
+  if (e.key === 'x' || e.key === 'X' || e.key === 'b' || e.key === 'B') {
+    useBomb();
+  }
   if (e.key === ' ') {
     e.preventDefault();
   }
@@ -2021,6 +2127,18 @@ function handleKeyDown(e: KeyboardEvent) {
 
 function handleKeyUp(e: KeyboardEvent) {
   keys.delete(e.key);
+}
+
+function handlePointerMove(e: PointerEvent) {
+  const canvas = canvasRef.value;
+  if (!canvas) return;
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = CANVAS_W / rect.width;
+  const scaleY = CANVAS_H / rect.height;
+  pointerX = (e.clientX - rect.left) * scaleX;
+  pointerY = (e.clientY - rect.top) * scaleY;
+  pointerLastFrame = frameCount;
+  pointerActive = true;
 }
 
 // ============ Resize Handling ============
@@ -2096,15 +2214,26 @@ onUnmounted(() => {
         ref="canvasRef"
         class="shadow-win95-inset outline-none block shrink-0"
         tabindex="0"
-        style="image-rendering: auto; max-width: 100%; height: auto;"
+        style="image-rendering: auto; max-width: 100%; height: auto; touch-action: none;"
+        @pointermove="handlePointerMove"
+        @pointerdown="handlePointerMove"
       ></canvas>
-      <button
-        @click="cheatInvincible = !cheatInvincible"
-        class="text-[11px] font-bold px-[10px] py-[2px] bg-[#c0c0c0] text-black border-none shadow-[inset_-1px_-1px_#0a0a0a,inset_1px_1px_#ffffff,inset_-2px_-2px_#808080,inset_2px_2px_#dfdfdf] active:shadow-[inset_-1px_-1px_#ffffff,inset_1px_1px_#0a0a0a] cursor-pointer font-sans"
-        :style="{ backgroundColor: cheatInvincible ? '#ff88ff' : '#c0c0c0' }"
-      >
-        {{ cheatInvincible ? '★ 无敌中 (按 I 关闭)' : '无敌模式 (I)' }}
-      </button>
+      <div class="flex items-center gap-2">
+        <button
+          @click="useBomb"
+          class="text-[11px] font-bold px-[10px] py-[2px] bg-[#c0c0c0] text-black border-none shadow-[inset_-1px_-1px_#0a0a0a,inset_1px_1px_#ffffff,inset_-2px_-2px_#808080,inset_2px_2px_#dfdfdf] active:shadow-[inset_-1px_-1px_#ffffff,inset_1px_1px_#0a0a0a] cursor-pointer font-sans"
+          :style="{ backgroundColor: bombCount > 0 ? '#ffcc88' : '#c0c0c0' }"
+        >
+          💣 炸弹 (X) x{{ bombCount }}
+        </button>
+        <button
+          @click="cheatInvincible = !cheatInvincible"
+          class="text-[11px] font-bold px-[10px] py-[2px] bg-[#c0c0c0] text-black border-none shadow-[inset_-1px_-1px_#0a0a0a,inset_1px_1px_#ffffff,inset_-2px_-2px_#808080,inset_2px_2px_#dfdfdf] active:shadow-[inset_-1px_-1px_#ffffff,inset_1px_1px_#0a0a0a] cursor-pointer font-sans"
+          :style="{ backgroundColor: cheatInvincible ? '#ff88ff' : '#c0c0c0' }"
+        >
+          {{ cheatInvincible ? '★ 无敌中 (按 I 关闭)' : '无敌模式 (I)' }}
+        </button>
+      </div>
     </div>
   </Window>
 </template>
