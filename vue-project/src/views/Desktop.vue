@@ -1,6 +1,11 @@
 <script setup lang="ts">
 import { ref, inject, watch, computed, onMounted, type ComputedRef } from 'vue';
 import Window from '../components/Window.vue';
+import { notes } from '../data/notes';
+
+const articleCount = notes.length;
+const categoryCount = new Set(notes.map(n => n.category).filter(Boolean)).size;
+const year = new Date().getFullYear();
 
 const hasVisited = localStorage.getItem('has-visited');
 const isWelcomeOpen = ref(!hasVisited);
@@ -49,7 +54,7 @@ const focusWindow = () => {
   >
     <div class="flex flex-col items-center text-center gap-3">
       <div class="flex items-center gap-4">
-        <img src="https://win98icons.alexmeub.com/icons/png/computer_explorer-5.png" class="w-16 h-16" alt="computer">
+        <img src="/icons/computer_explorer-5.png" class="w-16 h-16" alt="computer">
         <div class="text-left">
           <h1 class="text-xl font-bold text-[#000080]">YF's Blog</h1>
           <p class="text-xs text-gray-600">Version 2.0 · Windows 98 Edition</p>
@@ -74,11 +79,11 @@ const focusWindow = () => {
 
       <div class="grid grid-cols-3 gap-4 w-full text-xs">
         <div class="text-center p-2 shadow-[inset_-1px_-1px_#ffffff,inset_1px_1px_#0a0a0a] bg-[#f0f0f0]">
-          <div class="font-bold text-lg text-[#000080]">12+</div>
+          <div class="font-bold text-lg text-[#000080]">{{ articleCount }}</div>
           <div class="text-gray-600">技术文章</div>
         </div>
         <div class="text-center p-2 shadow-[inset_-1px_-1px_#ffffff,inset_1px_1px_#0a0a0a] bg-[#f0f0f0]">
-          <div class="font-bold text-lg text-[#000080]">6</div>
+          <div class="font-bold text-lg text-[#000080]">{{ categoryCount }}</div>
           <div class="text-gray-600">分类方向</div>
         </div>
         <div class="text-center p-2 shadow-[inset_-1px_-1px_#ffffff,inset_1px_1px_#0a0a0a] bg-[#f0f0f0]">
@@ -87,7 +92,7 @@ const focusWindow = () => {
         </div>
       </div>
 
-      <p class="text-[10px] text-gray-500 mt-2">© 2024 YF. All rights reserved. · Powered by Vue 3 + Vite</p>
+      <p class="text-[10px] text-gray-500 mt-2">© {{ year }} YF. All rights reserved. · Powered by Vue 3 + Vite</p>
     </div>
   </Window>
 </template>

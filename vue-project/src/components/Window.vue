@@ -395,7 +395,7 @@ onUnmounted(() => {
     </div>
 
     <!-- Content Area -->
-    <div class="flex-1 bg-white shadow-[inset_-1px_-1px_#ffffff,inset_1px_1px_#0a0a0a,inset_-2px_-2px_#dfdfdf,inset_2px_2px_#808080] m-[4px] p-[4px] overflow-y-auto text-black min-h-0">
+    <div class="win-content flex-1 bg-white shadow-[inset_-1px_-1px_#ffffff,inset_1px_1px_#0a0a0a,inset_-2px_-2px_#dfdfdf,inset_2px_2px_#808080] m-[4px] p-[4px] overflow-y-auto text-black min-h-0">
       <slot></slot>
     </div>
 

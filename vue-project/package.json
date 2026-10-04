@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "font-awesome": "^4.7.0",
     "prismjs": "^1.30.0",
     "vue": "^3.4.15",
     "vue-router": "^4.6.4"
@@ -17,9 +18,7 @@
     "@types/prismjs": "^1.26.6",
     "@vitejs/plugin-vue": "^5.0.3",
     "autoprefixer": "^10.4.27",
-    "font-awesome": "^4.7.0",
     "postcss": "^8.5.8",
-    "sass": "^1.98.0",
     "tailwindcss": "^3.4.19",
     "typescript": "^5.2.2",
     "vite": "^5.1.0",
