@@ -302,9 +302,9 @@ const showAlert = (message: string) => {
   alert(message);
 };
 
-// 桌面主题样式
+// 桌面主题样式（注意：url() 里用双引号，避免 Tailwind 提取类名时被 \' 转义破坏）
 const rootBgClass = computed(() =>
-  desktopTheme.value === 'wallpaper' ? 'bg-[url(\'/wallpaper.jpg\')] bg-cover bg-center' : ''
+  desktopTheme.value === 'wallpaper' ? 'bg-[url("/wallpaper.jpg")] bg-cover bg-center' : ''
 );
 const rootBgStyle = computed((): Record<string, string> => {
   const t = desktopTheme.value;

@@ -33,6 +33,15 @@ function petGoHome(): void {
 function openSysProps(): void {
   window.dispatchEvent(new CustomEvent('open-sysprops'));
 }
+
+// 恢复默认设置：清空主题/图标布局/桌宠位置等本机自定义，回到出厂状态
+function resetSettings(): void {
+  if (!window.confirm('确定恢复所有桌面设置为默认吗？（主题、图标布局、桌宠位置将被重置）')) return;
+  for (const k of ['desktop-theme', 'icon-layout', 'qq-pet-state', 'screensaver-ms']) {
+    try { localStorage.removeItem(k); } catch { /* 忽略 */ }
+  }
+  location.reload();
+}
 </script>
 
 <template>
@@ -97,6 +106,12 @@ function openSysProps(): void {
             class="px-2 py-[3px] bg-[#c0c0c0] text-black border-none shadow-[inset_-1px_-1px_#0a0a0a,inset_1px_1px_#ffffff,inset_-2px_-2px_#808080,inset_2px_2px_#dfdfdf] active:shadow-[inset_-1px_-1px_#ffffff,inset_1px_1px_#0a0a0a] cursor-pointer"
           >
             <i class="fa fa-info-circle mr-1"></i>系统属性
+          </button>
+          <button
+            @click="resetSettings"
+            class="px-2 py-[3px] bg-[#c0c0c0] text-black border-none shadow-[inset_-1px_-1px_#0a0a0a,inset_1px_1px_#ffffff,inset_-2px_-2px_#808080,inset_2px_2px_#dfdfdf] active:shadow-[inset_-1px_-1px_#ffffff,inset_1px_1px_#0a0a0a] cursor-pointer"
+          >
+            <i class="fa fa-undo mr-1"></i>恢复默认设置
           </button>
         </div>
       </div>

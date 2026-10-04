@@ -20,6 +20,7 @@ const inputEl = ref<HTMLInputElement | null>(null);
 
 const bootAt = Date.now();
 let matrixTimer: ReturnType<typeof setInterval> | undefined;
+let pingTimer: ReturnType<typeof setInterval> | undefined;
 
 const APPS: Record<string, string> = {
   notepad: '/notepad',
@@ -150,11 +151,11 @@ function run(raw: string): void {
       const ip = '42.' + (Math.floor(Math.random() * 200) + 20) + '.' + (Math.floor(Math.random() * 250) + 5) + '.10';
       push(`正在 Ping ${host} [${ip}] 具有 32 字节的数据:`, '#9adcff');
       let i = 0;
-      const timer = setInterval(() => {
+      pingTimer = setInterval(() => {
         i++;
         push(`来自 ${ip} 的回复: 字节=32 时间=${Math.floor(Math.random() * 30) + 8}ms TTL=118`);
         if (i >= 4) {
-          clearInterval(timer);
+          clearInterval(pingTimer);
           push(`\n${host} 的 Ping 统计信息:\n    已发送 = 4，已接收 = 4，丢失 = 0 (0% 丢失)`, '#9adcff');
           scrollBottom();
         }
@@ -227,6 +228,8 @@ function execute(): void {
 }
 
 function onKeydown(e: KeyboardEvent): void {
+  // 中文输入法组词中按 Enter 是确认候选词，不执行命令
+  if (e.isComposing || e.keyCode === 229) return;
   if (e.key === 'Enter') {
     execute();
   } else if (e.key === 'ArrowUp') {
@@ -264,6 +267,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   if (matrixTimer) clearInterval(matrixTimer);
+  if (pingTimer) clearInterval(pingTimer);
 });
 </script>
 
