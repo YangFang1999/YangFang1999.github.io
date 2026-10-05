@@ -261,7 +261,7 @@ export function drawHUD(ctx: CanvasRenderingContext2D): void {
   if (G.doubleFireTimer > 0) {
     ctx.fillStyle = '#4488ff';
     ctx.textAlign = 'left';
-    ctx.fillText(`🔥双倍 ${Math.ceil(G.doubleFireTimer / 60)}s`, 8, H - 6);
+    ctx.fillText(`🔥双倍${G.doubleFireLevel >= 2 ? '×2' : ''} ${Math.ceil(G.doubleFireTimer / 60)}s`, 8, H - 6);
   }
   if (G.shieldTimer > 0) {
     ctx.fillStyle = '#ffaa00';

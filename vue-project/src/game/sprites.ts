@@ -224,20 +224,27 @@ function bakeLargeEnemy(): Sprite {
 
 function bakeEliteEnemy(): Sprite {
   return makeSprite(74, 48, 37, 24, (c) => {
+    // 主体
     c.fillStyle = '#cc2233';
     c.beginPath();
     c.moveTo(-33, 22); c.lineTo(-13, -22); c.lineTo(13, -22); c.lineTo(33, 22);
     c.closePath(); c.fill();
-
+    // 高光
     c.fillStyle = '#ee4455';
     c.beginPath();
     c.moveTo(-6, -18); c.lineTo(6, -18); c.lineTo(16, 8); c.lineTo(-16, 8);
     c.closePath(); c.fill();
-
-    c.fillStyle = '#881122';
+    // 机翼（提亮，黑底上可见）
+    c.fillStyle = '#b03040';
     c.beginPath(); c.moveTo(-16, 4); c.lineTo(-35, 14); c.lineTo(-16, 18); c.closePath(); c.fill();
     c.beginPath(); c.moveTo(16, 4); c.lineTo(35, 14); c.lineTo(16, 18); c.closePath(); c.fill();
-
+    // 轮廓描边（黑底上清晰）
+    c.strokeStyle = '#ff9aa5';
+    c.lineWidth = 1.4;
+    c.beginPath();
+    c.moveTo(-33, 22); c.lineTo(-13, -22); c.lineTo(13, -22); c.lineTo(33, 22);
+    c.closePath(); c.stroke();
+    // 核心
     c.fillStyle = '#ff4444';
     c.beginPath(); c.arc(0, -3, 7, 0, Math.PI * 2); c.fill();
     c.fillStyle = '#ffff00';

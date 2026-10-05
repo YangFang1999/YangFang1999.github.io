@@ -283,8 +283,14 @@ const IDLE_MS = (() => {
 function resetIdle(): void {
   if (saverOn.value) saverOn.value = false;
   if (idleTimer) clearTimeout(idleTimer);
-  if (IDLE_MS > 0 && !isShutdown.value) {
-    idleTimer = setTimeout(() => { saverOn.value = true; }, IDLE_MS);
+  // 游戏进行中不触发屏保（玩到一半被管道盖住很离谱）
+  const onGameRoute = ['#/airplane', '#/survivors', '#/terminal', '#/typing'].includes(location.hash);
+  if (IDLE_MS > 0 && !isShutdown.value && !onGameRoute) {
+    idleTimer = setTimeout(() => {
+      if (!['#/airplane', '#/survivors', '#/terminal', '#/typing'].includes(location.hash)) {
+        saverOn.value = true;
+      }
+    }, IDLE_MS);
   }
 }
 

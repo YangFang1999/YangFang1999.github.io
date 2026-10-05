@@ -24,7 +24,7 @@ export class SurvivorGame {
   private fpsFrames = 0;
 
   private onKeyDown = (e: KeyboardEvent) => this.handleKeyDown(e);
-  private onKeyUp = (e: KeyboardEvent) => { G.keys.delete(e.key); };
+  private onKeyUp = (e: KeyboardEvent) => { G.keys.delete(e.code); };
   private onBlur = () => this.handleBlur();
   private onVisibility = () => { if (document.hidden) this.handleBlur(); };
   private onResize = () => this.handleResize();
@@ -155,25 +155,27 @@ export class SurvivorGame {
   }
 
   private handleKeyDown(e: KeyboardEvent): void {
-    G.keys.add(e.key);
-    if (e.key === 'Enter') {
+    // 用 e.code（物理键位）判定，中文输入法下不会失效
+    const code = e.code;
+    G.keys.add(code);
+    if (code === 'Enter') {
       if (G.phase === 'menu' || G.phase === 'gameover' || G.phase === 'victory') this.startGame();
     }
-    if (e.key === 'p' || e.key === 'P') this.togglePause();
+    if (code === 'KeyP') this.togglePause();
     // 作弊：I 无敌
-    if (e.key === 'I' || e.key === 'i') {
+    if (code === 'KeyI') {
       G.cheatInvincible = !G.cheatInvincible;
     }
     // 菜单翻页
     if (G.phase === 'menu') {
-      if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') G.menuPage = Math.max(0, G.menuPage - 1);
-      if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') G.menuPage = Math.min(2, G.menuPage + 1);
+      if (code === 'ArrowLeft' || code === 'KeyA') G.menuPage = Math.max(0, G.menuPage - 1);
+      if (code === 'ArrowRight' || code === 'KeyD') G.menuPage = Math.min(2, G.menuPage + 1);
     }
     // 升级面板快捷键
-    if (G.phase === 'levelup' && ['1', '2', '3'].includes(e.key)) {
-      this.chooseUpgrade(Number(e.key) - 1);
+    if (G.phase === 'levelup' && ['Digit1', 'Digit2', 'Digit3', 'Numpad1', 'Numpad2', 'Numpad3'].includes(code)) {
+      this.chooseUpgrade(Number(code.slice(-1)) - 1);
     }
-    if (e.key === ' ' || ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+    if (code === 'Space' || ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(code)) {
       e.preventDefault();
     }
   }
@@ -353,10 +355,10 @@ export class SurvivorGame {
     const spd = moveSpeed();
     const k = G.keys;
     let mx = 0, my = 0;
-    if (k.has('ArrowLeft') || k.has('a') || k.has('A')) mx -= 1;
-    if (k.has('ArrowRight') || k.has('d') || k.has('D')) mx += 1;
-    if (k.has('ArrowUp') || k.has('w') || k.has('W')) my -= 1;
-    if (k.has('ArrowDown') || k.has('s') || k.has('S')) my += 1;
+    if (k.has('ArrowLeft') || k.has('KeyA')) mx -= 1;
+    if (k.has('ArrowRight') || k.has('KeyD')) mx += 1;
+    if (k.has('ArrowUp') || k.has('KeyW')) my -= 1;
+    if (k.has('ArrowDown') || k.has('KeyS')) my += 1;
 
     if (mx !== 0 || my !== 0) {
       const len = Math.sqrt(mx * mx + my * my);

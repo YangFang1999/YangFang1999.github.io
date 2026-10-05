@@ -87,6 +87,7 @@ function entryScale(e: Enemy, full: number): number {
 }
 
 function drawRegularEnemy(ctx: CanvasRenderingContext2D, spr: ReturnType<typeof getSprites>, e: Enemy): void {
+  if (e.y + e.h < 0) return;   // 完全在屏幕上方时不绘制（血条也不会悬空）
   const scale = entryScale(e, 15);
   switch (e.type) {
     case 'small': drawSprite(ctx, spr.small, e.cx, e.cy, scale); break;
@@ -110,8 +111,9 @@ function drawRegularEnemy(ctx: CanvasRenderingContext2D, spr: ReturnType<typeof 
   const barH = e.type === 'large' ? 4 : 3;
   const barY = e.type === 'large' ? e.y - 8 : e.y - 6;
   const barW = e.w - 4;
+  const barX = e.type === 'elite' ? e.cx - barW / 2 : e.x + 2;
   ctx.fillStyle = '#222';
-  ctx.fillRect(e.x + 2, barY, barW, barH);
+  ctx.fillRect(barX, barY, barW, barH);
   if (e.type === 'medium') {
     ctx.fillStyle = e.hp > 2 ? '#ffaa00' : '#ff4400';
   } else if (e.type === 'large') {
@@ -120,16 +122,40 @@ function drawRegularEnemy(ctx: CanvasRenderingContext2D, spr: ReturnType<typeof 
     const ratio = e.hp / e.maxHp;
     ctx.fillStyle = ratio > 0.5 ? '#44cc44' : ratio > 0.25 ? '#cccc44' : '#cc4444';
   }
-  ctx.fillRect(e.x + 2, barY, barW * (e.hp / e.maxHp), barH);
+  ctx.fillRect(barX, barY, barW * (e.hp / e.maxHp), barH);
   if (e.type === 'elite') {
-    ctx.strokeStyle = '#888';
+    ctx.strokeStyle = '#ff9aa5';
     ctx.lineWidth = 1;
-    ctx.strokeRect(e.x, e.y - 11, e.w, 5);
+    ctx.strokeRect(barX - 1, barY - 1, barW + 2, barH + 2);
   }
 }
 
 function drawBossEntity(ctx: CanvasRenderingContext2D, spr: ReturnType<typeof getSprites>, e: Enemy): void {
+  if (e.y + e.h < 0) return;   // 完全在屏幕上方时不绘制
   const level = e.bossLevel || 1;
+
+  // 直线激光：蓄力（闪烁虚线）/ 发射（纵向光束）
+  if (e.laserState === 1 || e.laserState === 2) {
+    const lx = e.laserX ?? 0;
+    if (e.laserState === 1) {
+      const a = 0.25 + 0.45 * Math.abs(Math.sin(G.frameCount * 0.35));
+      ctx.strokeStyle = `rgba(255, 70, 70, ${a})`;
+      ctx.lineWidth = 2;
+      ctx.setLineDash([7, 7]);
+      ctx.beginPath(); ctx.moveTo(lx, 0); ctx.lineTo(lx, G.canvasH); ctx.stroke();
+      ctx.setLineDash([]);
+    } else {
+      const g = ctx.createLinearGradient(lx - 16, 0, lx + 16, 0);
+      g.addColorStop(0, 'rgba(255, 60, 60, 0)');
+      g.addColorStop(0.5, 'rgba(255, 130, 130, 0.9)');
+      g.addColorStop(1, 'rgba(255, 60, 60, 0)');
+      ctx.fillStyle = g;
+      ctx.fillRect(lx - 16, 0, 32, G.canvasH);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(lx - 3, 0, 6, G.canvasH);
+    }
+  }
+
   const scale = entryScale(e, 30);
   const enraged = level >= 5 || e.phase === 3;
   drawSprite(ctx, enraged ? spr.bossEnraged : spr.boss, e.cx, e.cy, scale);

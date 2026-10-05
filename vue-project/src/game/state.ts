@@ -34,6 +34,7 @@ export interface GameVars {
   spawnCounter: number;
   playerShootTimer: number;
   doubleFireTimer: number;
+  doubleFireLevel: number;   // 1=三连发 2=五连发（吃两个双倍火力叠加）
   shieldTimer: number;
   speedTimer: number;
   shakeTimer: number;
@@ -99,6 +100,7 @@ export const G: GameVars = {
   spawnCounter: 0,
   playerShootTimer: 0,
   doubleFireTimer: 0,
+  doubleFireLevel: 1,
   shieldTimer: 0,
   speedTimer: 0,
   shakeTimer: 0,
@@ -156,6 +158,7 @@ export function resetGame() {
   G.spawnCounter = 0;
   G.playerShootTimer = 0;
   G.doubleFireTimer = 0;
+  G.doubleFireLevel = 1;
   G.shieldTimer = 0;
   G.speedTimer = 0;
   G.shakeTimer = 0;

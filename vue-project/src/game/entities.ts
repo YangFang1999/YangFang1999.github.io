@@ -116,6 +116,7 @@ export function spawnPowerUp(x: number, y: number): void {
 
 export function updateBullets(dt: number): void {
   for (const b of G.bullets) {
+    if (b.arm && b.arm > 0) b.arm -= dt;
     b.x += b.vx * dt;
     b.y += b.vy * dt;
     b.cx = b.x + b.w / 2;
@@ -131,25 +132,48 @@ export function updateEnemies(dt: number): void {
 
     if (e.type === 'boss') {
       updateBossEntity(e, dt);
+      // 直线激光：锁定玩家横坐标 → 蓄力闪烁 → 纵向光束（有 i-frames，可躲）
+      if (e.laserState === undefined) { e.laserState = 0; e.laserTimer = 420; }
+      if (e.laserState === 0) {
+        e.laserTimer = (e.laserTimer ?? 420) - dt;
+        if ((e.laserTimer ?? 0) <= 0 && e.entryTimer <= 0) {
+          e.laserState = 1;
+          e.laserTimer = 55;
+          e.laserX = G.player.x + G.player.w / 2;
+        }
+      } else if (e.laserState === 1) {
+        e.laserTimer = (e.laserTimer ?? 55) - dt;
+        if ((e.laserTimer ?? 0) <= 0) { e.laserState = 2; e.laserTimer = 42; }
+      } else {
+        e.laserTimer = (e.laserTimer ?? 42) - dt;
+        if (G.player.invincible <= 0 && !G.cheatInvincible && G.shieldTimer <= 0 &&
+            Math.abs(G.player.x + G.player.w / 2 - (e.laserX ?? -999)) < 22) {
+          playerHit();
+        }
+        if ((e.laserTimer ?? 0) <= 0) { e.laserState = 0; e.laserTimer = 420 + Math.random() * 160; }
+      }
       continue;
     }
 
+    // 还没完全进入屏幕的敌人加速进场（精英机等慢速机不再半截悬在顶端）
+    const boost = e.y < 0 ? 2.5 : 1;
+
     switch (e.movePattern) {
       case 'fall':
-        e.y += e.speed * dt;
+        e.y += boost * e.speed * dt;
         break;
       case 'sway':
         e.x = e.startX + Math.sin(e.movePhase + G.frameCount * 0.03) * e.moveAmp;
-        e.y += e.speed * dt;
+        e.y += boost * e.speed * dt;
         break;
       case 'horizontal':
-        e.x += e.speed * e.dirX * 0.8 * dt;
-        e.y += e.speed * 0.15 * dt;
+        e.x += boost * e.speed * e.dirX * 0.8 * dt;
+        e.y += boost * e.speed * 0.15 * dt;
         if (e.x < -e.w || e.x > G.canvasW + e.w) e.dirX *= -1;
         break;
       case 'zigzag':
-        e.x += Math.sin(G.frameCount * 0.06 + e.movePhase) * e.speed * 1.5 * dt;
-        e.y += e.speed * 0.7 * dt;
+        e.x += Math.sin(G.frameCount * 0.06 + e.movePhase) * boost * e.speed * 1.5 * dt;
+        e.y += boost * e.speed * 0.7 * dt;
         if (e.x < 0) e.x = 0;
         if (e.x > G.canvasW - e.w) e.x = G.canvasW - e.w;
         break;
@@ -229,6 +253,18 @@ export function updatePopups(dt: number): void {
 
 export function killEnemy(e: Enemy): void {
   G.score += e.score;
+
+  // 精英机坠毁：释放一圈弹幕（带出生保护，不贴脸秒杀）
+  if (e.type === 'elite') {
+    for (let i = 0; i < 14; i++) {
+      const a = (Math.PI * 2 / 14) * i + Math.random() * 0.2;
+      G.bullets.push({
+        x: e.cx - 3, y: e.cy - 3, w: 6, h: 6, cx: e.cx, cy: e.cy,
+        vx: Math.cos(a) * 2, vy: Math.sin(a) * 2, isPlayer: false, arm: 22,
+      });
+    }
+    spawnScorePopup(e.cx, e.cy - 18, '精英机坠落!', '#ff8844', 12);
+  }
 
   G.comboCount++;
   G.comboTimer = COMBO.window;
@@ -329,6 +365,7 @@ export function collideEnemyAttacks(): void {
 
   for (const b of G.bullets) {
     if (b.isPlayer) continue;
+    if (b.arm && b.arm > 0) continue;   // 出生保护期内的弹幕不造成伤害
     if (aabbHit(b, playerBox())) {
       b.y = -999;
       playerHit();
@@ -354,10 +391,14 @@ export function collidePowerUps(): void {
     if (aabbHit(box, pu)) {
       pu.y = -999;
       switch (pu.type) {
-        case 'doubleFire':
+        case 'doubleFire': {
+          // 叠加：已激活时再吃 → 火力等级提升（两层 = 五连发）
+          if (G.doubleFireTimer > 0) G.doubleFireLevel = Math.min(2, G.doubleFireLevel + 1);
+          else G.doubleFireLevel = 1;
           G.doubleFireTimer = POWERUP.doubleFire;
-          spawnScorePopup(pu.cx, pu.cy, '双倍火力!', '#4488ff', 12);
+          spawnScorePopup(pu.cx, pu.cy, G.doubleFireLevel >= 2 ? '五连火力!' : '双倍火力!', '#4488ff', 12);
           break;
+        }
         case 'shield':
           G.shieldTimer = POWERUP.shield;
           spawnScorePopup(pu.cx, pu.cy, '无敌护盾!', '#ffaa00', 12);
@@ -401,8 +442,13 @@ export function playerAutoFire(dt: number): void {
     const by = G.player.y;
     G.bullets.push({ x: bx - 2, y: by, w: 4, h: 8, cx: bx, cy: by + 4, vx: 0, vy: FIRE.bulletVy, isPlayer: true });
     if (G.doubleFireTimer > 0) {
+      // 一层 = 三连发；叠加两层 = 五连发（外层弹道略散）
       G.bullets.push({ x: bx - 12, y: by + 4, w: 4, h: 8, cx: bx - 10, cy: by + 8, vx: -FIRE.sideVx, vy: FIRE.sideVy, isPlayer: true });
       G.bullets.push({ x: bx + 8, y: by + 4, w: 4, h: 8, cx: bx + 10, cy: by + 8, vx: FIRE.sideVx, vy: FIRE.sideVy, isPlayer: true });
+      if (G.doubleFireLevel >= 2) {
+        G.bullets.push({ x: bx - 19, y: by + 8, w: 4, h: 8, cx: bx - 17, cy: by + 12, vx: -1.5, vy: FIRE.sideVy + 0.7, isPlayer: true });
+        G.bullets.push({ x: bx + 15, y: by + 8, w: 4, h: 8, cx: bx + 17, cy: by + 12, vx: 1.5, vy: FIRE.sideVy + 0.7, isPlayer: true });
+      }
     }
   }
 }

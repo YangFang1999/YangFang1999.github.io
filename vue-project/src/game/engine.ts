@@ -31,7 +31,7 @@ export class AirplaneGame {
 
   // 事件句柄（解绑用）
   private onKeyDown = (e: KeyboardEvent) => this.handleKeyDown(e);
-  private onKeyUp = (e: KeyboardEvent) => { G.keys.delete(e.key); };
+  private onKeyUp = (e: KeyboardEvent) => { G.keys.delete(e.code); };
   private onBlur = () => this.handleBlur();
   private onVisibility = () => { if (document.hidden) this.handleBlur(); };
   private onResize = () => this.handleResize();
@@ -104,21 +104,23 @@ export class AirplaneGame {
   // ============ 输入 ============
 
   private handleKeyDown(e: KeyboardEvent): void {
-    G.keys.add(e.key);
+    // 用 e.code（物理键位）判定，中文输入法 / 其他键盘布局下不会失效
+    const code = e.code;
+    G.keys.add(code);
 
-    if (e.key === 'Enter') {
+    if (code === 'Enter') {
       if (G.gameState === 'menu' || G.gameState === 'gameover') this.startGame();
     }
-    if (e.key === 'p' || e.key === 'P') {
+    if (code === 'KeyP') {
       this.togglePause();
     }
-    if (e.key === 'I' || e.key === 'i') {
+    if (code === 'KeyI') {
       G.cheatInvincible = !G.cheatInvincible;
     }
-    if (e.key === 'x' || e.key === 'X' || e.key === 'b' || e.key === 'B') {
+    if (code === 'KeyX' || code === 'KeyB') {
       this.useBomb();
     }
-    if (e.key === ' ' || ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+    if (code === 'Space' || ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(code)) {
       e.preventDefault();
     }
   }
@@ -241,6 +243,7 @@ export class AirplaneGame {
 
     if (G.player.invincible > 0) G.player.invincible -= dt;
     if (G.doubleFireTimer > 0) G.doubleFireTimer -= dt;
+    else G.doubleFireLevel = 1;
     if (G.shieldTimer > 0) G.shieldTimer -= dt;
     if (G.speedTimer > 0) G.speedTimer -= dt;
 
@@ -276,10 +279,10 @@ export class AirplaneGame {
       }
     } else {
       const k = G.keys;
-      if (k.has('ArrowLeft') || k.has('a') || k.has('A')) G.player.x -= spd * dt;
-      if (k.has('ArrowRight') || k.has('d') || k.has('D')) G.player.x += spd * dt;
-      if (k.has('ArrowUp') || k.has('w') || k.has('W')) G.player.y -= spd * dt;
-      if (k.has('ArrowDown') || k.has('s') || k.has('S')) G.player.y += spd * dt;
+      if (k.has('ArrowLeft') || k.has('KeyA')) G.player.x -= spd * dt;
+      if (k.has('ArrowRight') || k.has('KeyD')) G.player.x += spd * dt;
+      if (k.has('ArrowUp') || k.has('KeyW')) G.player.y -= spd * dt;
+      if (k.has('ArrowDown') || k.has('KeyS')) G.player.y += spd * dt;
     }
     G.player.x = Math.max(0, Math.min(G.canvasW - G.player.w, G.player.x));
     G.player.y = Math.max(0, Math.min(G.canvasH - G.player.h, G.player.y));

@@ -11,6 +11,7 @@ export interface Entity {
 export interface Bullet extends Entity {
   vx: number; vy: number;
   isPlayer: boolean;
+  arm?: number;   // 出生保护帧数（如精英机坠毁弹幕，防止贴脸秒杀）
 }
 
 export interface Enemy extends Entity {
@@ -33,6 +34,9 @@ export interface Enemy extends Entity {
   moveDirX?: number;
   moveDirY?: number;
   moveChangeTimer?: number;
+  laserTimer?: number;   // 直线激光：蓄力/发射倒计时
+  laserState?: number;   // 0 待机 1 蓄力 2 发射
+  laserX?: number;
   phase?: number;
   volleyToggle?: number;
   burstCounter?: number;
