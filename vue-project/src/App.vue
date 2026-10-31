@@ -337,6 +337,7 @@ const dprInfo = computed(() => Math.round((window.devicePixelRatio || 1) * 100) 
         v-for="(ic, i) in icons"
         :key="ic.id + '-' + refreshKey"
         class="absolute"
+        :data-icon="ic.id"
         :style="posStyle(ic.id, i)"
         @pointerdown="onIconPointerDown($event, ic.id)"
         @pointermove="onIconPointerMove"
