@@ -671,10 +671,7 @@ function closeMenu(): void {
   menuOpen.value = false;
 }
 
-function onPetContext(e: MouseEvent): void {
-  e.preventDefault();
-  e.stopPropagation();
-  if (flying.value) return;
+function openMenuAt(clientX: number, clientY: number): void {
   const el = petEl.value;
   if (!el) return;
   const rect = el.getBoundingClientRect();
@@ -682,12 +679,19 @@ function onPetContext(e: MouseEvent): void {
   // 贴近屏幕右/下边缘时翻到企鹅另一侧，避免溢出
   const offX = vw - 176 - rect.left < -10
     ? -172
-    : Math.max(-10, Math.min(e.clientX - rect.left, vw - 176 - rect.left));
+    : Math.max(-10, Math.min(clientX - rect.left, vw - 176 - rect.left));
   const offY = window.innerHeight - 216 - rect.top < -6
     ? -214
-    : Math.max(-6, Math.min(e.clientY - rect.top, window.innerHeight - 216 - rect.top));
+    : Math.max(-6, Math.min(clientY - rect.top, window.innerHeight - 216 - rect.top));
   menuPos.value = { x: offX, y: offY };
   menuOpen.value = true;
+}
+
+function onPetContext(e: MouseEvent): void {
+  e.preventDefault();
+  e.stopPropagation();
+  if (flying.value) return;
+  openMenuAt(e.clientX, e.clientY);
 }
 
 // ============ 拖拽（含速度采样、回收站、骑窗提示） ============
@@ -698,7 +702,14 @@ let downY = 0;
 let downAt = 0;
 let moved = false;
 let lastClickAt = 0;
+let longPressTimer: ReturnType<typeof setTimeout> | undefined;
+let longPressFired = false;
 const velBuf: Array<{ t: number; x: number; y: number }> = [];
+
+function clearLongPress(): void {
+  if (longPressTimer) clearTimeout(longPressTimer);
+  longPressTimer = undefined;
+}
 
 function wake(): void {
   lastActive = Date.now();
@@ -729,12 +740,21 @@ function onPointerDown(e: PointerEvent): void {
   moved = false;
   velBuf.length = 0;
   velBuf.push({ t: performance.now(), x: e.clientX, y: e.clientY });
+  // 触屏没有右键：按住 550ms 不动 → 弹出桌宠菜单
+  longPressFired = false;
+  clearLongPress();
+  longPressTimer = setTimeout(() => {
+    if (!dragging.value || moved || flying.value) return;
+    longPressFired = true;
+    openMenuAt(e.clientX, e.clientY);
+  }, 550);
 }
 
 function onPointerMove(e: PointerEvent): void {
   if (!dragging.value || !petEl.value) return;
   // 用按下坐标的距离判定是否拖拽（movementX 在触屏/合成事件上不可靠）
   if (Math.abs(e.clientX - downX) + Math.abs(e.clientY - downY) > 6) {
+    if (!moved) clearLongPress();       // 一旦判定为拖拽，取消长按菜单
     if (!moved && riding.value) detachRide();  // 从窗口上拎起来
     if (!moved) menuOpen.value = false;
     moved = true;
@@ -794,6 +814,7 @@ function dragVelocity(): { x: number; y: number } {
 function onPointerUp(e: PointerEvent): void {
   if (!dragging.value) return;
   dragging.value = false;
+  clearLongPress();
   try { petEl.value?.releasePointerCapture(e.pointerId); } catch { /* 已释放 */ }
   clearRideHint();
   setBinHot(false, document.querySelector<HTMLElement>('[data-icon="bin"]'));
@@ -829,27 +850,42 @@ function onPointerUp(e: PointerEvent): void {
   const quick = Date.now() - downAt < 350 && !moved;
   if (quick) {
     const now = Date.now();
-    if (riding.value && now - lastClickAt < 500) {
+    // 长按菜单刚弹开的手指抬起不算点击
+    if (longPressFired) {
+      longPressFired = false;
+    } else if (riding.value && now - lastClickAt < 500) {
       hopOffRide();
       lastClickAt = 0;
       return;
-    }
-    if (wasFloating && now - lastClickAt < 500) {
+    } else if (wasFloating && now - lastClickAt < 500) {
       goHome();
       lastClickAt = 0;
       return;
+    } else {
+      lastClickAt = now;
+      react();
     }
-    lastClickAt = now;
-    react();
   } else if (wasFloating) {
     showBubble();
   }
   schedule(1400);
 }
 
-// ============ 眼神跟随鼠标 ============
+// ============ 眼神跟随鼠标（rAF 节流：高频 mousemove 不再每事件做布局读取） ============
+let mouseRaf = 0;
+let lastMouseEvt: MouseEvent | null = null;
+
 function onMouseMove(e: MouseEvent): void {
   if (reducedMotion) return;
+  lastMouseEvt = e;
+  if (mouseRaf) return;
+  mouseRaf = requestAnimationFrame(() => {
+    mouseRaf = 0;
+    if (lastMouseEvt) processMouseMove(lastMouseEvt);
+  });
+}
+
+function processMouseMove(e: MouseEvent): void {
   const el = petEl.value;
   if (!el) return;
   const r = el.getBoundingClientRect();
@@ -871,6 +907,8 @@ function onResize(): void {
   vw = window.innerWidth;
   x.value = Math.max(4, Math.min(vw - 52, x.value));
   restBottom.value = Math.max(40, Math.min(window.innerHeight - 58, restBottom.value));
+  // 视口变化后菜单位置不再可靠，直接收起（与 Win98 行为一致）
+  menuOpen.value = false;
 }
 
 function onDocPointerDown(e: PointerEvent): void {
@@ -922,8 +960,10 @@ onUnmounted(() => {
   if (fishTimer) clearTimeout(fishTimer);
   if (heartTimer) clearTimeout(heartTimer);
   if (vitalsTimer) clearInterval(vitalsTimer);
+  clearLongPress();
   cancelAnimationFrame(flingRAF);
   cancelAnimationFrame(rideRAF);
+  cancelAnimationFrame(mouseRaf);
   clearRideHint();
   window.removeEventListener('resize', onResize);
   window.removeEventListener('mousemove', onMouseMove);

@@ -76,7 +76,12 @@ export class AirplaneGame {
   }
 
   useBomb(): void {
-    if (G.gameState !== 'playing' || G.bombCount <= 0) return;
+    if (G.gameState !== 'playing') return;
+    if (G.bombCount <= 0) {
+      // 没有炸弹也要有反馈，否则按 X 像是失灵
+      spawnScorePopup(G.player.x + G.player.w / 2, G.player.y - 14, '没有炸弹了!', '#ff6666', 12);
+      return;
+    }
     G.bombCount--;
 
     // 清除所有敌机子弹
@@ -158,7 +163,9 @@ export class AirplaneGame {
   private handleResize(): void {
     const vh = window.innerHeight;
     const vw = window.innerWidth;
-    const availH = Math.min(CANVAS.maxH, Math.max(CANVAS.minH, vh - CANVAS.vMargin));
+    // 窄屏（手机）上控制按钮在画布下方，需要多预留高度
+    const vMargin = vw < 640 ? CANVAS.vMargin + 60 : CANVAS.vMargin;
+    const availH = Math.min(CANVAS.maxH, Math.max(CANVAS.minH, vh - vMargin));
     const availW = Math.min(CANVAS.maxW, Math.max(CANVAS.minW, vw * CANVAS.widthRatio));
 
     let w: number, h: number;

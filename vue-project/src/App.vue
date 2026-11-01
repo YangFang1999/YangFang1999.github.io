@@ -4,12 +4,18 @@ import { useRouter, useRoute } from 'vue-router';
 import DesktopIcon from './components/DesktopIcon.vue';
 import Taskbar from './components/Taskbar.vue';
 import QQPet from './components/QQPet.vue';
+import FindDialog from './components/FindDialog.vue';
 import ScreenSaver from './views/ScreenSaver.vue';
 import { notes } from './data/notes';
 import { desktopTheme, THEMES } from './settings';
+import { loadAllArticles, sizeKB } from './data/articlesIndex';
 
 const router = useRouter();
 const route = useRoute();
+
+// ============ 全局搜索「查找：全部文件」 ============
+const findOpen = ref(false);
+const diskKB = ref(0);
 
 // ============ 系统属性对话框 ============
 const sysPropsOpen = ref(false);
@@ -26,6 +32,12 @@ const uaShort = computed(() => {
 function openSysProps(): void {
   ctxMenu.value = null;
   sysPropsOpen.value = true;
+  // 后台算一次全站文档磁盘占用（带缓存，只算一次）
+  void loadAllArticles().then(all => {
+    let total = 0;
+    for (const html of all.values()) total += sizeKB(html);
+    diskKB.value = total;
+  });
 }
 
 onMounted(() => {
@@ -74,7 +86,7 @@ const icons: IconDef[] = [
   { id: 'computer', label: '我的电脑', iconClass: 'fa fa-desktop', color: 'text-white', to: '/computer' },
   { id: 'docs', label: '我的文档', iconClass: 'fa fa-folder-open', color: 'text-yellow-400', to: '/all-notes' },
   { id: 'control', label: '控制面板', iconClass: 'fa fa-cog', color: 'text-pink-300', to: '/categories' },
-  { id: 'ie', label: 'Internet 浏览器', iconClass: 'fa fa-globe', color: 'text-blue-300', to: 'https://github.com' },
+  { id: 'ie', label: 'Internet 浏览器', iconClass: 'fa fa-globe', color: 'text-blue-300', to: 'https://github.com/YangFang1999' },
   { id: 'notepad', label: '记事本', iconClass: 'fa fa-pencil-square-o', color: 'text-white', to: '/notepad' },
   { id: 'airplane', label: '飞机大战', iconClass: 'fa fa-fighter-jet', color: 'text-yellow-300', to: '/airplane' },
   { id: 'survivor', label: '桌面保卫战', iconClass: 'fa fa-shield', color: 'text-red-300', to: '/survivors' },
@@ -187,6 +199,11 @@ function onRootClick(): void {
 
 function onRootKeydown(e: KeyboardEvent): void {
   if (e.key === 'Escape') closeCtxMenu();
+  // Ctrl+K 唤出全局查找
+  if (e.ctrlKey && (e.code === 'KeyK' || e.key === 'k')) {
+    e.preventDefault();
+    findOpen.value = !findOpen.value;
+  }
 }
 
 // ============ 窗口路由模拟 ============
@@ -246,7 +263,8 @@ watch(() => route.path, (newPath) => {
 
 const navigateTo = (path: string) => {
   if (path.startsWith('http')) {
-    window.open(path, '_blank');
+    // noopener：新标签页拿不到本站引用，也更防标签劫持
+    window.open(path, '_blank', 'noopener,noreferrer');
   } else {
     router.push(path);
   }
@@ -310,7 +328,7 @@ const showAlert = (message: string) => {
 
 // 桌面主题样式（注意：url() 里用双引号，避免 Tailwind 提取类名时被 \' 转义破坏）
 const rootBgClass = computed(() =>
-  desktopTheme.value === 'wallpaper' ? 'bg-[url("/wallpaper.jpg")] bg-cover bg-center' : ''
+  desktopTheme.value === 'wallpaper' ? 'bg-[url("/wallpaper.webp")] bg-cover bg-center' : ''
 );
 const rootBgStyle = computed((): Record<string, string> => {
   const t = desktopTheme.value;
@@ -390,6 +408,7 @@ const dprInfo = computed(() => Math.round((window.devicePixelRatio || 1) * 100) 
           <table class="w-full">
             <tbody>
               <tr><td class="py-[3px] text-gray-700 w-[84px]">内容</td><td>技术文章 {{ notes.length }} 篇 · 游戏 2 款 · 桌宠 1 只</td></tr>
+              <tr><td class="py-[3px] text-gray-700">磁盘 C:</td><td>文档 {{ notes.length }} 个 · 约 <b class="text-[#000080]">{{ diskKB }}</b> KB</td></tr>
               <tr><td class="py-[3px] text-gray-700">处理器</td><td>{{ uaShort }}</td></tr>
               <tr><td class="py-[3px] text-gray-700">显示</td><td>{{ screenInfo }} @ DPR {{ dprInfo }}</td></tr>
               <tr><td class="py-[3px] text-gray-700">访客</td><td>您是本机第 <b class="text-[#000080]">{{ visitCount }}</b> 次到访</td></tr>
@@ -413,6 +432,9 @@ const dprInfo = computed(() => Math.round((window.devicePixelRatio || 1) * 100) 
       </router-view>
     </div>
 
+    <!-- 全局搜索：查找全部文件（Ctrl+K / 开始菜单） -->
+    <FindDialog :open="findOpen" @close="findOpen = false" @navigate="navigateTo" />
+
     <!-- 桌宠：QQ 企鹅（走在任务栏上沿） -->
     <QQPet />
 
@@ -424,6 +446,7 @@ const dprInfo = computed(() => Math.round((window.devicePixelRatio || 1) * 100) 
       :openWindows="openWindows"
       @activate-window="activateWindow"
       @navigate="navigateTo"
+      @open-find="findOpen = true"
       @shutdown="handleShutdown"
     />
 

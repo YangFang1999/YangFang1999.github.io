@@ -11,6 +11,7 @@ const categories = ref([
   { id: 'spring', title: 'Spring', icon: 'fa fa-leaf', color: 'text-green-500' },
   { id: 'database', title: 'Database', icon: 'fa fa-database', color: 'text-blue-500' },
   { id: 'frontend', title: 'Frontend', icon: 'fa fa-code', color: 'text-pink-500' },
+  { id: 'vue', title: 'Vue', icon: 'fa fa-diamond', color: 'text-emerald-400' },
   { id: 'devops', title: 'DevOps', icon: 'fa fa-server', color: 'text-purple-500' },
 ]);
 

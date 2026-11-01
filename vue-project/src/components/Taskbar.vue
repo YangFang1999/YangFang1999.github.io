@@ -90,6 +90,11 @@ const handleMenuNavigate = (path: string) => {
   emit('navigate', path);
 };
 
+const handleFind = () => {
+  isStartMenuOpen.value = false;
+  emit('open-find');
+};
+
 const closeStartMenuOutside = (e: Event) => {
   const target = e.target as Node;
   const startMenu = document.getElementById('start-menu');
@@ -108,6 +113,7 @@ const closeStartMenuOutside = (e: Event) => {
 const emit = defineEmits<{
   (e: 'activate-window', id: string): void;
   (e: 'navigate', path: string): void;
+  (e: 'open-find'): void;
   (e: 'shutdown'): void;
 }>();
 
@@ -144,6 +150,14 @@ defineProps<{
           <div class="px-3 py-1.5 flex items-center gap-2.5 cursor-pointer hover:bg-[#000080] hover:text-white transition-colors" @click="handleMenuNavigate('/categories')">
             <i class="fa fa-cog w-4 text-center"></i>
             <span>控制面板</span>
+          </div>
+          <div class="px-3 py-1.5 flex items-center gap-2.5 cursor-pointer hover:bg-[#000080] hover:text-white transition-colors" @click="handleFind">
+            <i class="fa fa-search w-4 text-center"></i>
+            <span>查找(F)...</span>
+          </div>
+          <div class="px-3 py-1.5 flex items-center gap-2.5 cursor-pointer text-[10px] text-[#808080] px-3 pt-0 pb-1" @click.stop="handleFind">
+            <i class="fa fa-keyboard-o w-4 text-center"></i>
+            <span>Ctrl+K</span>
           </div>
           <hr class="border-t-[#808080] border-b-[#ffffff] my-1.5 mx-1">
           <div class="px-3 py-1.5 flex items-center gap-2.5 cursor-pointer hover:bg-[#000080] hover:text-white transition-colors" @click="handleMenuNavigate('/airplane')">

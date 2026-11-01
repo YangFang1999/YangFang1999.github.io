@@ -7,6 +7,8 @@ const props = defineProps<{
   isOpen: boolean;
   isActive: boolean;
   defaultMaximized?: boolean;
+  /** 固定尺寸窗口（如游戏）：禁止还原/最大化切换，杜绝小窗口下内容被遮挡 */
+  fixedSize?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -102,11 +104,11 @@ const menus: { id: string; label: string; items: MenuItem[] }[] = [
 ];
 
 const systemMenuItems = computed<MenuItem[]>(() => [
-  { label: '还原(<u>R</u>)', disabled: !isMaximized.value, action: () => { closeSystemMenu(); isMaximized.value = false; } },
+  { label: '还原(<u>R</u>)', disabled: !isMaximized.value || !!props.fixedSize, action: () => { closeSystemMenu(); isMaximized.value = false; } },
   { label: '移动(<u>M</u>)', disabled: true },
   { label: '大小(<u>S</u>)', disabled: true },
   { label: '最小化(<u>N</u>)', action: () => { closeSystemMenu(); emit('minimize'); } },
-  { label: '最大化(<u>X</u>)', disabled: isMaximized.value, action: () => { closeSystemMenu(); isMaximized.value = true; } },
+  { label: '最大化(<u>X</u>)', disabled: isMaximized.value || !!props.fixedSize, action: () => { closeSystemMenu(); isMaximized.value = true; } },
   { type: 'separator' as const },
   { label: '关闭(<u>C</u>)', shortcut: 'Alt+F4', action: () => { closeSystemMenu(); emit('close'); } },
 ]);
@@ -138,6 +140,7 @@ const toggleSystemMenu = () => {
 };
 
 const handleMaximize = () => {
+  if (props.fixedSize) return;
   isMaximized.value = !isMaximized.value;
 };
 
@@ -265,7 +268,7 @@ onUnmounted(() => {
   <div
     v-if="isOpen && !isMinimized"
     ref="windowEl"
-    class="win-window fixed bg-[#c0c0c0] flex flex-col z-20 border-2"
+    class="win-window fixed bg-[#c0c0c0] flex flex-col z-20 border-2 pointer-events-auto"
     :class="isActive ? 'border-t-[#ffffff] border-l-[#ffffff] border-r-[#0a0a0a] border-b-[#0a0a0a]' : ''"
     :style="windowStyle"
     @mousedown="emit('focus')"
@@ -307,8 +310,9 @@ onUnmounted(() => {
           <div class="w-[8px] h-[2px] bg-black mb-[2px]"></div>
         </button>
 
-        <!-- Maximize / Restore -->
+        <!-- Maximize / Restore（固定尺寸窗口不显示） -->
         <button
+          v-if="!fixedSize"
           @click.stop="handleMaximize"
           class="win-ctrl-btn w-[16px] h-[14px] bg-[#c0c0c0] shadow-[inset_-1px_-1px_#0a0a0a,inset_1px_1px_#ffffff,inset_-2px_-2px_#808080,inset_2px_2px_#dfdfdf] flex items-center justify-center active:shadow-[inset_-1px_-1px_#ffffff,inset_1px_1px_#0a0a0a] cursor-pointer border-none p-0 relative"
           :title="isMaximized ? '还原' : '最大化'"

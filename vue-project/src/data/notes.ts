@@ -21,4 +21,8 @@ export const notes: Note[] = [
   { id: 'javascript-es6', title: 'JavaScript ES6+ 新特性', date: '2024-05-01', icon: 'fa fa-file-code-o', path: '/notes/javascript-es6', category: 'frontend' },
   { id: 'design-patterns', title: '设计模式入门', date: '2024-05-15', icon: 'fa fa-puzzle-piece', path: '/notes/design-patterns', category: 'java' },
   { id: 'redis-basics', title: 'Redis 基础入门', date: '2024-05-28', icon: 'fa fa-database', path: '/notes/redis-basics', category: 'database' },
+  { id: 'vue-reactivity', title: 'Vue 3 响应式系统详解', date: '2024-06-10', icon: 'fa fa-bolt', path: '/notes/vue-reactivity', category: 'vue' },
+  { id: 'vue-composition', title: '组合式 API 实战', date: '2024-06-18', icon: 'fa fa-puzzle-piece', path: '/notes/vue-composition', category: 'vue' },
+  { id: 'vue-router4', title: 'Vue Router 4 完全指南', date: '2024-06-25', icon: 'fa fa-map-signs', path: '/notes/vue-router4', category: 'vue' },
+  { id: 'pinia-intro', title: 'Pinia 状态管理入门', date: '2024-07-02', icon: 'fa fa-cubes', path: '/notes/pinia-intro', category: 'vue' },
 ];

@@ -1,33 +1,19 @@
 <script setup lang="ts">
-import { ref, computed, watch, nextTick } from 'vue';
+import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import Prism from 'prismjs';
 import 'prismjs/themes/prism.css';
 import 'prismjs/components/prism-java';
 import 'prismjs/components/prism-bash';
 import 'prismjs/components/prism-sql';
+import 'prismjs/components/prism-typescript';
 
 import Window from '../components/Window.vue';
 import { notes } from '../data/notes';
+import { loadArticle } from '../data/articlesIndex';
 
 const route = useRoute();
 const router = useRouter();
-
-// 每篇文章一个独立 chunk，只在访问对应文章时才下载
-const articleLoaders: Record<string, () => Promise<{ default: string }>> = {
-  'hello-world': () => import('../data/articles/hello-world'),
-  'idea-shortcuts': () => import('../data/articles/idea-shortcuts'),
-  'java-collections-framework': () => import('../data/articles/java-collections-framework'),
-  'vue-migration': () => import('../data/articles/vue-migration'),
-  'spring-boot-guide': () => import('../data/articles/spring-boot-guide'),
-  'mysql-basics': () => import('../data/articles/mysql-basics'),
-  'git-basics': () => import('../data/articles/git-basics'),
-  'docker-intro': () => import('../data/articles/docker-intro'),
-  'linux-commands': () => import('../data/articles/linux-commands'),
-  'javascript-es6': () => import('../data/articles/javascript-es6'),
-  'design-patterns': () => import('../data/articles/design-patterns'),
-  'redis-basics': () => import('../data/articles/redis-basics'),
-};
 
 const categoryNames: Record<string, string> = {
   java: 'Java',
@@ -35,6 +21,7 @@ const categoryNames: Record<string, string> = {
   database: 'Database',
   frontend: 'Frontend',
   devops: 'DevOps',
+  vue: 'Vue',
 };
 
 const noteId = computed(() => route.params.id as string);
@@ -55,30 +42,136 @@ const nextNote = computed(() =>
 const charCount = computed(() => noteContent.value.replace(/<[^>]*>/g, '').replace(/\s/g, '').length);
 const readMinutes = computed(() => Math.max(1, Math.round(charCount.value / 400)));
 
+// ============ 阅读体验：复制按钮 / 目录 / 进度条 ============
+interface TocItem { id: string; text: string; level: number }
+const headings = ref<TocItem[]>([]);
+const activeHeading = ref('');
+const progress = ref(0);
+// 目录默认收起：展开态会遮挡文章（尤其窗口最大化时），用户点标签自行展开；
+// 切换文章时保持当前收起/展开选择，不做重置
+const tocCollapsed = ref(true);
+let scrollerEl: HTMLElement | null = null;
+
+function copyText(text: string): Promise<void> {
+  if (navigator.clipboard?.writeText) return navigator.clipboard.writeText(text);
+  return new Promise((resolve, reject) => {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try {
+      document.execCommand('copy') ? resolve() : reject(new Error('copy failed'));
+    } catch (err) {
+      reject(err as Error);
+    } finally {
+      ta.remove();
+    }
+  });
+}
+
+// 给每个代码块包一层并挂 Win98 风格"复制"按钮（v-html 重渲染后需重新装饰）
+function decorateCode(): void {
+  rootEl.value?.querySelectorAll('pre').forEach(pre => {
+    const parent = pre.parentNode as HTMLElement | null;
+    if (!parent || parent.classList.contains('code-wrap')) return;
+    const wrap = document.createElement('div');
+    wrap.className = 'code-wrap';
+    parent.insertBefore(wrap, pre);
+    wrap.appendChild(pre);
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'code-copy';
+    btn.textContent = '复制';
+    btn.addEventListener('click', () => {
+      const code = pre.querySelector('code')?.textContent ?? pre.textContent ?? '';
+      copyText(code).then(() => {
+        btn.textContent = '已复制 ✓';
+        btn.classList.add('ok');
+        setTimeout(() => { btn.textContent = '复制'; btn.classList.remove('ok'); }, 1600);
+      }).catch(() => { btn.textContent = '复制失败'; });
+    });
+    wrap.appendChild(btn);
+  });
+}
+
+// 从渲染后的 HTML 抽取 h2/h3 生成目录
+function extractToc(): void {
+  const article = rootEl.value?.querySelector('.note-article');
+  const hs = article ? Array.from(article.querySelectorAll('h2, h3')) : [];
+  headings.value = hs.map((h, i) => {
+    if (!h.id) h.id = `sec-${noteId.value}-${i}`;
+    return { id: h.id, text: (h.textContent ?? '').trim(), level: h.tagName === 'H3' ? 3 : 2 };
+  }).filter(h => h.text.length > 0);
+  // 默认收起（用户可自行展开）；切换文章时保留用户当前的收起/展开选择
+}
+
+function tocClick(h: TocItem): void {
+  const el = document.getElementById(h.id);
+  if (!el || !scrollerEl) return;
+  const scRect = scrollerEl.getBoundingClientRect();
+  const top = el.getBoundingClientRect().top - scRect.top + scrollerEl.scrollTop - 10;
+  scrollerEl.scrollTo({ top, behavior: 'smooth' });
+}
+
+// 滚动容器（.win-content）：阅读进度 + 当前章节高亮
+function updateScrollState(): void {
+  const sc = scrollerEl;
+  if (!sc) return;
+  const max = sc.scrollHeight - sc.clientHeight;
+  progress.value = max > 4 ? Math.min(1, Math.max(0, sc.scrollTop / max)) : 1;
+  const scRect = sc.getBoundingClientRect();
+  let cur = '';
+  for (const h of headings.value) {
+    const el = document.getElementById(h.id);
+    if (!el) continue;
+    if (el.getBoundingClientRect().top - scRect.top < 96) cur = h.id;
+    else break;
+  }
+  activeHeading.value = cur;
+}
+
+function attachScroller(): void {
+  detachScroller();
+  scrollerEl = (rootEl.value?.closest('.win-content') as HTMLElement | null) ?? null;
+  scrollerEl?.addEventListener('scroll', updateScrollState, { passive: true });
+  updateScrollState();
+}
+
+function detachScroller(): void {
+  scrollerEl?.removeEventListener('scroll', updateScrollState);
+  scrollerEl = null;
+}
+
 const scrollToTop = () => {
-  const scroller = rootEl.value?.closest('.win-content');
-  scroller?.scrollTo({ top: 0 });
+  scrollerEl?.scrollTo({ top: 0 });
 };
 
 const loadNote = async () => {
   const current = note.value;
-  if (!current || !articleLoaders[current.id]) {
+  if (!current) {
     noteContent.value = '';
     isLoading.value = false;
     return;
   }
   isLoading.value = true;
-  const mod = await articleLoaders[current.id]();
-  noteContent.value = mod.default;
+  const html = await loadArticle(current.id);
+  noteContent.value = html;
   isLoading.value = false;
   await nextTick();
   if (rootEl.value) {
     Prism.highlightAllUnder(rootEl.value);
+    decorateCode();
+    extractToc();
   }
+  attachScroller();
   scrollToTop();
 };
 
 watch(noteId, loadNote, { immediate: true });
+onMounted(attachScroller);
+onUnmounted(detachScroller);
 
 const goNote = (id?: string) => {
   if (id) router.push(`/notes/${id}`);
@@ -158,6 +251,36 @@ const goNote = (id?: string) => {
       </template>
     </div>
   </Window>
+
+  <!-- 阅读进度条 + 悬浮目录：Teleport 到 body（Window 自带 translate transform 会劫持 fixed 定位）。
+       注意：Teleport 使本组件变为多根组件，App.vue 路由层的 pointer-events-auto 不再透传——
+       该类已在 Window.vue 根元素上内置，勿移除，否则整个文章窗口会点击穿透。 -->
+  <Teleport to="body">
+    <div v-if="note && !isLoading" class="read-progress" aria-hidden="true">
+      <div class="read-progress-fill" :style="{ width: (progress * 100).toFixed(1) + '%' }"></div>
+    </div>
+    <div
+      v-if="note && !isLoading && headings.length >= 3"
+      class="read-toc"
+      :class="{ collapsed: tocCollapsed }"
+    >
+      <button type="button" class="read-toc-head" @click="tocCollapsed = !tocCollapsed">
+        <i class="fa fa-list-ul"></i>
+        <span>目录</span>
+        <span class="read-toc-count">{{ headings.length }}</span>
+        <i class="fa fa-caret-square-o-right toggle"></i>
+      </button>
+      <ul v-show="!tocCollapsed">
+        <li
+          v-for="h in headings"
+          :key="h.id"
+          :class="[h.level === 3 ? 'sub' : '', { active: activeHeading === h.id }]"
+        >
+          <button type="button" @click="tocClick(h)">{{ h.text }}</button>
+        </li>
+      </ul>
+    </div>
+  </Teleport>
 </template>
 
 <style>
@@ -257,5 +380,134 @@ const goNote = (id?: string) => {
   border-top: 1px solid #808080;
   border-bottom: 1px solid #ffffff;
   margin: 1.5em 0;
+}
+
+/* ============ 阅读体验：复制按钮 / 目录 / 进度条（Teleport 到 body，全局样式） ============ */
+/* 顶部阅读进度条：Win98 分段蓝色块 */
+.read-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 7px;
+  background: #ffffff;
+  border-bottom: 1px solid #808080;
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.25);
+  z-index: 45;
+  pointer-events: none;
+}
+.read-progress-fill {
+  height: 100%;
+  background: repeating-linear-gradient(90deg, #000080 0 9px, #c0c0c0 9px 11px);
+  transition: width 0.12s linear;
+}
+
+/* 悬浮目录：右侧迷你 Win98 面板 */
+.read-toc {
+  position: fixed;
+  top: 66px;
+  right: 10px;
+  width: 216px;
+  max-height: 64vh;
+  display: flex;
+  flex-direction: column;
+  background: #c0c0c0;
+  border: 2px solid;
+  border-color: #ffffff #0a0a0a #0a0a0a #ffffff;
+  box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.4);
+  z-index: 45;
+  font-family: 'MS Sans Serif', Tahoma, 'Microsoft YaHei', sans-serif;
+}
+.read-toc.collapsed { max-height: none; }
+.read-toc-head {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  width: 100%;
+  border: none;
+  background: #c0c0c0;
+  padding: 4px 7px;
+  font-size: 11px;
+  font-weight: bold;
+  color: #000080;
+  cursor: pointer;
+  text-align: left;
+  border-bottom: 1px solid #808080;
+  box-shadow: inset 0 1px 0 #ffffff;
+}
+.read-toc.collapsed .read-toc-head { border-bottom-color: transparent; box-shadow: none; }
+.read-toc-head .read-toc-count {
+  margin-left: auto;
+  font-weight: normal;
+  color: #555;
+  font-size: 10px;
+}
+.read-toc-head .toggle { color: #555; transition: transform 0.15s; }
+.read-toc.collapsed .toggle { transform: rotate(180deg); }
+.read-toc ul {
+  list-style: none;
+  margin: 3px;
+  padding: 3px;
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid;
+  border-color: #808080 #dfdfdf #dfdfdf #808080;
+}
+.read-toc li button {
+  display: block;
+  width: 100%;
+  border: none;
+  background: transparent;
+  text-align: left;
+  font-size: 11px;
+  color: #1a1a1a;
+  padding: 3px 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.read-toc li.sub button { padding-left: 20px; color: #555; }
+.read-toc li button:hover { background: #000080; color: #fff; }
+.read-toc li.active button {
+  background: #000080;
+  color: #fff;
+  font-weight: bold;
+}
+@media (max-width: 899px) {
+  .read-toc { display: none; }
+}
+
+/* 代码块：相对容器 + 复制按钮（悬停浮现，触屏常显） */
+.note-article .code-wrap,
+.note-article pre.code-wrap {
+  position: relative;
+}
+.note-article .code-wrap pre { margin: 0 0 1em; }
+.code-copy {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  border: 1px solid;
+  border-color: #ffffff #0a0a0a #0a0a0a #ffffff;
+  box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #ffffff, inset -2px -2px #808080, inset 2px 2px #dfdfdf;
+  background: #c0c0c0;
+  color: #000;
+  font: 10px 'MS Sans Serif', Tahoma, 'Microsoft YaHei', sans-serif;
+  padding: 2px 7px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.12s;
+  z-index: 2;
+}
+.code-wrap:hover .code-copy,
+.code-copy:focus-visible { opacity: 1; }
+.code-copy:active {
+  border-color: #0a0a0a #ffffff #ffffff #0a0a0a;
+  box-shadow: inset -1px -1px #ffffff, inset 1px 1px #0a0a0a;
+}
+.code-copy.ok { color: #008000; font-weight: bold; }
+@media (hover: none) {
+  .code-copy { opacity: 1; }
 }
 </style>
