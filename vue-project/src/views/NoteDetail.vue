@@ -9,6 +9,7 @@ import 'prismjs/components/prism-sql';
 import 'prismjs/components/prism-typescript';
 
 import Window from '../components/Window.vue';
+import ReadComments from '../components/ReadComments.vue';
 import { notes } from '../data/notes';
 import { loadArticle } from '../data/articlesIndex';
 
@@ -51,6 +52,8 @@ const progress = ref(0);
 // 目录默认收起：展开态会遮挡文章（尤其窗口最大化时），用户点标签自行展开；
 // 切换文章时保持当前收起/展开选择，不做重置
 const tocCollapsed = ref(true);
+// 窗口最小化时把 Teleport 到 body 的悬浮目录/进度条一起藏起来，任务栏恢复时再显示
+const overlayOn = ref(true);
 let scrollerEl: HTMLElement | null = null;
 
 function copyText(text: string): Promise<void> {
@@ -149,6 +152,9 @@ const scrollToTop = () => {
   scrollerEl?.scrollTo({ top: 0 });
 };
 
+// 连点上一篇/下一篇时旧的异步加载结果按序号丢弃
+let loadSeq = 0;
+
 const loadNote = async () => {
   const current = note.value;
   if (!current) {
@@ -156,8 +162,10 @@ const loadNote = async () => {
     isLoading.value = false;
     return;
   }
+  const mySeq = ++loadSeq;
   isLoading.value = true;
   const html = await loadArticle(current.id);
+  if (mySeq !== loadSeq) return; // 快速连点上一篇/下一篇时丢弃过期结果
   noteContent.value = html;
   isLoading.value = false;
   await nextTick();
@@ -186,6 +194,8 @@ const goNote = (id?: string) => {
     isOpen
     isActive
     @close="router.push('/all-notes')"
+    @minimize="overlayOn = false"
+    @restore="overlayOn = true"
   >
     <div ref="rootEl">
       <!-- 文章未找到 -->
@@ -257,11 +267,11 @@ const goNote = (id?: string) => {
        注意：Teleport 使本组件变为多根组件，App.vue 路由层的 pointer-events-auto 不再透传——
        该类已在 Window.vue 根元素上内置，勿移除，否则整个文章窗口会点击穿透。 -->
   <Teleport to="body">
-    <div v-if="note && !isLoading" class="read-progress" aria-hidden="true">
+    <div v-if="overlayOn && note && !isLoading" class="read-progress" aria-hidden="true">
       <div class="read-progress-fill" :style="{ width: (progress * 100).toFixed(1) + '%' }"></div>
     </div>
     <div
-      v-if="note && !isLoading && headings.length >= 3"
+      v-if="overlayOn && note && !isLoading && headings.length >= 3"
       class="read-toc"
       :class="{ collapsed: tocCollapsed }"
     >
@@ -281,6 +291,8 @@ const goNote = (id?: string) => {
         </li>
       </ul>
     </div>
+    <!-- 评论面板：Giscus（GitHub Discussions），右侧浮动、可展开滚动 -->
+    <ReadComments v-if="overlayOn && note && !isLoading" :article-id="note?.id ?? ''" />
   </Teleport>
 </template>
 

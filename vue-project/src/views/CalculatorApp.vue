@@ -152,6 +152,9 @@ function inputNegate() {
 }
 
 function handleKeyDown(e: KeyboardEvent) {
+  // 焦点在输入框/下拉框时（如 Ctrl+K 查找对话框）不响应计算器键盘
+  const t = e.target as HTMLElement | null;
+  if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable)) return;
   if (e.key >= '0' && e.key <= '9') inputDigit(e.key);
   else if (e.key === '.') inputDecimal();
   else if (e.key === '+') inputOperator('+');

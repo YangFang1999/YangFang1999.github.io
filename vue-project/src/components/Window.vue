@@ -16,6 +16,7 @@ const emit = defineEmits<{
   (e: 'minimize'): void;
   (e: 'maximize'): void;
   (e: 'focus'): void;
+  (e: 'restore'): void;
 }>();
 
 const activeMenu = ref<string | null>(null);
@@ -35,8 +36,17 @@ let dragOrigTop = 0;
 watch(() => props.isActive, (active) => {
   if (active && isMinimized.value) {
     isMinimized.value = false;
+    emit('restore');
   }
 });
+
+// 任务栏点击时 App.vue 会广播 win-restore：最小化的窗口弹回并通知内容层（如悬浮目录）
+const onWinRestore = () => {
+  if (isMinimized.value) {
+    isMinimized.value = false;
+    emit('restore');
+  }
+};
 
 interface MenuItem {
   type?: 'separator';
@@ -98,7 +108,7 @@ const menus: { id: string; label: string; items: MenuItem[] }[] = [
     items: [
       { label: '帮助主题(<u>H</u>)', disabled: true },
       { type: 'separator' },
-      { label: '关于本程序(<u>A</u>)...', action: () => { closeMenu(); alert('YF Blog v2.0\nWindows 98 Edition\n基于 Vue 3 + TypeScript + Vite\n\n© 2024 YF. All rights reserved.'); } },
+      { label: '关于本程序(<u>A</u>)...', action: () => { closeMenu(); alert('YF Blog v2.2\nWindows 98 Edition\n基于 Vue 3 + TypeScript + Vite\n\n© 2024 YF. All rights reserved.'); } },
     ]
   },
 ];
@@ -256,11 +266,13 @@ onMounted(() => {
   }
   document.addEventListener('click', handleClickOutside, true);
   document.addEventListener('keydown', handleKeydown);
+  window.addEventListener('win-restore', onWinRestore);
 });
 
 onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside, true);
   document.removeEventListener('keydown', handleKeydown);
+  window.removeEventListener('win-restore', onWinRestore);
 });
 </script>
 

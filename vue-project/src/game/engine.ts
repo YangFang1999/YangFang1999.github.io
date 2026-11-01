@@ -109,6 +109,9 @@ export class AirplaneGame {
   // ============ 输入 ============
 
   private handleKeyDown(e: KeyboardEvent): void {
+    // 焦点在输入框/下拉框时（如 Ctrl+K 查找对话框）不响应游戏快捷键
+    const t = e.target as HTMLElement | null;
+    if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable)) return;
     // 用 e.code（物理键位）判定，中文输入法 / 其他键盘布局下不会失效
     const code = e.code;
     G.keys.add(code);

@@ -50,7 +50,7 @@ function enterC(): void {
 }
 
 const openPath = (path: string) => {
-  if (path.startsWith('http')) window.open(path, '_blank');
+  if (path.startsWith('http')) window.open(path, '_blank', 'noopener,noreferrer');
   else router.push(path);
 };
 

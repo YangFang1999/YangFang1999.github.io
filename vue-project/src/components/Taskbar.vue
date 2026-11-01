@@ -155,7 +155,7 @@ defineProps<{
             <i class="fa fa-search w-4 text-center"></i>
             <span>查找(F)...</span>
           </div>
-          <div class="px-3 py-1.5 flex items-center gap-2.5 cursor-pointer text-[10px] text-[#808080] px-3 pt-0 pb-1" @click.stop="handleFind">
+          <div class="px-3 py-1.5 flex items-center gap-2.5 cursor-pointer text-[10px] text-[#808080] pt-0 pb-1" @click.stop="handleFind">
             <i class="fa fa-keyboard-o w-4 text-center"></i>
             <span>Ctrl+K</span>
           </div>
@@ -189,7 +189,7 @@ defineProps<{
             <span>打字练习</span>
           </div>
           <hr class="border-t-[#808080] border-b-[#ffffff] my-1.5 mx-1">
-          <div class="px-3 py-1.5 flex items-center gap-2.5 cursor-pointer hover:bg-[#000080] hover:text-white transition-colors" @click="handleMenuNavigate('https://github.com')">
+          <div class="px-3 py-1.5 flex items-center gap-2.5 cursor-pointer hover:bg-[#000080] hover:text-white transition-colors" @click="handleMenuNavigate('https://github.com/YangFang1999')">
             <i class="fa fa-globe w-4 text-center"></i>
             <span>Internet 浏览器</span>
           </div>

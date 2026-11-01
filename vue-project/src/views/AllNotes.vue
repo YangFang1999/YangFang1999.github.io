@@ -3,6 +3,7 @@ import { ref, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import Window from '../components/Window.vue';
 import { notes } from '../data/notes';
+import { categoryNames } from '../data/articlesIndex';
 
 const router = useRouter();
 const route = useRoute();
@@ -24,7 +25,7 @@ const filteredNotes = computed(() => {
 
 const currentPath = computed(() => {
   if (currentCategory.value) {
-    const catName = currentCategory.value;
+    const catName = categoryNames[currentCategory.value] ?? currentCategory.value;
     return `C:\\我的文档\\${catName}\\`;
   }
   return `C:\\我的文档\\文章`;

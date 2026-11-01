@@ -60,6 +60,17 @@ const BIN_PANIC_QUOTES = ['不要丢下我！！', '啊啊啊别扔掉我！'];
 const BIN_ESCAPE_QUOTES = ['吓死我了…', '好险好险…', '回收站是我一生的噩梦'];
 const WAKE_QUOTES = ['唔……醒了醒了', '干嘛呀，人家睡着呢'];
 
+// 玩法说明内容（右键菜单「玩法说明」打开的帮助对话框）
+const PET_TIPS = [
+  { icon: 'fa fa-hand-pointer-o', title: '单击我', desc: '蹦一下，还会跟你搭话。我的眼神会一直跟着鼠标走，凑近了我会歪头盯着你看。' },
+  { icon: 'fa fa-arrows', title: '按住拖动', desc: '拎着我满桌面走，松手落在哪儿就住在哪儿（悬浮模式）；双击悬浮的我，送我回任务栏。' },
+  { icon: 'fa fa-rocket', title: '快速甩出去', desc: '拖住我快速一甩 = 抛掷！惯性飞行、撞墙弹地，摔狠了会冒星星发晕；飞行途中点我一下能把我接住。' },
+  { icon: 'fa fa-window-maximize', title: '骑在窗口上', desc: '把我悬到任意窗口标题栏附近松手，我会跳上去坐着；拖动窗口我会跟着走，甩得太猛会被甩下来。' },
+  { icon: 'fa fa-trash-o', title: '离回收站远点', desc: '把我拖到回收站上方……我会拼命挣扎。松手后一溜烟逃回任务栏，吓死我了。' },
+  { icon: 'fa fa-cutlery', title: '投喂与摸头', desc: '右键（触屏长按）打开菜单：喂小鱼干、摸摸头、哄睡觉。心情和饱食度会随时间下降，离线也会饿，记得常回来看看。' },
+  { icon: 'fa fa-bed', title: '冷落我试试', desc: '90 秒没互动我就地打瞌睡；被吵醒还会嘀咕两句。' },
+];
+
 // 情境感知台词：根据当前打开的应用换台词
 const APP_QUOTES: Array<[RegExp, string[]]> = [
   [/^\/airplane/, ['需要僚机吗？', '可别被打下来呀！', '人家也会飞哦～']],
@@ -142,6 +153,7 @@ const menuOpen = ref(false);
 const menuPos = ref({ x: 0, y: 0 });
 const fishVisible = ref(false);
 const heartList = ref<number[]>([]);
+const helpOpen = ref(false);
 
 const petEl = ref<HTMLElement | null>(null);
 
@@ -155,6 +167,7 @@ let vw = window.innerWidth;
 let lastActive = Date.now();
 let lastVitalAt = Date.now();
 let lastPatAt = 0;
+let hintLockUntil = 0;
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 const isFloating = (): boolean => restBottom.value > 70;
@@ -249,6 +262,7 @@ function say(text: string): void {
 
 function showBubble(): void {
   if (sleeping.value) return;
+  if (Date.now() < hintLockUntil) return; // 首次见面提示气泡展示期间，别被闲聊顶掉
   // 情境优先：当前应用有专属台词就大概率说它
   const ctx = APP_QUOTES.find(([re]) => re.test(route.path));
   if (ctx && Math.random() < 0.6) { say(pick(ctx[1])); return; }
@@ -667,6 +681,12 @@ function doGoHome(): void {
   goHome();
 }
 
+// ============ 玩法说明 ============
+function openHelp(): void {
+  closeMenu();
+  helpOpen.value = true;
+}
+
 function closeMenu(): void {
   menuOpen.value = false;
 }
@@ -918,7 +938,10 @@ function onDocPointerDown(e: PointerEvent): void {
 }
 
 function onDocKeydown(e: KeyboardEvent): void {
-  if (e.key === 'Escape') closeMenu();
+  if (e.key === 'Escape') {
+    if (helpOpen.value) { helpOpen.value = false; return; }
+    closeMenu();
+  }
 }
 
 function onVisChange(): void {
@@ -944,6 +967,16 @@ onMounted(() => {
   if (isFloating()) showBubble();
   schedule(1800);
   vitalsTimer = setInterval(updateVitals, 20000);
+  // 新用户首次见面：提示右键有菜单（仅一次，期间锁定闲聊气泡防顶掉）
+  try {
+    if (!localStorage.getItem('pet-hint-shown')) {
+      localStorage.setItem('pet-hint-shown', '1');
+      setTimeout(() => {
+        hintLockUntil = Date.now() + 3400;
+        say('右键我可以打开菜单，里面藏着全部隐藏玩法哦～');
+      }, 2600);
+    }
+  } catch { /* 忽略 */ }
   window.addEventListener('resize', onResize);
   window.addEventListener('mousemove', onMouseMove);
   window.addEventListener('pet-go-home', onGoHome);
@@ -1075,8 +1108,36 @@ onUnmounted(() => {
       <div class="pet-menu-item" @click="doPat"><i class="fa fa-thumbs-o-up"></i>摸摸头</div>
       <div class="pet-menu-item" @click="doSleep"><i class="fa fa-bed"></i>{{ sleeping ? '叫醒' : '哄睡觉' }}</div>
       <div v-if="isFloating()" class="pet-menu-item" @click="doGoHome"><i class="fa fa-home"></i>回任务栏</div>
+      <hr class="pet-menu-sep">
+      <div class="pet-menu-item" @click="openHelp"><i class="fa fa-question-circle"></i>玩法说明</div>
     </div>
   </div>
+
+  <!-- 玩法说明对话框：Teleport 到 body（企鹅容器带 filter，fixed 子元素会失效） -->
+  <Teleport to="body">
+    <div v-if="helpOpen" class="pet-help-mask" @click.self="helpOpen = false">
+      <div class="pet-help">
+        <div class="pet-help-bar">
+          <i class="fa fa-question-circle"></i>
+          <span class="flex-1">QQ 桌宠 · 隐藏玩法说明</span>
+          <button type="button" class="pet-help-close" title="关闭" @click="helpOpen = false">✕</button>
+        </div>
+        <div class="pet-help-body">
+          <div class="pet-help-row" v-for="tip in PET_TIPS" :key="tip.icon">
+            <span class="pet-help-ico"><i :class="tip.icon"></i></span>
+            <div class="pet-help-text">
+              <b>{{ tip.title }}</b>
+              <span>{{ tip.desc }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="pet-help-foot">
+          <span class="pet-help-note">线索越多，乐趣越多 —— 剩下的彩蛋自己发掘</span>
+          <button type="button" class="pet-help-ok" @click="helpOpen = false">知道了</button>
+        </div>
+      </div>
+    </div>
+  </Teleport>
 </template>
 
 <style scoped>
@@ -1337,6 +1398,104 @@ onUnmounted(() => {
 }
 .pet-menu-item:hover { background: #000080; color: #fff; }
 .pet-menu-item i { width: 14px; margin-right: 4px; text-align: center; }
+
+/* ============ 玩法说明对话框（Teleport 到 body 的 Win98 帮助窗） ============ */
+.pet-help-mask {
+  position: fixed;
+  inset: 0;
+  z-index: 75;
+  background: rgba(0, 0, 0, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.pet-help {
+  width: min(430px, 94vw);
+  background: #c0c0c0;
+  border: 2px solid;
+  border-color: #ffffff #0a0a0a #0a0a0a #ffffff;
+  box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.45);
+  font: 12px "Microsoft YaHei", "MS Sans Serif", sans-serif;
+  color: #000;
+}
+.pet-help-bar {
+  height: 26px;
+  background: linear-gradient(90deg, #000080, #1084d0);
+  color: #fff;
+  font-size: 12px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 3px 0 8px;
+  user-select: none;
+}
+.pet-help-bar span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pet-help-close {
+  width: 18px;
+  height: 16px;
+  font-size: 10px;
+  font-weight: bold;
+  line-height: 1;
+  background: #c0c0c0;
+  color: #000;
+  border: none;
+  box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #ffffff, inset -2px -2px #808080, inset 2px 2px #dfdfdf;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.pet-help-close:active { box-shadow: inset -1px -1px #ffffff, inset 1px 1px #0a0a0a; }
+.pet-help-body {
+  margin: 8px;
+  padding: 10px 12px;
+  background: #fff;
+  border: 1px solid;
+  border-color: #808080 #dfdfdf #dfdfdf #808080;
+  box-shadow: inset 1px 1px #0a0a0a, inset -1px -1px #dfdfdf;
+  max-height: 60vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+.pet-help-row { display: flex; gap: 9px; align-items: flex-start; }
+.pet-help-ico {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #c0c0c0;
+  box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #ffffff;
+  font-size: 12px;
+  color: #000080;
+}
+.pet-help-text { display: flex; flex-direction: column; gap: 1px; line-height: 1.55; min-width: 0; }
+.pet-help-text b { font-size: 12px; color: #000080; }
+.pet-help-text span { font-size: 11px; color: #222; }
+.pet-help-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0 8px 8px;
+}
+.pet-help-note { font-size: 10px; color: #666; }
+.pet-help-ok {
+  min-width: 72px;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: bold;
+  background: #c0c0c0;
+  color: #000;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  flex-shrink: 0;
+  box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #ffffff, inset -2px -2px #808080, inset 2px 2px #dfdfdf;
+}
+.pet-help-ok:active { box-shadow: inset -1px -1px #ffffff, inset 1px 1px #0a0a0a; }
 
 @media (prefers-reduced-motion: reduce) {
   .pupils { transition: none; }

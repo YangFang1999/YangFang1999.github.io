@@ -257,6 +257,12 @@ watch(() => route.path, (newPath) => {
   else if (newPath === '/calculator') {
     newWindows.push({ id: 'calculator', title: '计算器', icon: 'fa fa-calculator', isActive: true });
   }
+  else if (newPath === '/terminal') {
+    newWindows.push({ id: 'terminal', title: '命令提示符', icon: 'fa fa-terminal', isActive: true });
+  }
+  else if (newPath === '/typing') {
+    newWindows.push({ id: 'typing', title: '打字练习', icon: 'fa fa-keyboard-o', isActive: true });
+  }
 
   openWindows.value = newWindows;
 }, { immediate: true });
@@ -271,6 +277,8 @@ const navigateTo = (path: string) => {
 };
 
 const activateWindow = (id: string) => {
+  // 点任务栏先广播"恢复"：当前路由窗口若被最小化则弹回来（Window.vue 监听）
+  window.dispatchEvent(new CustomEvent('win-restore'));
   if (id === 'computer') router.push('/computer');
   else if (id === 'docs') router.push('/all-notes');
   else if (id === 'welcome') router.push('/');
@@ -280,6 +288,9 @@ const activateWindow = (id: string) => {
   else if (id === 'notepad') router.push('/notepad');
   else if (id === 'paint') router.push('/paint');
   else if (id === 'calculator') router.push('/calculator');
+  else if (id === 'terminal') router.push('/terminal');
+  else if (id === 'typing') router.push('/typing');
+  // id === 'note'：文章窗口就是当前路由，无需跳转，上面的事件已负责恢复
 
   openWindows.value.forEach(w => w.isActive = w.id === id);
 };
@@ -295,7 +306,7 @@ const saverOn = ref(false);
 let idleTimer: ReturnType<typeof setTimeout> | undefined;
 const IDLE_MS = (() => {
   const v = parseInt(localStorage.getItem('screensaver-ms') || '', 10);
-  return Number.isFinite(v) && v > 0 ? v : 60000;
+  return Number.isFinite(v) && v > 0 ? v : 120000; // 默认闲置 2 分钟进入屏保
 })();
 
 function resetIdle(): void {
