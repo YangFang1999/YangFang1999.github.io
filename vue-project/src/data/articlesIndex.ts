@@ -20,6 +20,7 @@ const articleLoaders: Record<string, () => Promise<{ default: string }>> = {
   'vue-composition': () => import('./articles/vue-composition'),
   'vue-router4': () => import('./articles/vue-router4'),
   'pinia-intro': () => import('./articles/pinia-intro'),
+  'learning-journey': () => import('./articles/learning-journey'),
 };
 
 const categoryNames: Record<string, string> = {
@@ -29,6 +30,7 @@ const categoryNames: Record<string, string> = {
   frontend: 'Frontend',
   devops: 'DevOps',
   vue: 'Vue',
+  essay: '随笔',
 };
 
 export { articleLoaders, categoryNames };

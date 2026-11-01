@@ -22,6 +22,7 @@ const categoryNames: Record<string, string> = {
   frontend: 'Frontend',
   devops: 'DevOps',
   vue: 'Vue',
+  essay: '随笔',
 };
 
 const noteId = computed(() => route.params.id as string);

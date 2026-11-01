@@ -13,6 +13,7 @@ const categories = ref([
   { id: 'frontend', title: 'Frontend', icon: 'fa fa-code', color: 'text-pink-500' },
   { id: 'vue', title: 'Vue', icon: 'fa fa-diamond', color: 'text-emerald-400' },
   { id: 'devops', title: 'DevOps', icon: 'fa fa-server', color: 'text-purple-500' },
+  { id: 'essay', title: '随笔', icon: 'fa fa-pencil', color: 'text-sky-300' },
 ]);
 
 const navigateTo = (path: string) => {

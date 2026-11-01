@@ -119,7 +119,7 @@ const goUp = () => { view.value = 'root'; };
         <span class="text-xs text-center group-hover:bg-navy group-hover:text-white px-1 border border-transparent group-hover:border-dotted group-hover:border-white w-full rounded-sm leading-tight">
           控制面板
         </span>
-        <span class="text-[10px] text-gray-500">6 个分类</span>
+        <span class="text-[10px] text-gray-500">7 个分类</span>
       </div>
 
       <div class="flex flex-col items-center gap-1 cursor-pointer group w-[88px]" @click="openPath('https://github.com/YangFang1999')">

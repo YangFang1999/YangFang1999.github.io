@@ -25,4 +25,5 @@ export const notes: Note[] = [
   { id: 'vue-composition', title: '组合式 API 实战', date: '2024-06-18', icon: 'fa fa-puzzle-piece', path: '/notes/vue-composition', category: 'vue' },
   { id: 'vue-router4', title: 'Vue Router 4 完全指南', date: '2024-06-25', icon: 'fa fa-map-signs', path: '/notes/vue-router4', category: 'vue' },
   { id: 'pinia-intro', title: 'Pinia 状态管理入门', date: '2024-07-02', icon: 'fa fa-cubes', path: '/notes/pinia-intro', category: 'vue' },
+  { id: 'learning-journey', title: '学习历程', date: '2026-08-31', icon: 'fa fa-pencil', path: '/notes/learning-journey', category: 'essay' },
 ];
