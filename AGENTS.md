@@ -17,7 +17,7 @@ npm run preview   # localhost:4173，直接从磁盘读 dist/，rebuild 后刷�
 - **桌面隐喻**：一条路由 = 一个"窗口"。`App.vue` 的 `openWindows`（watch route.path）是任务栏窗口注册表，加新路由必须同步更新它和 `activateWindow`。
 - `components/Window.vue` 是所有窗口的壳。根元素内置 `pointer-events-auto`——**勿删**：Teleport 让视图变多根组件后，App.vue 路由层的透传会失效，删了整个窗口点击穿透。props：`fixedSize`（禁还原，游戏用）、`plainMenus`（应用自带菜单行时隐藏默认假菜单栏）。
 - **文章体系**：正文 = `src/data/articles/<id>.ts` 导出 HTML 字符串；元数据 = `notes.ts`；共享索引 = `articlesIndex.ts`（懒加载缓存、字数/体积、全文搜索，FindDialog/Computer/终端共用）。加文章：article + notes.ts + articlesIndex loader 三处。**分类显示名映射在 articlesIndex / NoteDetail / Categories 三处重复（终端 CAT_ORDER 是第四处），加分类要改齐。**
-- **加新文章/分类的完整清单已固化为 skill `blog-add-article`**（用 Skill 工具调 `/blog-add-article`；文件在 `C:\Users\YF\.agents\skills\blog-add-article\SKILL.md`）——按"素材→id 决策→正文规范→三处接线→全站联动面盘点（自动/手动）→验证→部署"推演的全流程，含 Word 稿转换、hash 站内链接、giscus 评论按 `notes/<id>` 映射（id 永不改）、分类四处同步、静态文案数字。加文章前先读它。
+- **加新文章/分类的完整清单已固化为 skill `blog-add-article`**（用 Skill 工具调 `/blog-add-article`；文件在 `C:\Users\YF\.agents\skills\blog-add-article\SKILL.md`）——按"素材→id 决策→正文规范→三处接线→全站联动面盘点（自动/手动）→验证→部署"推演的全流程，含 Word 稿转换、hash 站内链接、giscus 评论按 `notes/<id>` 映射（id 永不改）、分类四处同步、**Readme 五处触点（含文章列表表格行 + 更新日志条目，每篇必查）**。加文章前先读它。
 - HTML 字符串里：代码块的 `<` 转义 `&lt;`，模板字符串内的反引号和 `${}` 也要转义。
 - 游戏引擎放 `src/game/`（纯逻辑/非响应式字段）；引擎字段不是响应式的，LED/计数类 UI 必须在操作后把值**拷贝进 ref**（computed 读引擎字段不会重算，扫雷踩过）。
 - `src/giscusCapture.ts` 必须保持 main.ts 里 **import 在 router 之前**（giscus OAuth 回跳要赶在 vue-router 快照 location 之前重写地址，顺序错了登录回跳会退回桌面）。
