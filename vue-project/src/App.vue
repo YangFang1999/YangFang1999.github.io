@@ -90,6 +90,7 @@ const icons: IconDef[] = [
   { id: 'notepad', label: '记事本', iconClass: 'fa fa-pencil-square-o', color: 'text-white', to: '/notepad' },
   { id: 'airplane', label: '飞机大战', iconClass: 'fa fa-fighter-jet', color: 'text-yellow-300', to: '/airplane' },
   { id: 'survivor', label: '桌面保卫战', iconClass: 'fa fa-shield', color: 'text-red-300', to: '/survivors' },
+  { id: 'mine', label: '扫雷', iconClass: 'fa fa-bomb', color: 'text-slate-200', to: '/minesweeper' },
   { id: 'paint', label: '画图', iconClass: 'fa fa-paint-brush', color: 'text-orange-300', to: '/paint' },
   { id: 'calc', label: '计算器', iconClass: 'fa fa-calculator', color: 'text-white', to: '/calculator' },
   { id: 'terminal', label: '命令提示符', iconClass: 'fa fa-terminal', color: 'text-green-300', to: '/terminal' },
@@ -248,6 +249,9 @@ watch(() => route.path, (newPath) => {
   else if (newPath === '/survivors') {
     newWindows.push({ id: 'survivor', title: '桌面保卫战', icon: 'fa fa-shield', isActive: true });
   }
+  else if (newPath === '/minesweeper') {
+    newWindows.push({ id: 'mine', title: '扫雷', icon: 'fa fa-bomb', isActive: true });
+  }
   else if (newPath === '/notepad') {
     newWindows.push({ id: 'notepad', title: '记事本 - 未命名', icon: 'fa fa-pencil-square-o', isActive: true });
   }
@@ -285,6 +289,7 @@ const activateWindow = (id: string) => {
   else if (id === 'categories') router.push('/categories');
   else if (id === 'airplane') router.push('/airplane');
   else if (id === 'survivor') router.push('/survivors');
+  else if (id === 'mine') router.push('/minesweeper');
   else if (id === 'notepad') router.push('/notepad');
   else if (id === 'paint') router.push('/paint');
   else if (id === 'calculator') router.push('/calculator');
@@ -309,14 +314,16 @@ const IDLE_MS = (() => {
   return Number.isFinite(v) && v > 0 ? v : 120000; // 默认闲置 2 分钟进入屏保
 })();
 
+// 游戏路由（屏保不触发，hash 形式）——玩到一半被管道盖住很离谱；新增游戏路由要同步这里
+const GAME_HASHES = ['#/airplane', '#/survivors', '#/minesweeper', '#/terminal', '#/typing'];
+
 function resetIdle(): void {
   if (saverOn.value) saverOn.value = false;
   if (idleTimer) clearTimeout(idleTimer);
-  // 游戏进行中不触发屏保（玩到一半被管道盖住很离谱）
-  const onGameRoute = ['#/airplane', '#/survivors', '#/terminal', '#/typing'].includes(location.hash);
+  const onGameRoute = GAME_HASHES.includes(location.hash);
   if (IDLE_MS > 0 && !isShutdown.value && !onGameRoute) {
     idleTimer = setTimeout(() => {
-      if (!['#/airplane', '#/survivors', '#/terminal', '#/typing'].includes(location.hash)) {
+      if (GAME_HASHES.includes(location.hash)) {
         saverOn.value = true;
       }
     }, IDLE_MS);
@@ -418,7 +425,7 @@ const dprInfo = computed(() => Math.round((window.devicePixelRatio || 1) * 100) 
           <hr class="border-t-[#808080] border-b-[#ffffff] mb-3">
           <table class="w-full">
             <tbody>
-              <tr><td class="py-[3px] text-gray-700 w-[84px]">内容</td><td>技术文章 {{ notes.length }} 篇 · 游戏 2 款 · 桌宠 1 只</td></tr>
+              <tr><td class="py-[3px] text-gray-700 w-[84px]">内容</td><td>技术文章 {{ notes.length }} 篇 · 游戏 3 款 · 桌宠 1 只</td></tr>
               <tr><td class="py-[3px] text-gray-700">磁盘 C:</td><td>文档 {{ notes.length }} 个 · 约 <b class="text-[#000080]">{{ diskKB }}</b> KB</td></tr>
               <tr><td class="py-[3px] text-gray-700">处理器</td><td>{{ uaShort }}</td></tr>
               <tr><td class="py-[3px] text-gray-700">显示</td><td>{{ screenInfo }} @ DPR {{ dprInfo }}</td></tr>

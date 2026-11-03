@@ -94,7 +94,8 @@ export class AirplaneGame {
 
     // 对所有敌人造成大量伤害
     for (const e of [...G.enemies]) {
-      if (e.entryTimer > 0) continue;
+      // hp<=0 的尸体不再结算，防止与同帧子弹/上一颗炸弹重复触发 killEnemy
+      if (e.entryTimer > 0 || e.hp <= 0) continue;
       e.hp -= BOMB.damage;
       if (e.hp <= 0) killEnemy(e);
     }

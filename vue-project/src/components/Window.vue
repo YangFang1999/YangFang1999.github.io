@@ -9,6 +9,10 @@ const props = defineProps<{
   defaultMaximized?: boolean;
   /** 固定尺寸窗口（如游戏）：禁止还原/最大化切换，杜绝小窗口下内容被遮挡 */
   fixedSize?: boolean;
+  /** 应用自带菜单行（如扫雷的"游戏/帮助"）时隐藏默认的假菜单栏 */
+  plainMenus?: boolean;
+  /** 非最大化时的窗口宽度（rem），缺省 42 */
+  widthRem?: number;
 }>();
 
 const emit = defineEmits<{
@@ -208,7 +212,7 @@ const windowStyle = computed(() => {
       left: windowPos.value.left + 'px',
       transform: 'none',
       width: '95%',
-      maxWidth: '42rem',
+      maxWidth: (props.widthRem ? props.widthRem : 42) + 'rem',
       height: 'auto',
       maxHeight: '80vh',
     };
@@ -218,7 +222,7 @@ const windowStyle = computed(() => {
     left: '50%',
     transform: 'translate(-50%, -50%)',
     width: '95%',
-    maxWidth: '42rem',
+    maxWidth: (props.widthRem ? props.widthRem : 42) + 'rem',
     height: 'auto',
     maxHeight: '80vh',
   };
@@ -372,8 +376,8 @@ onUnmounted(() => {
       </template>
     </div>
 
-    <!-- Menu Bar -->
-    <div class="win-menu-bar flex px-[2px] py-[2px] text-[11px] select-none bg-[#c0c0c0] gap-0 shrink-0">
+    <!-- Menu Bar（plainMenus 时由应用自带菜单行替代） -->
+    <div v-if="!plainMenus" class="win-menu-bar flex px-[2px] py-[2px] text-[11px] select-none bg-[#c0c0c0] gap-0 shrink-0">
       <div
         v-for="menu in menus"
         :key="menu.id"

@@ -168,6 +168,10 @@ defineProps<{
             <i class="fa fa-shield w-4 text-center"></i>
             <span>桌面保卫战</span>
           </div>
+          <div class="px-3 py-1.5 flex items-center gap-2.5 cursor-pointer hover:bg-[#000080] hover:text-white transition-colors" @click="handleMenuNavigate('/minesweeper')">
+            <i class="fa fa-bomb w-4 text-center"></i>
+            <span>扫雷</span>
+          </div>
           <div class="px-3 py-1.5 flex items-center gap-2.5 cursor-pointer hover:bg-[#000080] hover:text-white transition-colors" @click="handleMenuNavigate('/notepad')">
             <i class="fa fa-pencil-square-o w-4 text-center"></i>
             <span>记事本</span>

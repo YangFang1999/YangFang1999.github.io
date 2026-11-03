@@ -321,7 +321,8 @@ export function collidePlayerBullets(): void {
   for (const b of G.bullets) {
     if (!b.isPlayer) continue;
     for (const e of G.enemies) {
-      if (e.entryTimer > 0) continue;
+      // hp<=0 的尸体要等下一帧 updateEnemies 才移除，同帧多发子弹/炸弹命中会重复结算击杀（分数/连杀/掉落翻倍）
+      if (e.entryTimer > 0 || e.hp <= 0) continue;
       if (aabbHit(b, e)) {
         b.y = -999;
         e.hp -= G.bulletDamage;

@@ -70,7 +70,7 @@ const focusWindow = () => {
         <ul class="list-disc ml-6 space-y-1">
           <li>点击桌面上的 <strong>"我的文档"</strong> 图标查看所有文章，或按 <strong>Ctrl+K</strong> 全局搜索</li>
           <li>通过 <strong>"控制面板"</strong> 按分类浏览文章</li>
-          <li>开始菜单里藏着两款怀旧小游戏：<strong>飞机大战</strong> 和 <strong>桌面保卫战</strong>，学累了去守一波基地</li>
+          <li>开始菜单里藏着三款怀旧小游戏：<strong>飞机大战</strong>、<strong>桌面保卫战</strong> 和 <strong>扫雷</strong>，学累了去守一波基地</li>
           <li>桌面上还有一只 <strong>QQ 企鹅</strong> 桌宠跟着你——<strong>右键它</strong>打开菜单，里面藏着全部隐藏玩法（能抛、能骑窗口）</li>
           <li>随时点击左下角 <strong>"开始"</strong> 按钮打开菜单</li>
         </ul>

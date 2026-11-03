@@ -75,6 +75,7 @@ const PET_TIPS = [
 const APP_QUOTES: Array<[RegExp, string[]]> = [
   [/^\/airplane/, ['需要僚机吗？', '可别被打下来呀！', '人家也会飞哦～']],
   [/^\/survivors/, ['守住基地！我给你助威！', '怪物好多…你小心点']],
+  [/^\/minesweeper/, ['旗插对了嘛？', '踩雷我要笑出声哦', '3 秒开局，手速呢？']],
   [/^\/terminal/, ['在敲命令吗？懂哦懂哦', 'sudo 给我小鱼干', '黑底白字，真酷']],
   [/^\/paint/, ['画我画我！我超好画的！', '把我画成壁纸好不好？']],
   [/^\/notepad/, ['在写东西？我安静陪你～', '稿子记得保存哦']],
@@ -274,6 +275,9 @@ function showBubble(): void {
 }
 
 function schedule(ms: number): void {
+  // 先清旧链：空闲时永远挂着一条 pending tick，菜单回任务栏/叫醒等入口若不清旧，
+  // 并发 tick 链会每次 +1，气泡/走动频率成倍变快
+  if (timer) clearTimeout(timer);
   timer = setTimeout(tick, ms);
 }
 
@@ -961,6 +965,19 @@ function onGoHome(): void {
   goHome();
 }
 
+// 扫雷胜负联动：赢了冒爱心加心情，输了安慰两句
+function onMineEnd(e: Event): void {
+  const won = (e as CustomEvent).detail?.won === true;
+  wake();
+  if (won) {
+    mood.value = Math.min(100, mood.value + 2);
+    spawnHearts(3);
+    say('扫雷都能赢，佩服佩服！');
+  } else {
+    say(pick(['轰——听着都疼', '别灰心，旗要插在雷上呀']));
+  }
+}
+
 onMounted(() => {
   vw = window.innerWidth;
   loadState();
@@ -980,6 +997,7 @@ onMounted(() => {
   window.addEventListener('resize', onResize);
   window.addEventListener('mousemove', onMouseMove);
   window.addEventListener('pet-go-home', onGoHome);
+  window.addEventListener('minesweeper-end', onMineEnd);
   window.addEventListener('beforeunload', onSaveExit);
   document.addEventListener('visibilitychange', onVisChange);
   document.addEventListener('pointerdown', onDocPointerDown, true);
@@ -1001,6 +1019,7 @@ onUnmounted(() => {
   window.removeEventListener('resize', onResize);
   window.removeEventListener('mousemove', onMouseMove);
   window.removeEventListener('pet-go-home', onGoHome);
+  window.removeEventListener('minesweeper-end', onMineEnd);
   window.removeEventListener('beforeunload', onSaveExit);
   document.removeEventListener('visibilitychange', onVisChange);
   document.removeEventListener('pointerdown', onDocPointerDown, true);

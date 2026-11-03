@@ -2,7 +2,7 @@
 // 「我的电脑」：真资源管理器。
 // 根视图 = 盘符（C: 文档 / D: GAMEZ / 控制面板 / 网上邻居）；
 // C 盘 = 12 篇文章按日期排列（显示体积，点击直接打开文章）；
-// D 盘 = 两款游戏 exe。状态栏显示磁盘占用（正文懒加载统计）。
+// D 盘 = 三款游戏 exe。状态栏显示磁盘占用（正文懒加载统计）。
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import Window from '../components/Window.vue';
@@ -60,7 +60,7 @@ const addressBar = computed(() => {
   return '我的电脑';
 });
 
-const objectCount = computed(() => (view.value === 'c' ? files.value.length : view.value === 'd' ? 2 : 4));
+const objectCount = computed(() => (view.value === 'c' ? files.value.length : view.value === 'd' ? 3 : 4));
 
 const goUp = () => { view.value = 'root'; };
 </script>
@@ -109,7 +109,7 @@ const goUp = () => { view.value = 'root'; };
         <span class="text-xs text-center group-hover:bg-navy group-hover:text-white px-1 border border-transparent group-hover:border-dotted group-hover:border-white w-full rounded-sm leading-tight">
           GAMEZ (D:)
         </span>
-        <span class="text-[10px] text-gray-500">2 个游戏</span>
+        <span class="text-[10px] text-gray-500">3 个游戏</span>
       </div>
 
       <div class="flex flex-col items-center gap-1 cursor-pointer group w-[88px]" @click="router.push('/categories')">
@@ -173,6 +173,15 @@ const goUp = () => { view.value = 'root'; };
           桌面保卫战.exe
         </span>
         <span class="text-[10px] text-gray-500">肉鸽塔防</span>
+      </div>
+      <div class="flex flex-col items-center gap-1 cursor-pointer group w-[104px]" title="扫雷.exe" @click="openPath('/minesweeper')">
+        <div class="w-11 h-11 flex justify-center items-center text-[34px] group-hover:scale-110 transition-transform text-slate-300" style="filter: drop-shadow(1px 1px 0 rgba(0,0,0,0.2));">
+          <i class="fa fa-bomb"></i>
+        </div>
+        <span class="text-[11px] text-center leading-tight break-all group-hover:bg-navy group-hover:text-white px-1 border border-transparent group-hover:border-dotted group-hover:border-white w-full rounded-sm">
+          扫雷.exe
+        </span>
+        <span class="text-[10px] text-gray-500">经典益智</span>
       </div>
     </div>
 

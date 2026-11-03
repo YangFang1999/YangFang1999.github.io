@@ -34,6 +34,7 @@ const APPS: Record<string, string> = {
   calculator: '/calculator',
   airplane: '/airplane',
   survivor: '/survivors',
+  minesweeper: '/minesweeper',
   explorer: '/computer',
   terminal: '/terminal',
   typing: '/typing',
@@ -195,7 +196,7 @@ function cmdTree(): void {
     });
   });
   push('');
-  push(`共 ${cats.length} 个分类, ${notes.length} 篇文章。D:\\GAMEZ 里还有 2 款游戏。`, '#9adcff');
+  push(`共 ${cats.length} 个分类, ${notes.length} 篇文章。D:\\GAMEZ 里还有 3 款游戏。`, '#9adcff');
   scrollBottom();
 }
 
@@ -405,7 +406,7 @@ function run(raw: string): void {
         '  calc <表达式>    四则运算（支持 + - * / % 和括号）',
         '  color <代码>     终端配色（color 0A 黑底绿字，color 恢复默认）',
         '  history          命令历史（history -c 清空，跨会话保存）',
-        '  start <应用>     启动应用（notepad/paint/calculator/airplane/survivor/explorer...）',
+        '  start <应用>     启动应用（notepad/paint/calculator/airplane/survivor/minesweeper/explorer...）',
         '  neofetch         显示系统信息',
         '  ping <主机>      测试网络连通（Ctrl+C 中断）',
         '  matrix           ？？？',
@@ -481,7 +482,7 @@ function run(raw: string): void {
         'Kernel: ' + browserName() + ' ' + (navigator.userAgent.match(/(Edg|Firefox|Chrome|Safari)\/[\d.]+/)?.[0] ?? ''),
         'Uptime: ' + uptime(),
         'Articles: ' + notes.length + ' 篇',
-        'Games: 飞机大战 / 桌面保卫战',
+        'Games: 飞机大战 / 桌面保卫战 / 扫雷',
         'Pets: QQ 企鹅 x1',
         'Resolution: ' + window.screen.width + 'x' + window.screen.height,
       ];
