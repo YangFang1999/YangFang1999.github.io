@@ -1,6 +1,7 @@
 // 文章全量索引：懒加载 + 缓存、体积/阅读时长估算、全文搜索（含摘要）。
 // NoteDetail / 查找对话框 / 我的电脑 共用这一份，避免重复加载与重复实现。
 import { notes } from './notes';
+import { categoryNames } from './categories';
 
 // 每篇文章一个独立 chunk，只在需要时才下载（与 NoteDetail 原有逻辑一致）
 const articleLoaders: Record<string, () => Promise<{ default: string }>> = {
@@ -21,18 +22,10 @@ const articleLoaders: Record<string, () => Promise<{ default: string }>> = {
   'vue-router4': () => import('./articles/vue-router4'),
   'pinia-intro': () => import('./articles/pinia-intro'),
   'learning-journey': () => import('./articles/learning-journey'),
+  'lotus': () => import('./articles/lotus'),
 };
 
-const categoryNames: Record<string, string> = {
-  java: 'Java',
-  spring: 'Spring',
-  database: 'Database',
-  frontend: 'Frontend',
-  devops: 'DevOps',
-  vue: 'Vue',
-  essay: '随笔',
-};
-
+// 分类显示名的单一来源在 ./categories（终端/文章页/控制面板共用），此处仅转出给既有调用方
 export { articleLoaders, categoryNames };
 
 const contentCache = new Map<string, string>();

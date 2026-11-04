@@ -7,8 +7,9 @@ import { useRouter } from 'vue-router';
 import Window from '../components/Window.vue';
 import { notes, type Note } from '../data/notes';
 import {
-  loadArticle, loadAllArticles, searchArticles, sizeKB, estimateMinutes, stripTags, categoryNames,
+  loadArticle, loadAllArticles, searchArticles, sizeKB, estimateMinutes, stripTags,
 } from '../data/articlesIndex';
+import { categoryNames, CAT_ORDER } from '../data/categories';
 
 const router = useRouter();
 
@@ -40,7 +41,6 @@ const APPS: Record<string, string> = {
   typing: '/typing',
 };
 
-const CAT_ORDER = ['java', 'spring', 'database', 'frontend', 'vue', 'devops', 'essay'];
 const COMMANDS = [
   'calc', 'cd', 'cls', 'color', 'date', 'dir', 'echo', 'find', 'help', 'history',
   'list', 'ls', 'matrix', 'neofetch', 'open', 'ping', 'start', 'time', 'tree', 'type', 'ver', 'whoami',
@@ -499,6 +499,8 @@ function run(raw: string): void {
       const ip = '42.' + (Math.floor(Math.random() * 200) + 20) + '.' + (Math.floor(Math.random() * 250) + 5) + '.10';
       push(`正在 Ping ${host} [${ip}] 具有 32 字节的数据:`, '#9adcff');
       let i = 0;
+      // 连发防护：上一个 ping 未结束时先清掉，否则旧 interval 被覆盖后永远清不掉
+      if (pingTimer) clearInterval(pingTimer);
       pingTimer = setInterval(() => {
         i++;
         push(`来自 ${ip} 的回复: 字节=32 时间=${Math.floor(Math.random() * 30) + 8}ms TTL=118`);

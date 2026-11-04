@@ -218,6 +218,17 @@ function clearCanvas() {
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 }
+
+function exportPNG(): void {
+  const canvas = canvasRef.value;
+  if (!canvas) return;
+  const pad = (n: number): string => String(n).padStart(2, '0');
+  const d = new Date();
+  const a = document.createElement('a');
+  a.download = `画图-${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}.png`;
+  a.href = canvas.toDataURL('image/png');
+  a.click();
+}
 </script>
 
 <template>
@@ -251,6 +262,14 @@ function clearCanvas() {
           style="font-family: 'MS Sans Serif', 'Microsoft YaHei', sans-serif;"
         >
           清空
+        </button>
+        <button
+          @click="exportPNG"
+          class="text-[11px] font-bold px-[8px] py-[2px] bg-[#c0c0c0] text-black border-none shadow-[inset_-1px_-1px_#0a0a0a,inset_1px_1px_#ffffff,inset_-2px_-2px_#808080,inset_2px_2px_#dfdfdf] active:shadow-[inset_-1px_-1px_#ffffff,inset_1px_1px_#0a0a0a] cursor-pointer shrink-0"
+          style="font-family: 'MS Sans Serif', 'Microsoft YaHei', sans-serif;"
+          title="把当前画布导出为 PNG 图片"
+        >
+          <i class="fa fa-download mr-1"></i>导出
         </button>
       </div>
 

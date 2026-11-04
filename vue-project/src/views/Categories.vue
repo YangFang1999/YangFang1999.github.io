@@ -1,20 +1,12 @@
 <script setup lang="ts">
-import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import Window from '../components/Window.vue';
 import { desktopTheme, setTheme, THEMES, type DesktopTheme } from '../settings';
+import { CATEGORIES } from '../data/categories';
 
 const router = useRouter();
 
-const categories = ref([
-  { id: 'java', title: 'Java', icon: 'fa fa-coffee', color: 'text-orange-500' },
-  { id: 'spring', title: 'Spring', icon: 'fa fa-leaf', color: 'text-green-500' },
-  { id: 'database', title: 'Database', icon: 'fa fa-database', color: 'text-blue-500' },
-  { id: 'frontend', title: 'Frontend', icon: 'fa fa-code', color: 'text-pink-500' },
-  { id: 'vue', title: 'Vue', icon: 'fa fa-diamond', color: 'text-emerald-400' },
-  { id: 'devops', title: 'DevOps', icon: 'fa fa-server', color: 'text-purple-500' },
-  { id: 'essay', title: '随笔', icon: 'fa fa-pencil', color: 'text-sky-300' },
-]);
+const categories = CATEGORIES;
 
 const navigateTo = (path: string) => {
   if (path.startsWith('http')) {
@@ -74,7 +66,7 @@ function resetSettings(): void {
             <i :class="cat.icon"></i>
           </div>
           <span class="text-xs text-center group-hover:bg-navy group-hover:text-white px-1 border border-transparent group-hover:border-dotted group-hover:border-white w-full rounded-sm">
-            {{ cat.title }}
+            {{ cat.name }}
           </span>
         </div>
       </div>

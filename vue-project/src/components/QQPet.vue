@@ -347,15 +347,19 @@ function startWalk(): void {
   schedule(dur + 80);
 }
 
+let jumpTimer: ReturnType<typeof setTimeout> | undefined;
+let bounceTimer: ReturnType<typeof setTimeout> | undefined;
+let hintTimer: ReturnType<typeof setTimeout> | undefined;
+
 function jump(): void {
   jumping.value = true;
-  setTimeout(() => { jumping.value = false; schedule(1500 + Math.random() * 2500); }, 620);
+  jumpTimer = setTimeout(() => { jumping.value = false; schedule(1500 + Math.random() * 2500); }, 620);
 }
 
 function react(): void {
   bounce.value = true;
   showBubble();
-  setTimeout(() => { bounce.value = false; }, 520);
+  bounceTimer = setTimeout(() => { bounce.value = false; }, 520);
 }
 
 // 回到任务栏（双击悬浮企鹅 / 控制面板按钮 / 右键菜单）
@@ -520,6 +524,9 @@ function startRide(el: HTMLElement): void {
   say(pick(RIDE_QUOTES));
   cancelAnimationFrame(rideRAF);
   rideRAF = requestAnimationFrame(rideFrame);
+  // 补回 tick 链：pointerdown 已清掉旧链，而 onPointerUp 在骑窗分支提前 return，
+  // 不补的话骑窗期间 tick 的闲聊分支（RIDE_QUOTES 22%）永远执行不到
+  schedule(3000);
 }
 
 function rideFrame(now: number): void {
@@ -825,6 +832,8 @@ function updateDragAffordances(bottomNow: number): void {
 function dragVelocity(): { x: number; y: number } {
   if (velBuf.length < 2) return { x: 0, y: 0 };
   const last = velBuf[velBuf.length - 1];
+  // 急停后停顿再松手：末尾样本已过期，不能拿旧速度当松手速度（否则静止松手也起飞）
+  if (performance.now() - last.t > 100) return { x: 0, y: 0 };
   let first = velBuf[0];
   for (const s of velBuf) {
     if (last.t - s.t >= 60) first = s;
@@ -988,7 +997,7 @@ onMounted(() => {
   try {
     if (!localStorage.getItem('pet-hint-shown')) {
       localStorage.setItem('pet-hint-shown', '1');
-      setTimeout(() => {
+      hintTimer = setTimeout(() => {
         hintLockUntil = Date.now() + 3400;
         say('右键我可以打开菜单，里面藏着全部隐藏玩法哦～');
       }, 2600);
@@ -1010,6 +1019,9 @@ onUnmounted(() => {
   if (dizzyTimer) clearTimeout(dizzyTimer);
   if (fishTimer) clearTimeout(fishTimer);
   if (heartTimer) clearTimeout(heartTimer);
+  if (jumpTimer) clearTimeout(jumpTimer);
+  if (bounceTimer) clearTimeout(bounceTimer);
+  if (hintTimer) clearTimeout(hintTimer);
   if (vitalsTimer) clearInterval(vitalsTimer);
   clearLongPress();
   cancelAnimationFrame(flingRAF);

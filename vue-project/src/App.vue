@@ -62,7 +62,10 @@ onUnmounted(() => {
   window.removeEventListener('keydown', resetIdle);
   window.removeEventListener('wheel', resetIdle);
   if (idleTimer) clearTimeout(idleTimer);
+  if (resizeSaveTimer) { clearTimeout(resizeSaveTimer); resizeSaveTimer = undefined; saveLayout(); }
 });
+
+let resizeSaveTimer: ReturnType<typeof setTimeout> | undefined;
 
 function onWindowResize(): void {
   vhTick.value++;
@@ -73,7 +76,9 @@ function onWindowResize(): void {
       y: Math.max(0, Math.min(window.innerHeight - 130, p.y)),
     };
   }
-  saveLayout();
+  // 拖窗口边缘时 resize 连发，落盘防抖（此前每个事件写一次 localStorage）
+  if (resizeSaveTimer) clearTimeout(resizeSaveTimer);
+  resizeSaveTimer = setTimeout(saveLayout, 300);
 }
 
 // ============ 桌面图标：定义 + 拖拽布局 ============

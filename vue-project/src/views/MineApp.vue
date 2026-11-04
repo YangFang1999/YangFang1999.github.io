@@ -52,21 +52,26 @@ function sync(): void {
 }
 
 const flagsLeft = ref(0);
-const running = computed(() => eng.started && !eng.over);
+// 计时器只在 startTimer/stopTimer 之间存活，用普通标志位守门即可。
+// 之前这里用 computed 读 eng.started/eng.over——引擎字段非响应式，computed 无依赖可追踪、
+// 首次求值后永久缓存，全靠调用时序侥幸正确（AGENTS.md 点名的坑）。
+let timerRunning = false;
 
 function tickTimer(): void {
-  if (running.value) elapsedSec.value = Math.min(999, Math.floor((Date.now() - startAt) / 1000));
+  if (timerRunning) elapsedSec.value = Math.min(999, Math.floor((Date.now() - startAt) / 1000));
 }
 
 function startTimer(): void {
   startAt = Date.now();
   stopAt = 0;
   if (timerId) clearInterval(timerId);
+  timerRunning = true;
   timerId = setInterval(tickTimer, 250);
   tickTimer();
 }
 
 function stopTimer(): void {
+  timerRunning = false;
   stopAt = Date.now();
   if (timerId) { clearInterval(timerId); timerId = undefined; }
   elapsedSec.value = Math.min(999, Math.floor((stopAt - startAt) / 1000));
@@ -102,6 +107,7 @@ function newGame(): void {
   elapsedSec.value = 0;
   stopAt = 0;
   if (timerId) { clearInterval(timerId); timerId = undefined; }
+  timerRunning = false;
   longDone = false;
   pressIdx = -1;
 }
@@ -340,6 +346,7 @@ const ledOn = (seg: string, ch: string): boolean => (SEG_MAP[ch] ?? '').includes
               @pointerup="onCellUp($event, i)"
               @pointermove="onCellMove($event)"
               @pointerleave="onCellLeave"
+              @pointercancel="cancelPress"
               @contextmenu.prevent="onCtxMenu(i)"
             >
               <template v-if="c.state === 'revealed' && c.mine">

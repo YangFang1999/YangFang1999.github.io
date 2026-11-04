@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import Window from '../components/Window.vue';
 
@@ -8,6 +8,11 @@ const router = useRouter();
 const textContent = ref('');
 const fontSize = ref(14);
 const saved = ref(true);
+
+const KEY_CONTENT = 'notepad-content';
+const KEY_DRAFT = 'notepad-draft';
+let committed = '';        // 最近一次保存/新建时的内容（saved 标志的基准）
+let draftTimer: ReturnType<typeof setTimeout> | undefined;
 
 const textareaStyle = computed(() => ({
   fontSize: fontSize.value + 'px',
@@ -21,16 +26,63 @@ const lineCount = computed(() => {
   return textContent.value.split('\n').length;
 });
 
+function onBeforeUnload(e: BeforeUnloadEvent): void {
+  if (!saved.value) {
+    e.preventDefault();
+    e.returnValue = '';
+  }
+}
+
 onMounted(() => {
-  const saved_content = localStorage.getItem('notepad-content');
-  if (saved_content) {
-    textContent.value = saved_content;
+  const savedContent = localStorage.getItem(KEY_CONTENT);
+  const draft = localStorage.getItem(KEY_DRAFT);
+  if (draft !== null && draft !== savedContent) {
+    // 有未提交的自动草稿：恢复草稿并标记未保存，由用户决定保存还是新建
+    textContent.value = draft;
+    committed = savedContent ?? '';
+    saved.value = false;
+  } else if (savedContent !== null) {
+    textContent.value = savedContent;
+    committed = savedContent;
     saved.value = true;
   }
+  window.addEventListener('beforeunload', onBeforeUnload);
+});
+
+onUnmounted(() => {
+  // 防抖窗口内未落盘的草稿立刻补写，关窗不丢最后半秒的输入
+  if (draftTimer) {
+    clearTimeout(draftTimer);
+    draftTimer = undefined;
+    if (textContent.value !== committed) {
+      try {
+        if (textContent.value) localStorage.setItem(KEY_DRAFT, textContent.value);
+        else localStorage.removeItem(KEY_DRAFT);
+      } catch { /* 忽略 */ }
+    }
+  }
+  window.removeEventListener('beforeunload', onBeforeUnload);
+});
+
+// 打字即自动草稿（防抖 500ms）：忘了点保存也不会因刷新/误关丢稿
+watch(textContent, (v) => {
+  if (draftTimer) clearTimeout(draftTimer);
+  if (v === committed) return;   // 回到基准值（如新建清空）不标脏、不动草稿
+  saved.value = false;
+  draftTimer = setTimeout(() => {
+    try {
+      if (v) localStorage.setItem(KEY_DRAFT, v);
+      else localStorage.removeItem(KEY_DRAFT);
+    } catch { /* 忽略 */ }
+  }, 500);
 });
 
 function handleSave() {
-  localStorage.setItem('notepad-content', textContent.value);
+  try {
+    localStorage.setItem(KEY_CONTENT, textContent.value);
+    localStorage.removeItem(KEY_DRAFT);
+  } catch { /* 忽略 */ }
+  committed = textContent.value;
   saved.value = true;
 }
 
@@ -39,12 +91,17 @@ function handleNew() {
     if (!confirm('内容尚未保存，确定要新建吗？')) return;
   }
   textContent.value = '';
-  localStorage.removeItem('notepad-content');
+  try {
+    localStorage.removeItem(KEY_CONTENT);
+    localStorage.removeItem(KEY_DRAFT);
+  } catch { /* 忽略 */ }
+  committed = '';
   saved.value = true;
 }
 
-function onInput() {
-  saved.value = false;
+function onClose() {
+  if (!saved.value && !confirm('内容尚未保存，确定要关闭窗口吗？')) return;
+  router.push('/');
 }
 </script>
 
@@ -54,7 +111,7 @@ function onInput() {
     icon="fa fa-pencil-square-o"
     :isOpen="true"
     :isActive="true"
-    @close="router.push('/')"
+    @close="onClose"
   >
     <div class="flex flex-col h-full min-h-0 gap-0">
       <!-- Toolbar -->
@@ -88,7 +145,6 @@ function onInput() {
       <!-- Textarea -->
       <textarea
         v-model="textContent"
-        @input="onInput"
         class="flex-1 w-full resize-none outline-none p-[6px] bg-white text-black min-h-0 border-0"
         :style="textareaStyle"
         placeholder="在此输入..."

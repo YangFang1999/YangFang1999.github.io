@@ -12,19 +12,10 @@ import Window from '../components/Window.vue';
 import ReadComments from '../components/ReadComments.vue';
 import { notes } from '../data/notes';
 import { loadArticle } from '../data/articlesIndex';
+import { categoryNames } from '../data/categories';
 
 const route = useRoute();
 const router = useRouter();
-
-const categoryNames: Record<string, string> = {
-  java: 'Java',
-  spring: 'Spring',
-  database: 'Database',
-  frontend: 'Frontend',
-  devops: 'DevOps',
-  vue: 'Vue',
-  essay: '随笔',
-};
 
 const noteId = computed(() => route.params.id as string);
 const note = computed(() => notes.find(n => n.id === noteId.value));
@@ -49,6 +40,7 @@ interface TocItem { id: string; text: string; level: number }
 const headings = ref<TocItem[]>([]);
 const activeHeading = ref('');
 const progress = ref(0);
+const scrollable = ref(false);   // 内容是否可滚动（决定"回到顶部"按钮是否出现）
 // 目录默认收起：展开态会遮挡文章（尤其窗口最大化时），用户点标签自行展开；
 // 切换文章时保持当前收起/展开选择，不做重置
 const tocCollapsed = ref(true);
@@ -124,6 +116,7 @@ function updateScrollState(): void {
   const sc = scrollerEl;
   if (!sc) return;
   const max = sc.scrollHeight - sc.clientHeight;
+  scrollable.value = max > 4;
   progress.value = max > 4 ? Math.min(1, Math.max(0, sc.scrollTop / max)) : 1;
   const scRect = sc.getBoundingClientRect();
   let cur = '';
@@ -293,6 +286,19 @@ const goNote = (id?: string) => {
     </div>
     <!-- 评论面板：Giscus（GitHub Discussions），右侧浮动、可展开滚动 -->
     <ReadComments v-if="overlayOn && note && !isLoading" :article-id="note?.id ?? ''" />
+
+    <!-- 回到顶部：滚过开头才出现；短文/未滚动不出现 -->
+    <Transition name="bt-fade">
+      <button
+        v-if="overlayOn && note && !isLoading && scrollable && progress > 0.12"
+        type="button"
+        class="back-top"
+        title="回到顶部"
+        @click="scrollToTop"
+      >
+        <i class="fa fa-arrow-up"></i>
+      </button>
+    </Transition>
   </Teleport>
 </template>
 
@@ -523,4 +529,28 @@ const goNote = (id?: string) => {
 @media (hover: none) {
   .code-copy { opacity: 1; }
 }
+
+/* ============ 回到顶部：右下角 Win98 小方钮（评论面板收起态上方） ============ */
+.back-top {
+  position: fixed;
+  right: 12px;
+  bottom: 92px;
+  z-index: 45;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #c0c0c0;
+  color: #000;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #ffffff, inset -2px -2px #808080, inset 2px 2px #dfdfdf;
+}
+.back-top:active {
+  box-shadow: inset -1px -1px #ffffff, inset 1px 1px #0a0a0a;
+}
+.bt-fade-enter-active, .bt-fade-leave-active { transition: opacity 0.15s; }
+.bt-fade-enter-from, .bt-fade-leave-to { opacity: 0; }
 </style>
