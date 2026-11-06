@@ -1,9 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, nextTick } from 'vue';
-import { useRouter } from 'vue-router';
 import Window from '../components/Window.vue';
-
-const router = useRouter();
+import { closeWindows } from '../winNav';
 
 const canvasRef = ref<HTMLCanvasElement | null>(null);
 const containerRef = ref<HTMLDivElement | null>(null);
@@ -237,7 +235,7 @@ function exportPNG(): void {
     icon="fa fa-paint-brush"
     :isOpen="true"
     :isActive="true"
-    @close="router.push('/')"
+    @close="closeWindows(['paint'])"
   >
     <div class="flex flex-col h-full min-h-0 gap-0">
       <!-- Toolbar -->

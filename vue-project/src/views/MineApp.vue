@@ -7,11 +7,9 @@
 // - 三档难度 + 本机最佳纪录（每难度分开，破纪录提示）
 // - F2 开局、触屏长按插旗、胜负联动桌宠（minesweeper-end 事件）
 import { ref, computed, onMounted, onUnmounted } from 'vue';
-import { useRouter } from 'vue-router';
 import Window from '../components/Window.vue';
 import { Minesweeper, DIFFICULTIES, difficultyByKey, type Cell, type Difficulty } from '../game/minesweeper';
-
-const router = useRouter();
+import { closeWindows } from '../winNav';
 
 const BEST_KEY = 'minesweeper-best';
 interface BestRecord { time: number; date: string }
@@ -273,7 +271,7 @@ const ledOn = (seg: string, ch: string): boolean => (SEG_MAP[ch] ?? '').includes
     :isActive="true"
     plainMenus
     :widthRem="winWidthRem"
-    @close="router.push('/')"
+    @close="closeWindows(['mine'])"
   >
     <div class="ms-root">
       <!-- 菜单行 -->

@@ -1,9 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue';
-import { useRouter } from 'vue-router';
 import Window from '../components/Window.vue';
-
-const router = useRouter();
+import { closeWindows } from '../winNav';
 
 const display = ref('0');
 const expression = ref('');
@@ -224,7 +222,7 @@ const buttons: CalcBtn[][] = [
     icon="fa fa-calculator"
     :isOpen="true"
     :isActive="true"
-    @close="router.push('/')"
+    @close="closeWindows(['calculator'])"
   >
     <div class="flex flex-col gap-[4px] h-full max-w-[300px] mx-auto select-none outline-none" tabindex="0">
       <!-- Display -->

@@ -2,9 +2,7 @@
 // 打字练习：中文 / 英文 / 代码 三模式，WPM + 准确率 + 最佳纪录（localStorage）
 import { ref, computed, watch, onUnmounted } from 'vue';
 import Window from '../components/Window.vue';
-import { useRouter } from 'vue-router';
-
-const router = useRouter();
+import { closeWindows } from '../winNav';
 
 type Mode = 'cn' | 'en' | 'code';
 
@@ -156,7 +154,7 @@ const bestText = computed(() =>
     :isOpen="true"
     :isActive="true"
     :defaultMaximized="true"
-    @close="router.push('/')"
+    @close="closeWindows(['typing'])"
   >
     <div class="p-3 select-none">
       <!-- 模式切换 -->

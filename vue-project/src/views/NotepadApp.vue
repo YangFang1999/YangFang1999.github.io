@@ -1,9 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
-import { useRouter } from 'vue-router';
 import Window from '../components/Window.vue';
-
-const router = useRouter();
+import { closeWindows } from '../winNav';
 
 const textContent = ref('');
 const fontSize = ref(14);
@@ -12,7 +10,9 @@ const saved = ref(true);
 const KEY_CONTENT = 'notepad-content';
 const KEY_DRAFT = 'notepad-draft';
 let committed = '';        // 最近一次保存/新建时的内容（saved 标志的基准）
+let restoredText: string | null = null;   // 本次恢复的草稿原文（"丢弃"只在其未被继续编辑时直接回滚）
 let draftTimer: ReturnType<typeof setTimeout> | undefined;
+const draftRestored = ref(false);
 
 const textareaStyle = computed(() => ({
   fontSize: fontSize.value + 'px',
@@ -37,8 +37,10 @@ onMounted(() => {
   const savedContent = localStorage.getItem(KEY_CONTENT);
   const draft = localStorage.getItem(KEY_DRAFT);
   if (draft !== null && draft !== savedContent) {
-    // 有未提交的自动草稿：恢复草稿并标记未保存，由用户决定保存还是新建
+    // 有未提交的自动草稿：恢复草稿并标记未保存，由用户决定保存还是丢弃
     textContent.value = draft;
+    restoredText = draft;
+    draftRestored.value = true;
     committed = savedContent ?? '';
     saved.value = false;
   } else if (savedContent !== null) {
@@ -101,7 +103,16 @@ function handleNew() {
 
 function onClose() {
   if (!saved.value && !confirm('内容尚未保存，确定要关闭窗口吗？')) return;
-  router.push('/');
+  closeWindows(['notepad']);
+}
+
+// 丢弃恢复的草稿：回到最近保存的内容（无则清空）。若用户已在草稿上继续编辑，先确认
+function discardDraft(): void {
+  if (textContent.value !== restoredText && !confirm('当前内容与草稿不同，确定丢弃吗？')) return;
+  try { localStorage.removeItem(KEY_DRAFT); } catch { /* 忽略 */ }
+  textContent.value = committed;
+  saved.value = true;
+  draftRestored.value = false;
 }
 </script>
 
@@ -140,6 +151,22 @@ function onClose() {
         </button>
         <span v-if="!saved" class="text-[10px] text-red-600">● 未保存</span>
         <span v-else class="text-[10px] text-gray-500">已保存</span>
+      </div>
+
+      <!-- 草稿恢复横幅 -->
+      <div v-if="draftRestored" class="mx-[2px] mb-[4px] px-2 py-1 text-[11px] bg-[#e8ecf3] border border-t-[#808080] border-l-[#808080] border-b-[#ffffff] border-r-[#ffffff] flex items-center gap-2 shrink-0">
+        <i class="fa fa-info-circle text-[#000080]"></i>
+        <span class="flex-1 text-black">已恢复上次未保存的草稿</span>
+        <button
+          @click="discardDraft"
+          class="text-[10px] font-bold px-[8px] py-[1px] bg-[#c0c0c0] text-black border-none shadow-[inset_-1px_-1px_#0a0a0a,inset_1px_1px_#ffffff,inset_-2px_-2px_#808080,inset_2px_2px_#dfdfdf] active:shadow-[inset_-1px_-1px_#ffffff,inset_1px_1px_#0a0a0a] cursor-pointer shrink-0"
+          title="放弃草稿，回到最近保存的内容"
+        >丢弃草稿</button>
+        <button
+          @click="draftRestored = false"
+          class="text-[10px] px-[6px] py-[1px] bg-[#c0c0c0] text-gray-600 border-none shadow-[inset_-1px_-1px_#0a0a0a,inset_1px_1px_#ffffff,inset_-2px_-2px_#808080,inset_2px_2px_#dfdfdf] active:shadow-[inset_-1px_-1px_#ffffff,inset_1px_1px_#0a0a0a] cursor-pointer shrink-0"
+          title="保留草稿，关闭此提示"
+        >知道了</button>
       </div>
 
       <!-- Textarea -->

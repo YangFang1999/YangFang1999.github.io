@@ -1,11 +1,9 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue';
-import { useRouter } from 'vue-router';
 import Window from '../components/Window.vue';
 import { AirplaneGame } from '../game/engine';
 import { G } from '../game/state';
-
-const router = useRouter();
+import { closeWindows } from '../winNav';
 const canvasRef = ref<HTMLCanvasElement | null>(null);
 
 // 游戏本体状态在 game/ 模块里是非响应式的，这里镜像一份供按钮渲染
@@ -27,12 +25,19 @@ onMounted(() => {
     cheatInvincible.value = G.cheatInvincible;
     gameState.value = G.gameState;
   }, 300);
+  // 窗口最小化时游戏仍在后台跑（rAF 不停），藏进任务栏会被敌机打死——自动暂停
+  window.addEventListener('win-minimize', autoPause);
 });
+
+const autoPause = () => {
+  if (G.gameState === 'playing') game?.togglePause();
+};
 
 onUnmounted(() => {
   game?.destroy();
   game = null;
   if (syncTimer) clearInterval(syncTimer);
+  window.removeEventListener('win-minimize', autoPause);
 });
 
 const onBomb = () => { game?.useBomb(); bombCount.value = G.bombCount; };
@@ -50,7 +55,7 @@ const onPointerDown = (e: PointerEvent) => { game?.canvasTap(); game?.handlePoin
     :isActive="true"
     :defaultMaximized="true"
     fixedSize
-    @close="router.push('/')"
+    @close="closeWindows(['airplane'])"
   >
     <!-- 画布始终居中；控制台大屏悬浮左侧（不挤占居中），小屏在画布下方横排 -->
     <div class="relative flex flex-col items-center justify-center gap-2 w-full min-h-0">

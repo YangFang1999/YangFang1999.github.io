@@ -27,7 +27,7 @@ const router = createRouter({
 const routeTitles: Record<string, string> = {
   '/': '桌面',
   '/computer': '我的电脑',
-  '/all-notes': '我的文档',
+  '/all-notes': '我的文章',
   '/categories': '控制面板',
   '/airplane': '飞机大战',
   '/survivors': '桌面保卫战',

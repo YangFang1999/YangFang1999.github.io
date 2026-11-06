@@ -46,6 +46,7 @@ onMounted(() => {
   visitCount.value = n;
   window.addEventListener('open-sysprops', openSysProps);
   window.addEventListener('keydown', onRootKeydown);
+  window.addEventListener('win-close', onWinClose);
   window.addEventListener('resize', onWindowResize);
   window.addEventListener('pointermove', resetIdle);
   window.addEventListener('pointerdown', resetIdle);
@@ -56,6 +57,8 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener('open-sysprops', openSysProps);
   window.removeEventListener('keydown', onRootKeydown);
+  window.removeEventListener('win-close', onWinClose);
+  window.removeEventListener('popstate', onPopState);
   window.removeEventListener('resize', onWindowResize);
   window.removeEventListener('pointermove', resetIdle);
   window.removeEventListener('pointerdown', resetIdle);
@@ -89,7 +92,7 @@ interface IconDef {
 
 const icons: IconDef[] = [
   { id: 'computer', label: '我的电脑', iconClass: 'fa fa-desktop', color: 'text-white', to: '/computer' },
-  { id: 'docs', label: '我的文档', iconClass: 'fa fa-folder-open', color: 'text-yellow-400', to: '/all-notes' },
+  { id: 'docs', label: '我的文章', iconClass: 'fa fa-folder-open', color: 'text-yellow-400', to: '/all-notes' },
   { id: 'control', label: '控制面板', iconClass: 'fa fa-cog', color: 'text-pink-300', to: '/categories' },
   { id: 'ie', label: 'Internet 浏览器', iconClass: 'fa fa-globe', color: 'text-blue-300', to: 'https://github.com/YangFang1999' },
   { id: 'notepad', label: '记事本', iconClass: 'fa fa-pencil-square-o', color: 'text-white', to: '/notepad' },
@@ -205,17 +208,19 @@ function onRootClick(): void {
 
 function onRootKeydown(e: KeyboardEvent): void {
   if (e.key === 'Escape') closeCtxMenu();
-  // Ctrl+K 唤出全局查找
-  if (e.ctrlKey && (e.code === 'KeyK' || e.key === 'k')) {
+  // Ctrl+K 唤出全局查找（Mac 用 Cmd+K，两者都接受）
+  if ((e.ctrlKey || e.metaKey) && (e.code === 'KeyK' || e.key === 'k')) {
     e.preventDefault();
     findOpen.value = !findOpen.value;
   }
 }
 
 // ============ 窗口路由模拟 ============
-const openWindows = ref<{ id: string; title: string; icon: string; isActive: boolean }[]>([
-  { id: 'welcome', title: '欢迎来到 YF 的 Blog.exe', icon: 'fa fa-info-circle', isActive: true }
-]);
+// 时间线式持久注册表：按打开顺序排列。任务栏点击第 N 个窗口 = 关闭其后打开的
+// 全部窗口并回到它；窗口 X = 移除自身、退回前一个窗口（无则桌面）。全程不用 history.back。
+interface WinEntry { id: string; title: string; icon: string; isActive: boolean; path?: string }
+
+const openWindows = ref<WinEntry[]>([]);
 
 const activeWindowId = computed(() => {
   const active = openWindows.value.find(w => w.isActive);
@@ -223,58 +228,88 @@ const activeWindowId = computed(() => {
 });
 provide('activeWindowId', activeWindowId);
 
-watch(() => route.path, (newPath) => {
-  const newWindows: { id: string; title: string; icon: string; isActive: boolean }[] = [];
+// 浏览器后退/前进落到已关闭窗口的旧路由：不复活窗口，直接回桌面。
+// 信号 = popstate 标记 ∨ position 记账（后退 pos<lastPos、跳步前进 pos>lastPos+1）。
+// 记账必须用 route.fullPath：route.path 不含 query，文件夹跳转（?category=）不改 path
+// 会漏记一步，导致下一次真实跳转被误判成跳变（踩过：随笔文件夹 → 文章被守卫吞掉）。
+// 已知窗口按 path 前缀匹配：回退进 ?category= 文件夹视图属于同一窗口，放行。
+let lastNavPos: number | null = null;
+let popNav = false;
+const onPopState = (): void => { popNav = true; };
+window.addEventListener('popstate', onPopState);
 
-  const welcomeWin = openWindows.value.find(w => w.id === 'welcome');
-  if (welcomeWin) newWindows.push({ ...welcomeWin, isActive: false });
+watch(() => route.fullPath, () => {
+  const newPath = route.path;
+  const pos = (window.history.state as { position?: number } | null)?.position ?? null;
+  const backPop = lastNavPos !== null && pos !== null && pos < lastNavPos;
+  const skipFwd = lastNavPos !== null && pos !== null && pos > lastNavPos + 1;
+  lastNavPos = pos;
+  const wasPop = popNav || backPop || skipFwd;
+  popNav = false;
+  const basePath = newPath.split('?')[0];
+  if (wasPop && basePath !== '/' && !openWindows.value.some(w => w.path === basePath)) {
+    router.replace('/');
+    return;
+  }
 
-  if (newPath === '/computer') {
-    newWindows.push({ id: 'computer', title: '我的电脑', icon: 'fa fa-desktop', isActive: true });
+  // 持久窗口注册表：窗口一经打开就保留在任务栏（直到用户点 X 关闭），
+  // 路由切换只决定哪个窗口在前台。此前是整表重建——打开文章后"我的电脑"
+  // 会从任务栏消失、从控制面板进文章却硬挂一个"我的文章"（张冠李戴）。
+  openWindows.value.forEach(w => { w.isActive = false; });
+
+  const add = (id: string, title: string, icon: string, path: string) => {
+    const existing = openWindows.value.find(w => w.id === id);
+    if (existing) {
+      existing.title = title;
+      existing.icon = icon;
+      existing.path = path;
+      existing.isActive = true;
+    } else {
+      openWindows.value.push({ id, title, icon, isActive: true, path });
+    }
+  };
+
+  if (newPath === '/') {
+    // 桌面前台：本会话欢迎窗未关闭过则保持注册（与 Desktop 的显示条件一致）
+    let welcomeAlive = true;
+    try { welcomeAlive = sessionStorage.getItem('welcome-dismissed') !== '1'; } catch { /* 忽略 */ }
+    if (welcomeAlive) add('welcome', '欢迎来到 YF 的 Blog.exe', 'fa fa-info-circle', '/');
   }
-  else if (newPath === '/all-notes') {
-    newWindows.push({ id: 'computer', title: '我的电脑', icon: 'fa fa-desktop', isActive: false });
-    newWindows.push({ id: 'docs', title: '我的文档', icon: 'fa fa-folder-open', isActive: true });
-  }
-  else if (newPath === '/categories') {
-    newWindows.push({ id: 'computer', title: '我的电脑', icon: 'fa fa-desktop', isActive: false });
-    newWindows.push({ id: 'categories', title: '分类', icon: 'fa fa-cog', isActive: true });
-  }
+  else if (newPath === '/computer') add('computer', '我的电脑', 'fa fa-desktop', '/computer');
+  else if (newPath === '/all-notes') add('docs', '我的文章', 'fa fa-folder-open', '/all-notes');
+  else if (newPath === '/categories') add('categories', '分类', 'fa fa-cog', '/categories');
   else if (newPath.startsWith('/notes/')) {
     const noteId = route.params.id as string;
     const note = notes.find(n => n.id === noteId);
-    const title = note ? note.title : 'Note';
-
-    newWindows.push({ id: 'docs', title: '我的文档', icon: 'fa fa-folder-open', isActive: false });
-    newWindows.push({ id: 'note', title: title, icon: 'fa fa-file-text-o', isActive: true });
+    add('note', note ? note.title : 'Note', 'fa fa-file-text-o', `/notes/${noteId}`);
   }
-  else if (newPath === '/airplane') {
-    newWindows.push({ id: 'airplane', title: '飞机大战', icon: 'fa fa-fighter-jet', isActive: true });
-  }
-  else if (newPath === '/survivors') {
-    newWindows.push({ id: 'survivor', title: '桌面保卫战', icon: 'fa fa-shield', isActive: true });
-  }
-  else if (newPath === '/minesweeper') {
-    newWindows.push({ id: 'mine', title: '扫雷', icon: 'fa fa-bomb', isActive: true });
-  }
-  else if (newPath === '/notepad') {
-    newWindows.push({ id: 'notepad', title: '记事本 - 未命名', icon: 'fa fa-pencil-square-o', isActive: true });
-  }
-  else if (newPath === '/paint') {
-    newWindows.push({ id: 'paint', title: '画图 - 未命名', icon: 'fa fa-paint-brush', isActive: true });
-  }
-  else if (newPath === '/calculator') {
-    newWindows.push({ id: 'calculator', title: '计算器', icon: 'fa fa-calculator', isActive: true });
-  }
-  else if (newPath === '/terminal') {
-    newWindows.push({ id: 'terminal', title: '命令提示符', icon: 'fa fa-terminal', isActive: true });
-  }
-  else if (newPath === '/typing') {
-    newWindows.push({ id: 'typing', title: '打字练习', icon: 'fa fa-keyboard-o', isActive: true });
-  }
-
-  openWindows.value = newWindows;
+  else if (newPath === '/airplane') add('airplane', '飞机大战', 'fa fa-fighter-jet', '/airplane');
+  else if (newPath === '/survivors') add('survivor', '桌面保卫战', 'fa fa-shield', '/survivors');
+  else if (newPath === '/minesweeper') add('mine', '扫雷', 'fa fa-bomb', '/minesweeper');
+  else if (newPath === '/notepad') add('notepad', '记事本 - 未命名', 'fa fa-pencil-square-o', '/notepad');
+  else if (newPath === '/paint') add('paint', '画图 - 未命名', 'fa fa-paint-brush', '/paint');
+  else if (newPath === '/calculator') add('calculator', '计算器', 'fa fa-calculator', '/calculator');
+  else if (newPath === '/terminal') add('terminal', '命令提示符', 'fa fa-terminal', '/terminal');
+  else if (newPath === '/typing') add('typing', '打字练习', 'fa fa-keyboard-o', '/typing');
+  // '/'：桌面在前台，全部窗口退居任务栏
 }, { immediate: true });
+
+// 视图层点 X：移除该窗口，退回打开顺序里它之前最近的窗口；没有则回桌面
+const onWinClose = (e: Event): void => {
+  const detail = (e as CustomEvent).detail as { ids: string[] } | undefined;
+  const ids = detail?.ids ?? [];
+  const idx = openWindows.value.findIndex(w => ids.includes(w.id));
+  if (idx < 0) return;   // 重复的关窗事件：忽略
+  openWindows.value = openWindows.value.filter(w => !ids.includes(w.id));
+  const prev = openWindows.value[idx - 1] ?? null;
+  if (prev?.path) {
+    if (prev.path !== route.path) router.push(prev.path);
+    openWindows.value.forEach(w => w.isActive = w.id === prev.id);
+  } else {
+    openWindows.value.forEach(w => w.isActive = false);
+    if (route.path !== '/') router.push('/');
+  }
+};
 
 const navigateTo = (path: string) => {
   if (path.startsWith('http')) {
@@ -286,22 +321,20 @@ const navigateTo = (path: string) => {
 };
 
 const activateWindow = (id: string) => {
-  // 点任务栏先广播"恢复"：当前路由窗口若被最小化则弹回来（Window.vue 监听）
+  // Win98：点已激活窗口的任务栏按钮 = 最小化（窗口隐藏、按钮弹起，再点走恢复路径）
+  if (activeWindowId.value === id) {
+    window.dispatchEvent(new CustomEvent('win-minimize'));
+    const entry = openWindows.value.find(w => w.id === id);
+    if (entry) entry.isActive = false;
+    return;
+  }
+  // 时间线回退：点击第 N 个窗口 = 关闭其后打开的全部窗口，回到它
+  const idx = openWindows.value.findIndex(w => w.id === id);
+  if (idx < 0) return;
+  openWindows.value = openWindows.value.slice(0, idx + 1);
   window.dispatchEvent(new CustomEvent('win-restore'));
-  if (id === 'computer') router.push('/computer');
-  else if (id === 'docs') router.push('/all-notes');
-  else if (id === 'welcome') router.push('/');
-  else if (id === 'categories') router.push('/categories');
-  else if (id === 'airplane') router.push('/airplane');
-  else if (id === 'survivor') router.push('/survivors');
-  else if (id === 'mine') router.push('/minesweeper');
-  else if (id === 'notepad') router.push('/notepad');
-  else if (id === 'paint') router.push('/paint');
-  else if (id === 'calculator') router.push('/calculator');
-  else if (id === 'terminal') router.push('/terminal');
-  else if (id === 'typing') router.push('/typing');
-  // id === 'note'：文章窗口就是当前路由，无需跳转，上面的事件已负责恢复
-
+  const target = openWindows.value[idx];
+  if (target.path && target.path !== route.path) router.push(target.path);
   openWindows.value.forEach(w => w.isActive = w.id === id);
 };
 

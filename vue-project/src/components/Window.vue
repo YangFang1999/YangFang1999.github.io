@@ -52,6 +52,14 @@ const onWinRestore = () => {
   }
 };
 
+// 任务栏再点已激活窗口 = 最小化（App.vue 广播 win-minimize，仅前台窗口响应）
+const onWinMinimize = () => {
+  if (props.isActive && !isMinimized.value) {
+    isMinimized.value = true;
+    emit('minimize');
+  }
+};
+
 interface MenuItem {
   type?: 'separator';
   label?: string;
@@ -271,12 +279,14 @@ onMounted(() => {
   document.addEventListener('click', handleClickOutside, true);
   document.addEventListener('keydown', handleKeydown);
   window.addEventListener('win-restore', onWinRestore);
+  window.addEventListener('win-minimize', onWinMinimize);
 });
 
 onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside, true);
   document.removeEventListener('keydown', handleKeydown);
   window.removeEventListener('win-restore', onWinRestore);
+  window.removeEventListener('win-minimize', onWinMinimize);
 });
 </script>
 

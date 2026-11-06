@@ -145,7 +145,7 @@ defineProps<{
           </div>
           <div class="px-3 py-1.5 flex items-center gap-2.5 cursor-pointer hover:bg-[#000080] hover:text-white transition-colors" @click="handleMenuNavigate('/all-notes')">
             <i class="fa fa-folder-open w-4 text-center"></i>
-            <span>我的文档</span>
+            <span>我的文章</span>
           </div>
           <div class="px-3 py-1.5 flex items-center gap-2.5 cursor-pointer hover:bg-[#000080] hover:text-white transition-colors" @click="handleMenuNavigate('/categories')">
             <i class="fa fa-cog w-4 text-center"></i>

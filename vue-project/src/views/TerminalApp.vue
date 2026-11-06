@@ -10,6 +10,7 @@ import {
   loadArticle, loadAllArticles, searchArticles, sizeKB, estimateMinutes, stripTags,
 } from '../data/articlesIndex';
 import { categoryNames, CAT_ORDER } from '../data/categories';
+import { closeWindows } from '../winNav';
 
 const router = useRouter();
 
@@ -624,8 +625,9 @@ function tabComplete(): void {
 function onKeydown(e: KeyboardEvent): void {
   // 中文输入法组词中按 Enter 是确认候选词，不执行命令
   if (e.isComposing || e.keyCode === 229) return;
-  if (e.ctrlKey && (e.key === 'l' || e.key === 'L')) { e.preventDefault(); lines.value = []; return; }
-  if (e.ctrlKey && (e.key === 'c' || e.key === 'C')) { e.preventDefault(); interruptJobs(); return; }
+  // Mac 用 Cmd+L / Cmd+C，两者都接受
+  if ((e.ctrlKey || e.metaKey) && (e.key === 'l' || e.key === 'L')) { e.preventDefault(); lines.value = []; return; }
+  if ((e.ctrlKey || e.metaKey) && (e.key === 'c' || e.key === 'C')) { e.preventDefault(); interruptJobs(); return; }
   if (e.key === 'Tab') { e.preventDefault(); tabComplete(); return; }
   if (e.key === 'Enter') {
     execute();
@@ -676,7 +678,7 @@ onUnmounted(() => {
     :isOpen="true"
     :isActive="true"
     :defaultMaximized="true"
-    @close="router.push('/')"
+    @close="closeWindows(['terminal'])"
   >
     <div
       class="w-full h-full font-mono text-[13px] leading-[1.5] overflow-hidden flex flex-col"

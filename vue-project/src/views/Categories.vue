@@ -3,6 +3,7 @@ import { useRouter } from 'vue-router';
 import Window from '../components/Window.vue';
 import { desktopTheme, setTheme, THEMES, type DesktopTheme } from '../settings';
 import { CATEGORIES } from '../data/categories';
+import { closeWindows } from '../winNav';
 
 const router = useRouter();
 
@@ -44,7 +45,7 @@ function resetSettings(): void {
       icon="fa fa-cog"
       :isOpen="true"
       :isActive="true"
-      @close="router.push('/')"
+      @close="closeWindows(['categories'])"
     >
       <!-- Address Bar -->
       <div class="flex items-center gap-2 px-2 py-1 border-b border-gray-300 mb-2">

@@ -1,12 +1,10 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue';
-import { useRouter } from 'vue-router';
 import Window from '../components/Window.vue';
 import { SurvivorGame } from '../game/survivor/core';
 import { G } from '../game/survivor/state';
 import type { Choice, Phase } from '../game/survivor/types';
-
-const router = useRouter();
+import { closeWindows } from '../winNav';
 const canvasRef = ref<HTMLCanvasElement | null>(null);
 
 // 游戏状态镜像（供 DOM 升级面板与按钮渲染）
@@ -36,12 +34,19 @@ onMounted(() => {
     cheatInv.value = G.cheatInvincible;
     if (G.phase === 'levelup') choices.value = [...G.choices];
   }, 250);
+  // 窗口最小化时游戏仍在后台跑，藏进任务栏会被病毒围死——自动暂停
+  window.addEventListener('win-minimize', autoPause);
 });
+
+const autoPause = () => {
+  if (G.phase === 'playing') game?.togglePause();
+};
 
 onUnmounted(() => {
   game?.destroy();
   game = null;
   if (syncTimer) clearInterval(syncTimer);
+  window.removeEventListener('win-minimize', autoPause);
 });
 
 const onPick = (i: number) => { game?.chooseUpgrade(i); };
@@ -80,7 +85,7 @@ const onPointerDown = (e: PointerEvent) => {
     :isActive="true"
     :defaultMaximized="true"
     fixedSize
-    @close="router.push('/')"
+    @close="closeWindows(['survivor'])"
   >
     <!-- 画布始终居中；控制台大屏悬浮左侧（不挤占居中），小屏在画布下方横排 -->
     <div class="relative flex flex-col items-center justify-center gap-2 w-full min-h-0">

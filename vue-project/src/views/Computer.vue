@@ -8,6 +8,7 @@ import { useRouter } from 'vue-router';
 import Window from '../components/Window.vue';
 import { notes } from '../data/notes';
 import { loadAllArticles, sizeKB } from '../data/articlesIndex';
+import { closeWindows } from '../winNav';
 
 const router = useRouter();
 
@@ -71,7 +72,7 @@ const goUp = () => { view.value = 'root'; };
     icon="fa fa-desktop"
     :isOpen="true"
     :isActive="true"
-    @close="router.push('/')"
+    @close="closeWindows(['computer'])"
   >
     <!-- Address Bar -->
     <div class="flex items-center gap-2 px-2 py-1 border-b border-gray-300 mb-3">

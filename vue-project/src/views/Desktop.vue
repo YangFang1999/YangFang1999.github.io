@@ -2,15 +2,21 @@
 import { ref, inject, watch, computed, onMounted, type ComputedRef } from 'vue';
 import Window from '../components/Window.vue';
 import { notes } from '../data/notes';
+import { closeWindows } from '../winNav';
 
 const articleCount = notes.length;
 const categoryCount = new Set(notes.map(n => n.category).filter(Boolean)).size;
 const year = new Date().getFullYear();
 
-const hasVisited = localStorage.getItem('has-visited');
-const isWelcomeOpen = ref(!hasVisited);
+// 欢迎窗按"标签页会话"记忆：本会话关过就不再弹（新标签页会重新出现一次），
+// 路由切走再回来不丢——此前用 has-visited 永久关闭，切回桌面时欢迎窗和任务栏按钮对不上
+const WELCOME_DISMISS_KEY = 'welcome-dismissed';
+const welcomeDismissed = (() => {
+  try { return sessionStorage.getItem(WELCOME_DISMISS_KEY) === '1'; } catch { return false; }
+})();
+const isWelcomeOpen = ref(!welcomeDismissed);
 const isWelcomeMinimized = ref(false);
-const isWelcomeActive = ref(!hasVisited);
+const isWelcomeActive = ref(!welcomeDismissed);
 
 onMounted(() => {
   localStorage.setItem('has-visited', '1');
@@ -25,6 +31,9 @@ watch(activeWindowId!, (id) => {
 
 const closeWindow = () => {
   isWelcomeOpen.value = false;
+  try { sessionStorage.setItem(WELCOME_DISMISS_KEY, '1'); } catch { /* 忽略 */ }
+  // 同步移除任务栏注册表条目（欢迎窗不在路由栈里，App 会因无前窗而停在桌面）
+  closeWindows(['welcome']);
 };
 
 const minimizeWindow = () => {
@@ -68,7 +77,7 @@ const focusWindow = () => {
         <p>这是一个复刻 <strong>Windows 98</strong> 风格的技术博客，记录了我的编程学习笔记和开发经验。</p>
         <p>你可以：</p>
         <ul class="list-disc ml-6 space-y-1">
-          <li>点击桌面上的 <strong>"我的文档"</strong> 图标查看所有文章，或按 <strong>Ctrl+K</strong> 全局搜索</li>
+          <li>点击桌面上的 <strong>"我的文章"</strong> 图标查看所有文章，或按 <strong>Ctrl+K</strong> 全局搜索</li>
           <li>通过 <strong>"控制面板"</strong> 按分类浏览文章</li>
           <li>开始菜单里藏着三款怀旧小游戏：<strong>飞机大战</strong>、<strong>桌面保卫战</strong> 和 <strong>扫雷</strong>，学累了去守一波基地</li>
           <li>桌面上还有一只 <strong>QQ 企鹅</strong> 桌宠跟着你——<strong>右键它</strong>打开菜单，里面藏着全部隐藏玩法（能抛、能骑窗口）</li>

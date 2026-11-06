@@ -13,6 +13,7 @@ import ReadComments from '../components/ReadComments.vue';
 import { notes } from '../data/notes';
 import { loadArticle } from '../data/articlesIndex';
 import { categoryNames } from '../data/categories';
+import { closeWindows } from '../winNav';
 
 const route = useRoute();
 const router = useRouter();
@@ -176,7 +177,8 @@ onMounted(attachScroller);
 onUnmounted(detachScroller);
 
 const goNote = (id?: string) => {
-  if (id) router.push(`/notes/${id}`);
+  // 上一篇/下一篇用 replace：历史里不留中间文章，关窗回退不会弹回上一篇（乒乓环）
+  if (id) router.replace(`/notes/${id}`);
 };
 </script>
 
@@ -186,7 +188,7 @@ const goNote = (id?: string) => {
     icon="fa fa-file-text-o"
     isOpen
     isActive
-    @close="router.push('/all-notes')"
+    @close="closeWindows(['note'])"
     @minimize="overlayOn = false"
     @restore="overlayOn = true"
   >
@@ -196,7 +198,7 @@ const goNote = (id?: string) => {
         <p class="text-4xl mb-4">📄</p>
         <h2 class="text-base font-bold text-[#000080] mb-2">文章不存在</h2>
         <p class="text-gray-600 mb-1">没有找到文章「{{ noteId }}」，链接可能已失效。</p>
-        <router-link to="/all-notes" class="inline-block mt-3 font-bold text-[#000080] hover:bg-[#000080] hover:text-white px-1">← 返回我的文档</router-link>
+        <router-link to="/all-notes" replace class="inline-block mt-3 font-bold text-[#000080] hover:bg-[#000080] hover:text-white px-1">← 返回我的文章</router-link>
       </div>
 
       <template v-else>
@@ -245,10 +247,10 @@ const goNote = (id?: string) => {
           </div>
           <div class="mt-3 text-center">
             <button
-              @click="router.push('/all-notes')"
+              @click="router.replace('/all-notes')"
               class="px-4 py-1 bg-[#c0c0c0] text-xs text-black shadow-win95-outset active:shadow-win95-inset win-btn cursor-pointer"
             >
-              <i class="fa fa-arrow-up mr-1"></i>返回我的文档
+              <i class="fa fa-arrow-up mr-1"></i>返回我的文章
             </button>
           </div>
         </footer>
