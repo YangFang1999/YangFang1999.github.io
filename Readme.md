@@ -30,7 +30,7 @@
 
 ### 📝 技术博客
 
-- **18 篇深度文章** — 从 Java Hello World 到 Spring Boot、Docker，每篇都是千字长文
+- **22 篇深度文章** — 从 Java Hello World 到 MySQL 进阶系列、Spring Boot、Docker，每篇都是千字长文
 - **7 大分类** — Java · Spring · Database · Frontend · Vue · DevOps · 随笔
 - **代码高亮** — 使用 Prism.js，支持 Java、Bash、SQL 语法高亮
 - **Windows 资源管理器风格浏览** — 地址栏、文件图标、向上导航按钮
@@ -40,7 +40,7 @@
 
 | 应用 | 说明 |
 |------|------|
-| 📁 **我的电脑** | 真·文件资源管理器：C 盘 = 18 篇文章（文本文档，按日期排列、显示体积，点击直接阅读）、D 盘 GAMEZ = 三款游戏 exe、控制面板与网上邻居入口；状态栏统计文档磁盘占用 |
+| 📁 **我的电脑** | 真·文件资源管理器：C 盘 = 22 篇文章（文本文档，按日期排列、显示体积，点击直接阅读）、D 盘 GAMEZ = 三款游戏 exe、控制面板与网上邻居入口；状态栏统计文档磁盘占用 |
 | 🔍 **查找：全部文件** | 全局搜索（**Ctrl+K** 或开始菜单 → 查找）：复刻 Win98 查找对话框，标题/分类即时过滤 + 正文全文检索（关键词计数 + 摘要高亮），双击/回车直达文章，可拖拽 |
 | 📂 **我的文章** | 分类文件夹两级浏览：根目录按分类展示**文件夹**，点进后文章以**文件行**平铺（标题.txt + 日期，一行一篇点行即读）；标题搜索跨文件夹命中，地址栏随路径变化 |
 | ⚙️ **控制面板** | 7 大分类浏览入口，点击进入对应分类的文章列表 |
@@ -173,7 +173,7 @@ vue-project/
 │   │   ├── render.ts / hud.ts  # 桌面背景烘焙 / 实体绘制 / 菜单日历结算
 │   │   ├── state.ts / fx.ts / types.ts
 │   └── data/
-│       ├── notes.ts            # 文章元数据 (Note 接口定义 + 18 篇文章列表)
+│       ├── notes.ts            # 文章元数据 (Note 接口定义 + 22 篇文章列表)
 │       └── articles/           # 每篇文章正文一个 .ts 文件，路由按需动态加载
 ├── index.html                  # Vite 入口 HTML (SEO meta + favicon + noscript)
 ├── vite.config.ts              # Vite 配置：vendor 代码分割，ES2015 目标
@@ -255,6 +255,10 @@ npx gh-pages -d dist
 | Spring Boot Guide — 从零搭建 RESTful API | Spring | 2024-03-20 |
 | MySQL Basics — 数据库基础入门 | Database | 2024-03-22 |
 | Redis 基础入门 | Database | 2024-05-28 |
+| MySQL 索引详解 — 从 B+ 树到索引下推 | Database | 2026-11-04 |
+| MySQL 事务与锁 — 从 ACID 到 MVCC | Database | 2026-11-05 |
+| MySQL 日志系统 — 一条 UPDATE 的完整旅程 | Database | 2026-11-06 |
+| MySQL 性能调优与 SQL 优化实战 | Database | 2026-11-07 |
 | Vue Migration — 静态 HTML 到 Vue 3 重构实战 | Frontend | 2024-03-15 |
 | JavaScript ES6+ 新特性 | Frontend | 2024-05-01 |
 | Vue 3 响应式系统详解 — 从 defineProperty 到 Proxy | Vue | 2024-06-10 |
@@ -268,6 +272,11 @@ npx gh-pages -d dist
 | Linux 基础命令 | DevOps | 2024-04-20 |
 
 ## 🗓️ 更新日志
+
+### v2.3 (2026-11)
+
+- 📚 **MySQL 进阶系列上线（4 篇）** —— Database 分类从入门走向进阶，四篇一脉相承：**《MySQL 索引详解 — 从 B+ 树到索引下推》**（候选数据结构逐个淘汰、三层 B+ 树扛 2000 万行的估算、InnoDB 聚簇与 MyISAM 非聚簇差异、回表与覆盖索引、最左前缀、索引下推 ICP、失效清单、自增主键与页分裂）；**《MySQL 事务与锁 — 从 ACID 到 MVCC》**（并发三问题、四大隔离级别、ReadView 与版本链、快照读/当前读与幻读边角、record/gap/next-key 行锁、无索引锁全表、死锁与长事务）；**《MySQL 日志系统 — 一条 UPDATE 的完整旅程》**（undo/redo/binlog 三大日志分工、redo 循环写、binlog 三格式、两阶段提交、一条 UPDATE 的 8 步旅程）；**《MySQL 性能调优与 SQL 优化实战》**（调优金字塔、慢查询定位、EXPLAIN 逐列精读、深分页/JOIN/COUNT 写法优化、前缀索引与区分度）
+- ⬆️ 版本号 v2.2 → v2.3
 
 ### v2.2 (2026-10)
 

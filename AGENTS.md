@@ -15,6 +15,7 @@ npm run preview   # localhost:4173，直接从磁盘读 dist/，rebuild 后刷�
 ## 架构边界
 
 - **桌面隐喻**：一条路由 = 一个"窗口"。`App.vue` 的 `openWindows` 是**时间线式持久注册表**（按打开顺序）：任务栏点击第 N 个窗口 = 移除其后打开的全部窗口并回到它；窗口 X = 移除自身、退回前一个窗口（无则桌面）——**全程不用 history.back**（历史回退与 push 返回类导航会形成乒乓环，踩过两次）。加新路由必须同步 watch 的 `add(...)`（带 path）和 `activateWindow`；新视图 `@close` 必须调 `winNav.ts` 的 `closeWindows([id])`，否则窗口关不掉。
+- **站内 hash 链接只许走 router.push**：文章内互链写 `href="#/notes/<id>"` 没问题，但原生片段跳转（链接点击、`location.hash=` 赋值）会触发 popstate，被防复活守卫误判成历史回退弹回桌面——App.vue 的 `onDocClick` 已全局委托拦截改走 `router.push`（2026-11-07 踩过：MySQL 系列互链首测全被吞）。**测试时也别用 location.hash 跳路由**，走 UI 点击或 evaluate 里派发 click。
 - `components/Window.vue` 是所有窗口的壳。根元素内置 `pointer-events-auto`——**勿删**：Teleport 让视图变多根组件后，App.vue 路由层的透传会失效，删了整个窗口点击穿透。props：`fixedSize`（禁还原，游戏用）、`plainMenus`（应用自带菜单行时隐藏默认假菜单栏）。
 - **文章体系**：正文 = `src/data/articles/<id>.ts` 导出 HTML 字符串；元数据 = `notes.ts`；共享索引 = `articlesIndex.ts`（懒加载缓存、字数/体积、全文搜索，FindDialog/Computer/终端共用）。加文章：article + notes.ts + articlesIndex loader 三处。**分类单一来源：`data/categories.ts`**（显示名/终端顺序/控制面板卡片图标颜色），加分类只改这一个文件，articlesIndex / NoteDetail / Categories / TerminalApp 都从这里取——2026-11-03 已从四处重复映射收敛，勿再复制。
 - **加新文章/分类的完整清单已固化为 skill `blog-add-article`**（用 Skill 工具调 `/blog-add-article`；文件在 `C:\Users\YF\.agents\skills\blog-add-article\SKILL.md`）——按"素材→id 决策→正文规范→三处接线→全站联动面盘点（自动/手动）→验证→部署"推演的全流程，含 Word 稿转换、hash 站内链接、giscus 评论按 `notes/<id>` 映射（id 永不改）、分类四处同步、**Readme 五处触点（含文章列表表格行 + 更新日志条目，每篇必查）**。加文章前先读它。

@@ -66,7 +66,7 @@ const focusWindow = () => {
         <img src="/icons/computer_explorer-5.png" class="w-16 h-16" alt="computer">
         <div class="text-left">
           <h1 class="text-xl font-bold text-[#000080]">YF's Blog</h1>
-          <p class="text-xs text-gray-600">Version 2.2 · Windows 98 Edition</p>
+          <p class="text-xs text-gray-600">Version 2.3 · Windows 98 Edition</p>
         </div>
       </div>
 

@@ -47,6 +47,7 @@ onMounted(() => {
   window.addEventListener('open-sysprops', openSysProps);
   window.addEventListener('keydown', onRootKeydown);
   window.addEventListener('win-close', onWinClose);
+  document.addEventListener('click', onDocClick);
   window.addEventListener('resize', onWindowResize);
   window.addEventListener('pointermove', resetIdle);
   window.addEventListener('pointerdown', resetIdle);
@@ -58,6 +59,7 @@ onUnmounted(() => {
   window.removeEventListener('open-sysprops', openSysProps);
   window.removeEventListener('keydown', onRootKeydown);
   window.removeEventListener('win-close', onWinClose);
+  document.removeEventListener('click', onDocClick);
   window.removeEventListener('popstate', onPopState);
   window.removeEventListener('resize', onWindowResize);
   window.removeEventListener('pointermove', resetIdle);
@@ -237,6 +239,18 @@ let lastNavPos: number | null = null;
 let popNav = false;
 const onPopState = (): void => { popNav = true; };
 window.addEventListener('popstate', onPopState);
+
+// 文章内的站内链接（href="#/notes/xxx"）是原生片段跳转——同文档导航会触发 popstate，
+// 被上面的防复活守卫误判成历史回退而弹回桌面（实测踩过）。统一拦截改走 router.push
+// （pushState 不触发 popstate），popstate 就只剩浏览器前进/后退和手动改地址栏，守卫语义更纯。
+const onDocClick = (e: MouseEvent): void => {
+  if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+  const anchor = (e.target as HTMLElement | null)?.closest?.('a[href^="#/"]') as HTMLAnchorElement | null;
+  if (!anchor) return;
+  e.preventDefault();
+  const target = anchor.getAttribute('href') ?? '';
+  if (target.startsWith('#/')) void router.push(target.slice(1));
+};
 
 watch(() => route.fullPath, () => {
   const newPath = route.path;
@@ -456,7 +470,7 @@ const dprInfo = computed(() => Math.round((window.devicePixelRatio || 1) * 100) 
           <div class="flex items-center gap-3 mb-3">
             <img src="/icons/windows-0.png" class="w-10 h-10" alt="windows">
             <div>
-              <div class="font-bold text-[#000080] text-sm">YF's Blog v2.2</div>
+              <div class="font-bold text-[#000080] text-sm">YF's Blog v2.3</div>
               <div class="text-gray-700 text-[11px]">Windows 98 Edition · Powered by Vue 3</div>
             </div>
           </div>

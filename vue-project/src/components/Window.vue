@@ -120,7 +120,7 @@ const menus: { id: string; label: string; items: MenuItem[] }[] = [
     items: [
       { label: '帮助主题(<u>H</u>)', disabled: true },
       { type: 'separator' },
-      { label: '关于本程序(<u>A</u>)...', action: () => { closeMenu(); alert('YF Blog v2.2\nWindows 98 Edition\n基于 Vue 3 + TypeScript + Vite\n\n© 2024 YF. All rights reserved.'); } },
+      { label: '关于本程序(<u>A</u>)...', action: () => { closeMenu(); alert('YF Blog v2.3\nWindows 98 Edition\n基于 Vue 3 + TypeScript + Vite\n\n© 2024 YF. All rights reserved.'); } },
     ]
   },
 ];

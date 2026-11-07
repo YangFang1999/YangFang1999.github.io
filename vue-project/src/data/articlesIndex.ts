@@ -23,6 +23,10 @@ const articleLoaders: Record<string, () => Promise<{ default: string }>> = {
   'pinia-intro': () => import('./articles/pinia-intro'),
   'learning-journey': () => import('./articles/learning-journey'),
   'lotus': () => import('./articles/lotus'),
+  'mysql-index': () => import('./articles/mysql-index'),
+  'mysql-txn-lock': () => import('./articles/mysql-txn-lock'),
+  'mysql-logs': () => import('./articles/mysql-logs'),
+  'mysql-tuning': () => import('./articles/mysql-tuning'),
 };
 
 // 分类显示名的单一来源在 ./categories（终端/文章页/控制面板共用），此处仅转出给既有调用方

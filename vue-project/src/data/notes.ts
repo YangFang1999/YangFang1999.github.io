@@ -27,4 +27,8 @@ export const notes: Note[] = [
   { id: 'pinia-intro', title: 'Pinia 状态管理入门', date: '2024-07-02', icon: 'fa fa-cubes', path: '/notes/pinia-intro', category: 'vue' },
   { id: 'lotus', title: '莲', date: '2026-03-01', icon: 'fa fa-tint', path: '/notes/lotus', category: 'essay' },
   { id: 'learning-journey', title: '学习历程', date: '2026-08-31', icon: 'fa fa-road', path: '/notes/learning-journey', category: 'essay' },
+  { id: 'mysql-index', title: 'MySQL 索引详解：从 B+ 树到索引下推', date: '2026-11-04', icon: 'fa fa-key', path: '/notes/mysql-index', category: 'database' },
+  { id: 'mysql-txn-lock', title: 'MySQL 事务与锁：从 ACID 到 MVCC', date: '2026-11-05', icon: 'fa fa-lock', path: '/notes/mysql-txn-lock', category: 'database' },
+  { id: 'mysql-logs', title: 'MySQL 日志系统：一条 UPDATE 的完整旅程', date: '2026-11-06', icon: 'fa fa-history', path: '/notes/mysql-logs', category: 'database' },
+  { id: 'mysql-tuning', title: 'MySQL 性能调优与 SQL 优化实战', date: '2026-11-07', icon: 'fa fa-wrench', path: '/notes/mysql-tuning', category: 'database' },
 ];
