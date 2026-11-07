@@ -60,7 +60,7 @@ export default `	      <h1>Java 入门：从 Hello World 到理解 JVM 运行原
 	          <li>下载并安装 JDK（推荐 Eclipse Temurin，安装过程一路 Next 即可，记住安装路径）。</li>
 	          <li>打开"系统属性" → "高级" → "环境变量"。</li>
 	          <li><strong>新建系统变量</strong>：变量名 <code>JAVA_HOME</code>，变量值是 JDK 安装路径（例如 <code>C:\Program Files\Eclipse Adoptium\jdk-21.0.2.13-hotspot\</code>）。这步不是操作系统必需的，但 Maven、Gradle、Tomcat、IDE 等工具都会读取 <code>JAVA_HOME</code> 来定位 JDK，<strong>所以强烈建议配置</strong>。</li>
-	          <li><strong>编辑 Path 变量</strong>：新增一条 <code>%JAVA_HOME%in</code>（注意不要删掉 Path 里已有的其他内容）。</li>
+	          <li><strong>编辑 Path 变量</strong>：新增一条 <code>%JAVA_HOME%\\bin</code>（注意不要删掉 Path 里已有的其他内容）。</li>
 	          <li>打开<strong>新的</strong> CMD 窗口（旧的不会自动刷新环境变量），依次输入 <code>java -version</code> 和 <code>javac -version</code>，都正常显示版本号即配置成功。</li>
 	      </ol>
 	      <p><strong>常见坑：</strong>改完环境变量后一定要重新打开命令行窗口！如果还是提示"不是内部或外部命令"，检查 Path 里是否有拼写错误、是否有多余的分号或空格。实在不行，重启电脑是最稳妥的办法。</p>
@@ -128,7 +128,7 @@ java HelloWorld         # 运行：字节码 → 机器码 → 执行</code></pr
 	          <tr>
 	              <td><code>'javac' 不是内部或外部命令</code></td>
 	              <td>Path 环境变量没有 JDK 的 bin 目录</td>
-	              <td>检查 Path 是否包含 <code>%JAVA_HOME%in</code>，重新打开 CMD</td>
+	              <td>检查 Path 是否包含 <code>%JAVA_HOME%\\bin</code>，重新打开 CMD</td>
 	          </tr>
 	          <tr>
 	              <td><code>类 HelloWorld 是公共的，应在名为 HelloWorld.java 的文件中声明</code></td>
@@ -176,6 +176,47 @@ java HelloWorld         # 运行：字节码 → 机器码 → 执行</code></pr
 	      </table>
 	      <p>先建立空间感即可：<strong>"new 出来的都在堆上，方法怎么跑的在栈上，类本身的信息在方法区"</strong>。之后学垃圾回收、内存泄漏排查（jmap / MAT）时，这张地图就是坐标系。</p>
 
+	      <h2>10. 包与 classpath：Java 怎么找到类</h2>
+	      <p>项目一大，类就要分目录管理——这就是<strong>包（package）</strong>。包既是命名空间（避免类名冲突），也是访问控制的边界：</p>
+	      <pre><code class="language-java">// 文件必须放在 com/example/blog/ 目录下（包名 = 目录结构）
+package com.example.blog;
+
+public class Article {
+    // 类的完整名称：com.example.blog.Article
+}
+</code></pre>
+	      <p>编译后要按包运行，这里藏着新手第二个大坑——<strong>classpath</strong>：</p>
+	      <pre><code class="language-bash"># 编译（-d 指定输出目录）
+javac -d out src/com/example/blog/Article.java
+
+# 运行：java 后面跟"完整类名"，classpath 告诉 JVM 去哪找类的根
+java -cp out com.example.blog.Article
+# ✗ 错误姿势：java -cp out com/example/blog/Article（用斜杠会报"找不到或无法加载主类"）
+# ✗ 错误姿势：cd 到 com/example/blog 里再 java Article（会找不带包名的 Article）</code></pre>
+	      <p>理解要点：<strong>JVM 按"classpath 里的每一项当作根目录 + 完整类名转路径"去找 .class 文件</strong>。IDE 和构建工具把这些细节全包了，所以很多人从没搞懂过——但报 <code>ClassNotFoundException</code> / <code>NoClassDefFoundError</code> 时，这条原理就是唯一线索（前者是编译期/加载时完全找不到，后者是编译在、运行时不在，典型如依赖版本冲突）。</p>
+
+	      <h2>11. 从 class 到 jar，再到 Maven</h2>
+	      <p>单个类的时代结束得很快。项目有了几十个类 + 第三方库后，出现了两个新问题：怎么打包交付？怎么管理依赖？</p>
+	      <p><strong>第一步：jar 包</strong>——本质是把 class 文件和资源按包结构 zip 起来，再加一个清单：</p>
+	      <pre><code class="language-bash">jar --create --file myapp.jar -C out .        # 把 out 目录打 jar
+jar --update --file myapp.jar --main-class com.example.blog.Main   # 声明入口
+java -jar myapp.jar                            # 可直接运行（读取 META-INF/MANIFEST.MF 的 Main-Class）</code></pre>
+	      <p><strong>第二步：依赖管理</strong>——你的程序用到 10 个第三方库，每个库又依赖别的库（传递依赖），手工下载 jar 很快变成灾难。于是有了 Maven/Gradle：在 <code>pom.xml</code> 里声明"我要哪些库（坐标 = groupId + artifactId + version）"，构建工具自动从中央仓库下载并解决依赖树。这也是为什么 IDE、CI、所有教程默认你装了 Maven——<strong>Hello World 是手工时代，Maven 是工业化时代</strong>，两者的桥就是本节的 jar 与 classpath 概念。</p>
+
+	      <h2>12. 高频面试题快答</h2>
+	      <table>
+	          <tr>
+	              <th>问题</th>
+	              <th>一句话答案</th>
+	          </tr>
+	          <tr><td>Java 为什么能跨平台？</td><td>编译产物是字节码而非机器码，各平台 JVM 把同一份字节码翻译成本地指令——"WORA" 靠的是 JVM 屏蔽差异</td></tr>
+	          <tr><td>Java 是编译型还是解释型？</td><td>混合：先编译成字节码（javac），再解释执行 + JIT 热点编译成机器码，"先慢后快"</td></tr>
+	          <tr><td>JDK 8 / 11 / 17 / 21 哪些是 LTS？</td><td>8、11、17、21 是 LTS（长期支持），非 LTS 版本只有半年维护期，生产选 LTS</td></tr>
+	          <tr><td>Oracle JDK 和 OpenJDK 的区别？</td><td>同为 Java 的实现，Oracle JDK 商用需订阅；OpenJDK 是开源参考实现，Temurin/Corretto 等发行版免费</td></tr>
+	          <tr><td>main 方法可以是 private / 非 static 吗？</td><td>可以编译（老版本），但 JVM 入口约定是 public static void main(String[])，运行会报错；Java 21 之前没有其他入口形态</td></tr>
+	          <tr><td>ClassNotFoundException 和 NoClassDefFoundError？</td><td>前者 Exception：显式按名加载找不到；后者 Error：编译时在、运行时丢失（依赖冲突的典型信号）</td></tr>
+	      </table>
+
 	      <h2>小结</h2>
 	      <p>今天我们不仅写了一行 Java 代码，还深入理解了 <strong>JDK/JRE/JVM 的关系、编译运行的完整流程、字节码的概念、以及环境变量背后的原理</strong>。你可能觉得"Hello World 而已，至于讲这么多吗？"——但这些基础概念会在你未来的每一行代码中反复出现：当 ClassNotFoundException 报错时、当你理解 Maven 依赖冲突时、当面试官问你"Java 为什么能跨平台"时，你会发现今天的底层原理格外有用。</p>
-	      <p>编程学习就像拼拼图——每一块看似零散的知识，最终都会连成一片完整的版图。<strong>不急不躁，把基础打牢，我们下一篇文章见。</strong>下一站建议：<a href="#/notes/java-collections-framework">Java 集合框架</a>——日常开发用得最多的 API，也是这张拼图里最先拼上的一大块。</p>`;
+	      <p>编程学习就像拼拼图——每一块看似零散的知识，最终都会连成一片完整的版图。<strong>不急不躁，把基础打牢，我们下一篇文章见。</strong>下一站建议：<a href="#/notes/java-collections-framework">Java 集合框架</a>——日常开发用得最多的 API，也是这张拼图里最先拼上的一大块。等写起真正的项目，再回头看本节的 classpath 与依赖管理，你会对 <a href="#/notes/spring-boot-guide">Spring Boot</a> 项目的 pom.xml 有完全不同的理解。</p>`;
