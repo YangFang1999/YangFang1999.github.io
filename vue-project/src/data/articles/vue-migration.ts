@@ -160,9 +160,20 @@ export const notes: Note[] = [
 	          <li>缺少单元测试——核心组件（Window、Taskbar）应该有基础的渲染测试。</li>
 	      </ul>
 
+	      <h2>10. 迁移避坑清单：我踩过的坑你别再踩</h2>
+	      <p>重构不是一帆风顺的，这些坑每一颗都是真金白银的调试时间换来的：</p>
+	      <ul>
+	          <li><strong>别一次性重写，走"绞杀者"路线：</strong>先让 Vue 应用接管路由壳子，老页面作为组件逐页搬进来。大爆炸式重写的结果通常是"新站没写完，老站还挂着，两边数据都对不上"。</li>
+	          <li><strong>v-html 渲染富文本要先想好 XSS：</strong>文章正文用 <code>v-html</code> 渲染，如果内容来源含用户输入（比如评论），必须消毒。本站正文是自己写的 HTML 字符串，风险可控；但这个决定要显式做出来，而不是忘了。</li>
+	          <li><strong>Teleport 会改变组件"根"的行为：</strong>文章窗口用 <code>&lt;Teleport to="body"&gt;</code> 挂到 body 后组件变多根，外层容器的事件透传会失效——根元素自己补 <code>pointer-events-auto</code>，否则整个窗口点击穿透（这个 bug 排查了一晚上）。</li>
+	          <li><strong>hash 路由下别用裸路径链接：</strong><code>href="/notes/xxx"</code> 会触发整页刷新回到桌面，站内链接一律 <code>href="#/notes/xxx"</code> 或 RouterLink。</li>
+	          <li><strong>构建检查 = 类型检查：</strong>本项目的验证手段是 <code>npm run build</code>（vue-tsc + vite build），没有 lint 和测试框架。改完必 build，类型错误挡在部署前——小项目这样够用，别为了仪式感堆工具链。</li>
+	      </ul>
+
 	      <h2>小结</h2>
 	      <p>从静态 HTML 到 Vue 3 的迁移，本质上是一次<strong>"从手工作坊到工业化生产"</strong>的升级。组件化让你不用再复制粘贴 HTML，TypeScript 让你在重构时有底气，Vite 让开发体验从"等待"变成"即时"。如果你的个人网站也到了维护瓶颈期，强烈建议走一遍这个流程——<strong>边做边学，是最好的学习方式。</strong></p>
 	      <p>启动开发服务器只需一行命令：</p>
 	      <pre><code class="language-bash">cd vue-project
 npm install    # 首次运行需安装依赖
-npm run dev    # 启动开发服务器，浏览器自动打开 http://localhost:5173</code></pre>`;
+npm run dev    # 启动开发服务器，浏览器自动打开 http://localhost:5173</code></pre>
+	      <p>重构用到的核心知识在这个站里都有系列文章：<a href="#/notes/vue-reactivity">响应式系统</a>、<a href="#/notes/vue-composition">组合式 API</a>、<a href="#/notes/vue-router4">Vue Router 4</a>、<a href="#/notes/pinia-intro">Pinia</a>——本站本身就是这些文章的活例子。</p>`;

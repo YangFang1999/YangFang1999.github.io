@@ -1,7 +1,7 @@
 // 文章正文（HTML）。由 NoteDetail 按需动态加载，只包含正文，不含页面框架。
 export default `	      <h1>MySQL 从入门到高效使用：SQL 语法、设计规范与性能优化</h1>
 
-	      <p>MySQL 是目前最流行的开源关系型数据库。从个人博客到大型电商，从日志存储到数据分析，MySQL 几乎无处不在。但会用 SQL 和用好 MySQL 是两回事——本文从基础语法讲起，延伸到表设计规范和常见的性能优化技巧，帮你从一个"会写增删改查"的开发者成长为"知道怎么写更高效"的工程师。</p>
+	      <p>MySQL 是目前最流行的开源关系型数据库。从个人博客到大型电商，从日志存储到数据分析，MySQL 几乎无处不在。但会用 SQL 和用好 MySQL 是两回事——本文从基础语法讲起，延伸到表设计规范和常见的性能优化技巧，帮你从一个"会写增删改查"的开发者成长为"知道怎么写更高效"的工程师。这篇是本站 MySQL 系列的入口：想继续深入请看<a href="#/notes/mysql-index">索引详解</a>、<a href="#/notes/mysql-txn-lock">事务与锁</a>、<a href="#/notes/mysql-logs">日志系统</a>和<a href="#/notes/mysql-tuning">调优实战</a>。</p>
 
 	      <h2>1. 关系型数据库核心概念</h2>
 	      <p>在写 SQL 之前，先搞清楚几个基本概念。这些词在面试和工作中会反复出现：</p>
@@ -60,6 +60,7 @@ DROP DATABASE IF EXISTS mydb;</code></pre>
 	          <tr><td>时间</td><td><code>TIMESTAMP</code></td><td>自动处理时区转换（DATETIME 不处理）</td></tr>
 	          <tr><td>布尔值</td><td><code>TINYINT(1)</code></td><td>MySQL 没有真正的 BOOLEAN 类型</td></tr>
 	      </table>
+	      <p>一条总原则：<strong>够用的前提下选最小的类型</strong>——列越小，一页 16KB 能存的行越多，索引和缓存效率都跟着涨（原理见 <a href="#/notes/mysql-index">索引篇的 B+ 树页估算</a>）。</p>
 
 	      <h2>4. CRUD 进阶：不止是简单的 SELECT</h2>
 	      <pre><code class="language-sql">-- ====== 查询 ======
@@ -67,7 +68,7 @@ DROP DATABASE IF EXISTS mydb;</code></pre>
 SELECT id, username, email
 FROM users
 WHERE status = 'active'
-  AND created_at >= '2024-01-01'
+  AND created_at &gt;= '2024-01-01'
 ORDER BY created_at DESC
 LIMIT 10 OFFSET 20;     -- 跳过 20 条，取 10 条（第 3 页）
 
@@ -75,19 +76,13 @@ LIMIT 10 OFFSET 20;     -- 跳过 20 条，取 10 条（第 3 页）
 SELECT status, COUNT(*) AS cnt, AVG(age) AS avg_age
 FROM users
 GROUP BY status
-HAVING cnt > 5;          -- 对分组结果过滤（不用 WHERE，WHERE 在 GROUP BY 之前过滤行）
-
--- 多表关联查询
-SELECT u.username, o.order_no, o.amount
-FROM users u
-INNER JOIN orders o ON u.id = o.user_id
-WHERE o.status = 'paid';
+HAVING cnt &gt; 5;          -- 对分组结果过滤（不用 WHERE，WHERE 在 GROUP BY 之前过滤行）
 
 -- 子查询
 SELECT username
 FROM users
 WHERE id IN (
-    SELECT DISTINCT user_id FROM orders WHERE amount > 1000
+    SELECT DISTINCT user_id FROM orders WHERE amount &gt; 1000
 );
 
 -- ====== 插入 ======
@@ -109,12 +104,38 @@ WHERE id = 1;
 UPDATE users SET is_deleted = 1, deleted_at = NOW() WHERE id = 1;</code></pre>
 	      <p><strong>核心要点：</strong></p>
 	      <ul>
-	          <li><strong>SELECT * 别乱用：</strong>只查需要的字段，减少网络传输和内存占用。尤其在表有 TEXT 等大字段时。</li>
+	          <li><strong>SELECT * 别乱用：</strong>只查需要的字段，减少网络传输和内存占用。尤其在表有 TEXT 等大字段时（索引层面的原因见<a href="#/notes/mysql-index">回表与覆盖索引</a>）。</li>
 	          <li><strong>LIMIT 必须配合 ORDER BY：</strong>没有 ORDER BY 的 LIMIT 返回顺序是不确定的。</li>
 	          <li><strong>软删除优于硬删除：</strong>数据是资产，用 <code>is_deleted</code> 字段标记删除而非真正 DELETE，方便数据恢复和审计。</li>
 	      </ul>
 
-	      <h2>5. 索引：查询快的核心秘诀</h2>
+	      <h2>5. 多表连接：JOIN 到底怎么连</h2>
+	      <p>业务数据必然分表存储（用户表、订单表），JOIN 是把它们拼回来的方式。三种连接的区别用一句话 + 一个例子说清：</p>
+	      <pre><code class="language-sql">-- 内连接：只返回两边都能匹配上的行
+SELECT u.username, o.order_no, o.amount
+FROM users u
+INNER JOIN orders o ON u.id = o.user_id
+WHERE o.status = 'paid';
+
+-- 左连接：左表全保留，右表匹配不上补 NULL
+-- "所有用户 + 他们的订单数（没下过单的用户也要出现，订单数为 0）"
+SELECT u.username, COUNT(o.id) AS order_count
+FROM users u
+LEFT JOIN orders o ON u.id = o.user_id
+GROUP BY u.id, u.username;
+
+-- 右连接 = 左连接换方向，实际开发为了可读性一律写 LEFT JOIN</code></pre>
+	      <p>两个高频细节：<strong>① LEFT JOIN 后接 WHERE 右表条件会把左连接"退化"成内连接</strong>（把 NULL 行全过滤掉了）——过滤右表的限制应该写在 ON 里；<strong>② 被驱动表的关联列必须有索引</strong>，否则每次匹配都是全表扫描（优化细节见<a href="#/notes/mysql-tuning">调优实战的 JOIN 一节</a>）。</p>
+
+	      <h2>6. 事务：让多条 SQL 同生共死</h2>
+	      <pre><code class="language-sql">START TRANSACTION;
+UPDATE account SET balance = balance - 100 WHERE id = 1;
+UPDATE account SET balance = balance + 100 WHERE id = 2;
+COMMIT;      -- 全部生效
+-- 或者 ROLLBACK;  全部撤销</code></pre>
+	      <p>事务保证 ACID 四个特性，四个隔离级别控制并发行为，InnoDB 默认级别是 REPEATABLE READ——"为什么默认是它""MVCC 怎么实现的""锁有哪几种"，完整展开见 <a href="#/notes/mysql-txn-lock">MySQL 事务与锁</a>。这里先记住两条日常纪律：<strong>① UPDATE/DELETE 必须带 WHERE 且走索引；② 事务尽量短，别把 RPC 调用包进事务里。</strong></p>
+
+	      <h2>7. 索引：查询快的核心秘诀</h2>
 	      <p><strong>索引是什么？</strong>类比书的目录——没有目录你要一页页翻找内容（全表扫描），有了目录可以直接定位（索引查找）。</p>
 	      <p><strong>MySQL 常用索引类型：</strong></p>
 	      <ul>
@@ -133,17 +154,18 @@ EXPLAIN SELECT * FROM users WHERE email = 'test@example.com';
 -- 关注 type 列：ALL（全表扫描，最差）→ index → range → ref → const（最好）
 -- 关注 key 列：实际使用的索引名
 -- 关注 rows 列：预估扫描行数</code></pre>
+	      <p>索引的数据结构（为什么是 B+ 树）、聚簇与非聚簇、回表、覆盖索引、索引下推这些"为什么"，在 <a href="#/notes/mysql-index">MySQL 索引详解</a>里完整展开——这一篇先会用，下一篇懂原理。</p>
 
-	      <h2>6. SQL 调优清单</h2>
+	      <h2>8. SQL 调优清单</h2>
 	      <ol>
 	          <li><strong>WHERE 条件里的列加索引：</strong>这是最有效的优化。但不要给每列都加索引——索引占空间，且写操作需要维护索引。</li>
-	          <li><strong>避免在 WHERE 中对列做函数操作：</strong><code>WHERE DATE(created_at) = '2024-01-01'</code> 不走索引，应改为 <code>WHERE created_at >= '2024-01-01' AND created_at < '2024-01-02'</code>。</li>
+	          <li><strong>避免在 WHERE 中对列做函数操作：</strong><code>WHERE DATE(created_at) = '2024-01-01'</code> 不走索引，应改为 <code>WHERE created_at &gt;= '2024-01-01' AND created_at &lt; '2024-01-02'</code>。</li>
 	          <li><strong>LIKE 前缀模糊走不了索引：</strong><code>LIKE '%keyword%'</code> 或 <code>LIKE '%keyword'</code> 不走索引，<code>LIKE 'keyword%'</code> 可以走。</li>
 	          <li><strong>用 JOIN 替代子查询（很多时候）：</strong>MySQL 的查询优化器对 JOIN 的优化比子查询好。</li>
-	          <li><strong>大表分页优化：</strong><code>LIMIT 100000, 10</code> 会扫描前 100010 行再扔掉前 100000 行，非常慢。用"延迟关联"或"游标分页"替代。</li>
+	          <li><strong>大表分页优化：</strong><code>LIMIT 100000, 10</code> 会扫描前 100010 行再扔掉前 100000 行，非常慢。用"延迟关联"或"游标分页"替代（写法见 <a href="#/notes/mysql-tuning">调优实战</a>）。</li>
 	      </ol>
 
-	      <h2>7. InnoDB 存储引擎——你需要知道的</h2>
+	      <h2>9. InnoDB 存储引擎——你需要知道的</h2>
 	      <p>MySQL 的默认存储引擎是 InnoDB，它提供了几个关键特性：</p>
 	      <ul>
 	          <li><strong>事务（ACID）：</strong>支持事务，通过 MVCC（多版本并发控制）实现高并发下的读不阻塞写。</li>
@@ -153,6 +175,20 @@ EXPLAIN SELECT * FROM users WHERE email = 'test@example.com';
 	      </ul>
 	      <p><strong>关于事务隔离级别：</strong>InnoDB 默认是 <code>REPEATABLE READ</code>（可重复读），通过 Next-Key Lock 在一定程度上避免了幻读问题。</p>
 
+	      <h2>10. 窗口函数：MySQL 8.0 的报表利器</h2>
+	      <p>聚合 + 明细同时要的场景，以前要靠子查询绕，8.0 的窗口函数一行搞定：</p>
+	      <pre><code class="language-sql">-- 每个用户的订单 + 该用户订单金额在全体中的排名
+SELECT order_no, user_id, amount,
+       ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY amount DESC) AS rank_in_user,
+       ROUND(amount * 100.0 / SUM(amount) OVER (PARTITION BY user_id), 2) AS pct_of_user
+FROM orders;
+
+-- 常用窗口函数速查：
+-- ROW_NUMBER()  连续编号（1,2,3...）
+-- RANK()        并列同名次，跳号（1,1,3）
+-- SUM/AVG/COUNT() OVER (...)  组内累计/均值
+-- LAG()/LEAD()  取上一行/下一行的值（环比计算神器）</code></pre>
+
 	      <h2>小结</h2>
 	      <p>MySQL 这门技术，入门容易精通难。本文覆盖了从 SQL 语法到表设计规范再到索引优化的核心知识。如果你只能记住三点，请记住：<strong>① 字符集用 utf8mb4；② 金额用 DECIMAL；③ WHERE 条件里的列要建索引。</strong>这三点做到了，至少能避免 80% 的初级错误。</p>
-	      <p>下一步推荐学习的方向：慢查询日志分析（<code>slow_query_log</code>）、EXPLAIN 执行计划详解、分库分表方案（ShardingSphere）、以及 MySQL 8.0 的新特性（窗口函数、CTE 递归查询等）。</p>`;
+	      <p>这是 MySQL 系列的第一篇。继续深入：为什么是 B+ 树、回表与索引下推看<a href="#/notes/mysql-index">索引详解</a>；隔离级别与 MVCC 看<a href="#/notes/mysql-txn-lock">事务与锁</a>；redo/binlog 与两阶段提交看<a href="#/notes/mysql-logs">日志系统</a>；EXPLAIN 实战与深分页优化看<a href="#/notes/mysql-tuning">调优实战</a>。缓存层的搭档是 <a href="#/notes/redis-basics">Redis</a>。</p>`;

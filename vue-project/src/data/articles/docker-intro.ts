@@ -1,7 +1,7 @@
 // 文章正文（HTML）。由 NoteDetail 按需动态加载，只包含正文，不含页面框架。
 export default `	      <h1>Docker 容器化实战：从镜像构建到多容器编排</h1>
 
-	      <p>"在我电脑上能跑啊"——这句话大概是软件开发史上最经典的甩锅台词。Docker 的出现就是为了解决这个根本问题：<strong>让应用在任何环境中以相同的方式运行</strong>。本文将带你从 Docker 的核心概念出发，逐步深入到编写 Dockerfile、使用 Docker Compose 编排多容器应用，以及生产环境的最佳实践。</p>
+	      <p>"在我电脑上能跑啊"——这句话大概是软件开发史上最经典的甩锅台词。Docker 的出现就是为了解决这个根本问题：<strong>让应用在任何环境中以相同的方式运行</strong>。本文将带你从 Docker 的核心概念出发，逐步深入到编写 Dockerfile、使用 Docker Compose 编排多容器应用，以及生产环境的最佳实践与常见坑。</p>
 
 	      <h2>1. Docker 解决了什么问题？</h2>
 	      <p>在没有 Docker 的时代（其实也就是 2013 年以前），部署一个 Java Web 应用大概是这样的：</p>
@@ -48,6 +48,20 @@ export default `	      <h1>Docker 容器化实战：从镜像构建到多容器�
 	              <td>管弦乐队的指挥</td>
 	          </tr>
 	      </table>
+	      <p><strong>容器 vs 虚拟机</strong>——一个高频疑问，一张表说清：</p>
+	      <table>
+	          <tr>
+	              <th></th>
+	              <th>虚拟机</th>
+	              <th>容器</th>
+	          </tr>
+	          <tr><td>隔离方式</td><td>Hypervisor 虚拟出整套硬件，每个 VM 跑完整操作系统</td><td>共享宿主机内核，靠 Namespace（视图隔离）+ Cgroups（资源限额）隔离进程</td></tr>
+	          <tr><td>启动速度</td><td>分钟级</td><td><strong>秒级甚至毫秒级</strong></td></tr>
+	          <tr><td>体积</td><td>GB 级（整个 OS）</td><td>MB 级（只有应用和依赖）</td></tr>
+	          <tr><td>性能损耗</td><td>有（硬件虚拟化）</td><td>接近原生</td></tr>
+	          <tr><td>隔离强度</td><td><strong>强</strong>（内核都不同）</td><td>弱于 VM（共享内核，安全敏感场景要加裁剪）</td></tr>
+	      </table>
+	      <p>一句话：VM 隔离的是"机器"，容器隔离的是"进程与其视角"——轻量得多，也正因如此能在一台机器上高密度部署。</p>
 
 	      <h2>3. 常用 Docker 命令速查</h2>
 	      <pre><code class="language-bash"># ====== 镜像操作 ======
@@ -69,13 +83,23 @@ docker start my-nginx                      # 启动已停止的容器
 docker restart my-nginx                    # 重启容器
 docker rm my-nginx                         # 删除容器（必须先停止）
 docker rm -f my-nginx                      # 强制删除（运行中的也直接删）
-docker logs -f my-nginx                    # 查看容器日志（-f 实时跟踪）
+docker logs -f my-nginx                    # 查看容器日志（-f 实时跟踪，--tail 100 最近 100 行）
+
+# ====== 观察 ======
+docker stats                               # 所有容器的实时 CPU/内存/网络占用
+docker inspect my-nginx                    # 查看容器完整元数据（IP/挂载/环境变量）
+docker top my-nginx                        # 容器内的进程列表
 
 # ====== 进入容器内部调试 ======
 docker exec -it my-nginx /bin/bash         # 进入容器的 bash（Alpine 用 /bin/sh）
 
+# ====== 文件复制 ======
+docker cp app.log my-nginx:/tmp/           # 宿主机 → 容器
+docker cp my-nginx:/etc/nginx/nginx.conf ./ # 容器 → 宿主机
+
 # ====== 清理 ======
-docker system prune -a                     # 清理所有未使用的镜像、容器、网络、构建缓存</code></pre>
+docker system prune -a                     # 清理所有未使用的镜像、容器、网络、构建缓存
+docker system df                           # 查看 Docker 占用了多少磁盘</code></pre>
 
 	      <h2>4. 编写高质量的 Dockerfile</h2>
 	      <p>以 Spring Boot 应用为例，先看一个"能用但不够好"的版本，再看优化后的版本：</p>
@@ -98,7 +122,7 @@ RUN mvn package -DskipTests
 
 # 第二阶段：运行（只保留运行需要的）
 FROM eclipse-temurin:21-jre-alpine
-RUN addgroup -S app && adduser -S app -G app   # 非 root 用户运行
+RUN addgroup -S app &amp;&amp; adduser -S app -G app   # 非 root 用户运行
 USER app
 WORKDIR /app
 COPY --from=builder /build/target/*.jar app.jar
@@ -109,17 +133,16 @@ ENTRYPOINT ["java", "-XX:+UseZGC", "-jar", "app.jar"]</code></pre>
 	      <h3>Dockerfile 最佳实践清单：</h3>
 	      <ul>
 	          <li><strong>多阶段构建：</strong>构建阶段用 Maven/Gradle 镜像（含 JDK + 构建工具），运行阶段只用 JRE 镜像。最终的运行镜像能瘦身 50% 以上。</li>
-	          <li><strong>利用构建缓存：</strong>先 COPY 不常变的文件（如 pom.xml），再 COPY 源码。Docker 每一层有缓存，改源码不会触发重新下载依赖。</li>
+	          <li><strong>利用构建缓存：</strong>先 COPY 不常变的文件（如 pom.xml），再 COPY 源码。Docker 每一层有缓存，改源码不会触发重新下载依赖。<strong>层的顺序 = 缓存的命中预期</strong>，最常变的放最后。</li>
 	          <li><strong>用特定版本标签：</strong><code>FROM openjdk:17</code> 危险——你不知道具体是哪个小版本，且每次构建可能拉到不同版本。用 <code>FROM eclipse-temurin:21-jre-alpine</code>。</li>
 	          <li><strong>非 root 用户运行：</strong>默认容器内是 root 用户，有安全风险。创建专用用户来运行应用。</li>
 	          <li><strong>添加 HEALTHCHECK：</strong>告诉 Docker 如何判断容器是否健康，配合编排工具做自动恢复。</li>
-	          <li><strong>使用 .dockerignore：</strong>类似 .gitignore，排除 node_modules、.git、target 等大目录，避免它们被 COPY 进镜像。</li>
+	          <li><strong>使用 .dockerignore：</strong>类似 .gitignore（见 <a href="#/notes/git-basics">Git 篇</a>），排除 node_modules、.git、target 等大目录，避免它们被 COPY 进镜像。</li>
 	      </ul>
 
 	      <h2>5. Docker Compose：编排多容器应用</h2>
 	      <p>一个典型的 Web 应用通常需要：Web 服务 + 数据库 + 缓存 + 消息队列。Docker Compose 用一个 YAML 文件定义所有这些服务：</p>
 	      <pre><code class="language-bash"># docker-compose.yml
-version: '3.8'
 services:
   # Spring Boot 应用
   app:
@@ -165,39 +188,57 @@ services:
 volumes:
   mysql_data:     # 命名卷，数据不会因容器删除而丢失
   redis_data:</code></pre>
+	      <p>（新版 Compose 已不再强制 <code>version:</code> 字段，写上会有 warning。）</p>
 
 	      <pre><code class="language-bash"># Docker Compose 常用命令
-docker-compose up -d              # 启动所有服务（-d 后台）
-docker-compose down               # 停止并删除所有服务
-docker-compose down -v            # 同时删除数据卷（慎用！）
-docker-compose logs -f app        # 查看 app 服务的日志
-docker-compose restart app        # 重启单个服务
-docker-compose ps                 # 查看所有服务状态</code></pre>
+docker compose up -d              # 启动所有服务（-d 后台）
+docker compose down               # 停止并删除所有服务
+docker compose down -v            # 同时删除数据卷（慎用！）
+docker compose logs -f app        # 查看 app 服务的日志
+docker compose restart app        # 重启单个服务
+docker compose ps                 # 查看所有服务状态
+docker compose up -d --build app  # 改完代码重建并只更新 app 服务</code></pre>
 
 	      <h2>6. Docker 网络：容器之间怎么通信？</h2>
-	      <p>Docker Compose 默认会创建一个 bridge 网络，所有服务加入同一个网络后，可以通过<strong>服务名</strong>互相访问。比如 app 容器里可以用 <code>jdbc:mysql://db:3306/mydb</code> 连接数据库，<code>db</code> 会被自动解析为 MySQL 容器的 IP。</p>
+	      <p>Docker Compose 默认会创建一个 bridge 网络，所有服务加入同一个网络后，可以通过<strong>服务名</strong>互相访问。比如 app 容器里可以用 <code>jdbc:mysql://db:3306/mydb</code> 连接数据库，<code>db</code> 会被自动解析为 MySQL 容器的 IP——这就是 Compose 里不用写 IP、只写服务名的原因。</p>
 	      <p><strong>常见的网络模式：</strong></p>
 	      <ul>
 	          <li><strong>bridge（默认）：</strong>容器连接到一个虚拟网桥，各自有独立 IP，通过端口映射对外暴露。</li>
 	          <li><strong>host：</strong>容器直接使用宿主机网络，性能最好但失去了网络隔离。</li>
 	          <li><strong>none：</strong>容器没有网络，适合不需要网络的批处理任务。</li>
 	      </ul>
+	      <p>排查连通性的套路：容器 A 访问不到容器 B 时，先 <code>docker exec -it A sh</code> 进去，<code>ping B</code>（网络通不通）、<code>nc -zv db 3306</code>（端口开没开）——配合 <a href="#/notes/linux-commands">Linux 命令</a>的网络三件套，九成问题当场定位。</p>
 
 	      <h2>7. 数据持久化：容器删了数据不能丢</h2>
 	      <p>容器是无状态的——删除容器后，容器内的所有数据都会丢失。要保留数据，必须用<strong>数据卷（Volume）</strong>或<strong>绑定挂载（Bind Mount）</strong>：</p>
 	      <ul>
 	          <li><strong>Volume（推荐）：</strong>Docker 管理，存储在 <code>/var/lib/docker/volumes/</code>，与宿主机文件系统解耦。跨平台、可备份、可共享。</li>
-	          <li><strong>Bind Mount：</strong>把宿主机的一个目录挂载到容器中。适合开发环境（改代码即时生效），但不适合生产。</li>
+	          <li><strong>Bind Mount：</strong>把宿主机的一个目录挂载到容器中（<code>-v /host/path:/container/path</code>）。适合开发环境（改代码即时生效），但不适合生产（路径耦合宿主机）。</li>
 	      </ul>
+	      <p>判断铁律：<strong>数据库、上传文件这类"状态"，必须有卷；应用本身保持无状态</strong>，状态外置到数据库/缓存/对象存储——这样扩缩容和重启才没有后顾之忧。</p>
 
 	      <h2>8. 镜像瘦身技巧</h2>
 	      <ul>
 	          <li><strong>选 Alpine 版本的基础镜像：</strong><code>eclipse-temurin:21-jre-alpine</code> 比 <code>openjdk:17</code> 小几倍。</li>
-	          <li><strong>合并 RUN 命令：</strong>每个 RUN 产生一个新层，合并后减少层数。用 <code>&&</code> 连接多个命令，最后 <code>rm -rf /var/cache/apk/*</code> 清理包管理器缓存。</li>
+	          <li><strong>合并 RUN 命令：</strong>每个 RUN 产生一个新层，合并后减少层数。用 <code>&amp;&amp;</code> 连接多个命令，最后 <code>rm -rf /var/cache/apk/*</code> 清理包管理器缓存。<strong>注意：写在后面一层的 rm 删不掉前面层里的文件</strong>（层是只读叠加的），清理必须与安装写在同一条 RUN 里。</li>
 	          <li><strong>.dockerignore 排除无关文件：</strong>node_modules、.git、target、*.md 等构建时不需要的文件。</li>
 	          <li><strong>多阶段构建：</strong>把编译和运行分开，最终的镜像只包含运行时依赖。</li>
 	      </ul>
 
+	      <h2>9. 生产环境常见坑</h2>
+	      <table>
+	          <tr>
+	              <th>坑</th>
+	              <th>现象</th>
+	              <th>解决</th>
+	          </tr>
+	          <tr><td>容器时区是 UTC</td><td>日志时间差 8 小时</td><td>环境变量 <code>TZ=Asia/Shanghai</code>，或挂载 <code>/etc/localtime</code></td></tr>
+	          <tr><td>日志膨胀打满磁盘</td><td>json-file 日志无限增长</td><td><code>--log-opt max-size=10m --log-opt max-file=3</code> 限制轮转</td></tr>
+	          <tr><td>强杀进程丢请求</td><td>stop 等 10 秒后直接 SIGKILL</td><td>应用正确处理 SIGTERM（Spring Boot 默认支持优雅停机，配置 <code>server.shutdown: graceful</code>）</td></tr>
+	          <tr><td>JVM 在容器里内存算错</td><td>按宿主机内存算堆导致 OOMKilled</td><td>JDK 10+ 默认感知容器限额；再显式设 <code>-XX:MaxRAMPercentage=75</code></td></tr>
+	          <tr><td>容器内 localhost 误区</td><td>容器里访问 localhost 连不上别人的服务</td><td>localhost 是容器自己；跨容器用服务名/IP，访问宿主机用 <code>host.docker.internal</code></td></tr>
+	      </table>
+
 	      <h2>小结</h2>
-	      <p>Docker 是云原生时代的基石技术。<strong>学会 Docker，你的应用可以以相同的方式在任何地方运行</strong>——本地开发、测试环境、生产服务器、Kubernetes 集群。本文覆盖了日常开发中最常用的场景：从基础命令到 Dockerfile 编写，再到 Compose 多容器编排。掌握这些，你已经能应对 90% 的容器化需求。</p>
-	      <p>下一步推荐学习：Docker 镜像优化和安全性（镜像扫描、签名）、Kubernetes 基础（Pod、Service、Deployment）、CI/CD 中的 Docker 集成（GitHub Actions + Docker Build）。</p>`;
+	      <p>Docker 是云原生时代的基石技术。<strong>学会 Docker，你的应用可以以相同的方式在任何地方运行</strong>——本地开发、测试环境、生产服务器、Kubernetes 集群。本文覆盖了日常开发中最常用的场景：从基础命令到 Dockerfile 编写，再到 Compose 多容器编排与生产避坑。掌握这些，你已经能应对 90% 的容器化需求。</p>
+	      <p>下一步推荐学习：Docker 镜像优化和安全性（镜像扫描、签名）、Kubernetes 基础（Pod、Service、Deployment）、CI/CD 中的 Docker 集成（GitHub Actions + Docker Build）。运维命令的细节都可以在 <a href="#/notes/linux-commands">Linux 命令速查</a>里找到对应。</p>`;

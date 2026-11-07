@@ -184,7 +184,8 @@ export default `	      <h1>IntelliJ IDEA 高效开发：从快捷键到生产力
 	              <td>断点处可以执行任意 Java 代码！比如执行 <code>list.size()</code>、修改变量值等</td>
 	          </tr>
 	      </table>
-	      <p><strong>高玩技巧——条件断点：</strong>在断点上右键，设置条件（如 <code>i == 99</code>），只有满足条件时程序才会停住。在循环里排查某个特定迭代的问题时特别好用。</p>
+	      <p><strong>高玩技巧——条件断点：</strong>在断点上右键，设置条件（如 <code>i == 99</code>），只有满足条件时程序才会停住。在循环里排查某个特定迭代的问题时特别好用。断点还可以右键勾选 <strong>"Remove once hit"</strong>（触发一次后自动消失），排查"第一次进入这里时状态对不对"最合适。</p>
+	      <p><strong>两个更少人知的调试神器：</strong>① <strong>Drop Frame（回退帧）</strong>——调试器工具栏上的回退箭头，能把当前栈帧"退回去重跑"：单步走过了关键行？不用重启，直接退回这一帧重新执行（副作用如写库无法撤销，但纯计算场景是时间机器）。② <strong>Force Return（强制返回）</strong>——在栈帧上右键，让方法立刻返回一个你指定的值：想测"如果这个接口返回 null 会怎样"，不用改代码。</p>
 
 	      <h2>6. 场景五：Live Templates —— 你敲几个字母，它写一段代码</h2>
 	      <p>Live Template 是 IDEA 的代码模板系统，输入缩写 + Tab，自动展开为完整代码块。内置的常用模板：</p>
@@ -203,7 +204,9 @@ inn + Tab     →  if (var != null) {}</code></pre>
 	          <li><strong>列模式：</strong>按住 <code>Alt</code>，鼠标拖动选择矩形区域——处理列对齐的数据时超好用。</li>
 	          <li><strong>最近文件：</strong><code>Ctrl + E</code> 弹出最近打开的文件列表——在几个文件之间反复横跳时比用鼠标点 tab 快。</li>
 	          <li><strong>书签：</strong><code>F11</code> 在当前行打书签，<code>Ctrl + F11</code> 打带编号的书签，<code>Shift + F11</code> 查看所有书签——追踪关键代码位置。</li>
-	          <li><strong>Postfix Completion：</strong>输入 <code>list.for</code> + Tab 自动生成 for 循环；<code>user.nn</code> + Tab 生成 if (user != null)；<code>name.sout</code> + Tab 生成 System.out.println(name)。这是比 Live Template 更自然的补全方式。</li>
+	          <li><strong>Postfix Completion：</strong>输入 <code>list.for</code> + Tab 自动生成 for 循环；<code>user.nn</code> + Tab 生成 if (user != null)；<code>name.sout</code> + Tab 生成 System.out.println(name)。这是比 Live Template 更自然的补全方式——先写表达式，再想"对它做什么"。</li>
+	          <li><strong>理清上下游：</strong><code>Ctrl + Alt + H</code> 显示调用层次（谁调它 / 它调谁，双向可切）；<code>Ctrl + Alt + U</code> 把当前类的继承体系画成 UML 图——接手陌生模块时，这两个是快速建立"地图感"的起点。</li>
+	          <li><strong>剪贴板历史：</strong><code>Ctrl + Shift + V</code> 弹出最近复制的十几条内容——从报错信息、日志、代码之间来回搬运时，比来回切换复制快得多。</li>
 	      </ul>
 
 	      <h2>8. 性能优化：IDEA 卡怎么办？</h2>

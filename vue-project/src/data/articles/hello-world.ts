@@ -160,6 +160,22 @@ java HelloWorld         # 运行：字节码 → 机器码 → 执行</code></pr
 	          <li><strong>推荐的 JDK 自带工具：</strong>jps（查看 Java 进程）、jmap（查看堆内存）、jstack（查看线程栈）、jconsole（可视化监控）。这些是性能调优和排查问题的利器，知道它们的存在就行，后续深入。</li>
 	      </ul>
 
+	      <h2>9. 顺带认识：JVM 的内存长什么样</h2>
+	      <p>既然讲到了 JVM 运行原理，把运行时内存的五个区域也提前认识一下——后面学集合、并发、调优时它们会反复出现：</p>
+	      <table>
+	          <tr>
+	              <th>区域</th>
+	              <th>线程私有？</th>
+	              <th>存什么</th>
+	          </tr>
+	          <tr><td><strong>程序计数器</strong></td><td>私有</td><td>当前线程执行到的字节码行号（唯一的不会 OOM 的区域）</td></tr>
+	          <tr><td><strong>虚拟机栈</strong></td><td>私有</td><td>方法调用的栈帧（局部变量、操作数栈）；递归太深报 StackOverflowError</td></tr>
+	          <tr><td><strong>本地方法栈</strong></td><td>私有</td><td>native 方法（C/C++ 实现）的调用栈</td></tr>
+	          <tr><td><strong>堆（Heap）</strong></td><td><strong>共享</strong></td><td><strong>所有对象实例的诞生地</strong>，GC 的主战场，-Xmx 控制的就是它</td></tr>
+	          <tr><td><strong>方法区</strong></td><td>共享</td><td>类元信息、静态变量、常量池（JDK 8 起落地为元空间 Metaspace）</td></tr>
+	      </table>
+	      <p>先建立空间感即可：<strong>"new 出来的都在堆上，方法怎么跑的在栈上，类本身的信息在方法区"</strong>。之后学垃圾回收、内存泄漏排查（jmap / MAT）时，这张地图就是坐标系。</p>
+
 	      <h2>小结</h2>
 	      <p>今天我们不仅写了一行 Java 代码，还深入理解了 <strong>JDK/JRE/JVM 的关系、编译运行的完整流程、字节码的概念、以及环境变量背后的原理</strong>。你可能觉得"Hello World 而已，至于讲这么多吗？"——但这些基础概念会在你未来的每一行代码中反复出现：当 ClassNotFoundException 报错时、当你理解 Maven 依赖冲突时、当面试官问你"Java 为什么能跨平台"时，你会发现今天的底层原理格外有用。</p>
-	      <p>编程学习就像拼拼图——每一块看似零散的知识，最终都会连成一片完整的版图。<strong>不急不躁，把基础打牢，我们下一篇文章见。</strong></p>`;
+	      <p>编程学习就像拼拼图——每一块看似零散的知识，最终都会连成一片完整的版图。<strong>不急不躁，把基础打牢，我们下一篇文章见。</strong>下一站建议：<a href="#/notes/java-collections-framework">Java 集合框架</a>——日常开发用得最多的 API，也是这张拼图里最先拼上的一大块。</p>`;
